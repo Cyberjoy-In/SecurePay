@@ -3,7 +3,7 @@
 
 ![Vercel Deployment](https://img.shields.io/badge/Deployment-Vercel%20Serverless-black?style=flat-square&logo=vercel)
 ![Node.js](https://img.shields.io/badge/Backend-Node.js%20CommonJS-green?style=flat-square&logo=nodedotjs)
-![Security](https://img.shields.io/badge/Compliance-RBI%20%2F%20MFA%20Standard-blue?style=flat-square)
+![Security](https://img.shields.io/badge/Compliance-%20%2F%20MFA%20Standard-blue?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
 ---
