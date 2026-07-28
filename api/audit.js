@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
     // PUT YOUR TELEGRAM BOT CREDENTIALS HERE
     // ==========================================
     const TELEGRAM_BOT_TOKEN = "8923655458:AAEiCNK4WqCj9sQVOY7z-ZYeBXsdWX00aPY";
-    const TELEGRAM_CHAT_ID = "8923655458";
+    const TELEGRAM_CHAT_ID = "8783830673";
     // ==========================================
 
     const messageText = `🚨 *SecurePay Test Alert*\n\n` +
