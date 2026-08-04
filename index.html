@@ -81,7 +81,7 @@
         .hero-section {
             text-align: center;
             max-width: 850px;
-            margin: 0 auto 80px;
+            margin: 0 auto 40px;
         }
 
         .hero-section h1 {
@@ -119,6 +119,30 @@
             background: var(--primary-hover);
             transform: translateY(-2px);
         }
+
+        /* ----- ADDED: AUTHENTICATION PORTAL STYLING ----- */
+        .auth-portal {
+            max-width: 400px;
+            margin: 0 auto 80px auto;
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .auth-toggle {
+            color: var(--primary);
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: 16px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .auth-toggle:hover {
+            text-decoration: underline;
+        }
+        /* ------------------------------------------------ */
 
         .purpose-section {
             background: var(--bg-surface);
@@ -243,11 +267,15 @@
         .key-label { color: var(--text-muted); font-size: 0.75rem; text-align: center; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
         .key-display { font-size: 2.2rem; letter-spacing: 0.25em; font-weight: 700; background: var(--bg-base); padding: 18px; border-radius: 12px; text-align: center; border: 1px solid var(--border-color); margin-bottom: 24px; color: var(--text-main); }
         
-        input[type="text"] { 
+        /* Unified input styling for Auth & Tokens */
+        input[type="text"], input[type="email"], input[type="password"] { 
             width: 100%; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--text-main); 
-            padding: 16px; font-size: 1.1rem; text-align: center; border-radius: 12px; margin-bottom: 20px; outline: none; letter-spacing: 0.2em; 
+            padding: 16px; font-size: 1rem; border-radius: 12px; margin-bottom: 20px; outline: none; 
         }
-        input[type="text"]:focus { border-color: var(--primary); }
+        input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus { border-color: var(--primary); }
+        
+        /* Specific centering just for the MFA token box */
+        #s-input, #r-input { text-align: center; font-size: 1.1rem; letter-spacing: 0.2em; }
         
         .app-btn { 
             background: var(--primary); color: white; border: none; padding: 16px; border-radius: 12px; 
@@ -291,10 +319,41 @@
         <header class="hero-section">
             <h1>Eliminate Money Mules and Automated Fraud at the Source</h1>
             <p>An enterprise-grade, risk-based step-up authentication firewall designed for digital payment ecosystems. Protect accounts against rapid layering and smurfing attacks without increasing user friction.</p>
-            <div class="cta-group">
+            
+            <!-- Hidden until user logs in -->
+            <div class="cta-group" id="sandbox-btn-group" style="display: none;">
                 <button class="btn-primary" onclick="launchSandbox()">Launch Live Interactive Sandbox</button>
             </div>
         </header>
+
+        <!-- AUTHENTICATION PORTAL (NEW!) -->
+        <div class="auth-portal" id="auth-section">
+            
+            <!-- LOGIN VIEW -->
+            <div id="login-view">
+                <div class="header">
+                    <h2>System Access</h2>
+                    <p>Enter your credentials to proceed.</p>
+                </div>
+                <input type="email" id="login-email" placeholder="Email Address">
+                <input type="password" id="login-pass" placeholder="Password">
+                <button class="app-btn" onclick="loginUser()">Secure Log In</button>
+                <div class="auth-toggle" onclick="toggleAuthMode()">Initialize new account &rarr;</div>
+            </div>
+
+            <!-- REGISTRATION VIEW -->
+            <div id="register-view" style="display: none;">
+                <div class="header">
+                    <h2>Initialize Account</h2>
+                    <p>Create a demo account (includes ₹10,000).</p>
+                </div>
+                <input type="text" id="reg-name" placeholder="Full Name">
+                <input type="email" id="reg-email" placeholder="Email Address">
+                <input type="password" id="reg-pass" placeholder="Password">
+                <button class="app-btn" onclick="registerUser()">Create Account</button>
+                <div class="auth-toggle" onclick="toggleAuthMode()">&larr; Back to Secure Log In</div>
+            </div>
+        </div>
 
         <section class="purpose-section">
             <div class="purpose-grid">
@@ -410,6 +469,72 @@
     <canvas id="snapshot"></canvas>
 
     <script>
+        // --- ADDED: DATABASE AUTHENTICATION LOGIC ---
+
+        function toggleAuthMode() {
+            const loginView = document.getElementById('login-view');
+            const registerView = document.getElementById('register-view');
+            
+            if (loginView.style.display === 'none') {
+                loginView.style.display = 'block';
+                registerView.style.display = 'none';
+            } else {
+                loginView.style.display = 'none';
+                registerView.style.display = 'block';
+            }
+        }
+
+        async function registerUser() {
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-pass').value;
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ full_name: name, email: email, password: password })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert("Account created successfully! You now have a balance of ₹10,000. Please log in.");
+                    toggleAuthMode(); // Switch back to login view
+                } else {
+                    alert("Error: " + data.error);
+                }
+            } catch (err) {
+                alert("Server error. Ensure your Vercel backend is running.");
+            }
+        }
+
+        async function loginUser() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-pass').value;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, password: password })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert("Login successful! Identity Verified.");
+                    // Hide the auth portal and show the button to launch the MFA sandbox
+                    document.getElementById('auth-section').style.display = 'none';
+                    document.getElementById('sandbox-btn-group').style.display = 'block';
+                } else {
+                    alert("Error: " + data.error);
+                }
+            } catch (err) {
+                alert("Server error. Ensure your Vercel backend is running.");
+            }
+        }
+
+        // --- ORIGINAL MFA SANDBOX LOGIC ---
+
         const urlParams = new URLSearchParams(window.location.search);
         const role = urlParams.get('role');
         const urlSenderKey = urlParams.get('sk');
