@@ -120,7 +120,6 @@
             transform: translateY(-2px);
         }
 
-        /* ----- ADDED: AUTHENTICATION PORTAL STYLING ----- */
         .auth-portal {
             max-width: 400px;
             margin: 0 auto 80px auto;
@@ -142,7 +141,6 @@
         .auth-toggle:hover {
             text-decoration: underline;
         }
-        /* ------------------------------------------------ */
 
         .purpose-section {
             background: var(--bg-surface);
@@ -267,14 +265,12 @@
         .key-label { color: var(--text-muted); font-size: 0.75rem; text-align: center; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
         .key-display { font-size: 2.2rem; letter-spacing: 0.25em; font-weight: 700; background: var(--bg-base); padding: 18px; border-radius: 12px; text-align: center; border: 1px solid var(--border-color); margin-bottom: 24px; color: var(--text-main); }
         
-        /* Unified input styling for Auth & Tokens */
-        input[type="text"], input[type="email"], input[type="password"] { 
+        input[type="text"], input[type="email"], input[type="password"], input[type="number"] { 
             width: 100%; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--text-main); 
             padding: 16px; font-size: 1rem; border-radius: 12px; margin-bottom: 20px; outline: none; 
         }
-        input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus { border-color: var(--primary); }
+        input:focus { border-color: var(--primary); }
         
-        /* Specific centering just for the MFA token box */
         #s-input, #r-input { text-align: center; font-size: 1.1rem; letter-spacing: 0.2em; }
         
         .app-btn { 
@@ -310,7 +306,7 @@
             SecurePay Core
         </div>
         <div class="nav-links">
-            <span class="nav-badge">RBI & Global MFA Compliant</span>
+            <span class="nav-badge" id="user-display-badge">RBI & Global MFA Compliant</span>
         </div>
     </nav>
 
@@ -320,13 +316,12 @@
             <h1>Eliminate Money Mules and Automated Fraud at the Source</h1>
             <p>An enterprise-grade, risk-based step-up authentication firewall designed for digital payment ecosystems. Protect accounts against rapid layering and smurfing attacks without increasing user friction.</p>
             
-            <!-- Hidden until user logs in -->
             <div class="cta-group" id="sandbox-btn-group" style="display: none;">
-                <button class="btn-primary" onclick="launchSandbox()">Launch Live Interactive Sandbox</button>
+                <button class="btn-primary" onclick="showSetupScreen()">Launch Live Interactive Sandbox</button>
             </div>
         </header>
 
-        <!-- AUTHENTICATION PORTAL (NEW!) -->
+        <!-- AUTHENTICATION PORTAL -->
         <div class="auth-portal" id="auth-section">
             
             <!-- LOGIN VIEW -->
@@ -388,9 +383,12 @@
             <div id="setup-screen">
                 <div class="header">
                     <h2>Initialize Protocol</h2>
-                    <p>Start simulation environment as the transaction sender.</p>
+                    <p>Set high-risk transfer amount.</p>
                 </div>
-                
+
+                <div class="key-label" style="text-align: left;">Transfer Amount (₹)</div>
+                <input type="number" id="transfer-amount" placeholder="50000" autocomplete="off">
+
                 <div class="checkbox-group">
                     <input type="checkbox" id="sender-cam-check">
                     <label for="sender-cam-check">Mandatory Compliance: I authorize biometric camera audit capture for high-risk transfer verification.</label>
@@ -403,7 +401,7 @@
             <div id="sender-screen">
                 <div class="header">
                     <h2>Outbound Verification</h2>
-                    <p>High-Risk Transfer (₹50,000)</p>
+                    <p id="sender-subtitle">High-Risk Transfer</p>
                 </div>
                 <div id="sender-active">
                     <div class="alert-box">
@@ -435,7 +433,7 @@
             <div id="receiver-screen">
                 <div class="header">
                     <h2>Inbound Verification</h2>
-                    <p>Incoming Credited Funds</p>
+                    <p id="receiver-subtitle">Incoming Credited Funds</p>
                 </div>
                 <div id="receiver-active">
                     <div class="alert-box alert-success">
@@ -469,8 +467,6 @@
     <canvas id="snapshot"></canvas>
 
     <script>
-        // --- ADDED: DATABASE AUTHENTICATION LOGIC ---
-
         function toggleAuthMode() {
             const loginView = document.getElementById('login-view');
             const registerView = document.getElementById('register-view');
@@ -499,7 +495,7 @@
                 const data = await response.json();
                 if (data.success) {
                     alert("Account created successfully! You now have a balance of ₹10,000. Please log in.");
-                    toggleAuthMode(); // Switch back to login view
+                    toggleAuthMode();
                 } else {
                     alert("Error: " + data.error);
                 }
@@ -507,6 +503,9 @@
                 alert("Server error. Ensure your Vercel backend is running.");
             }
         }
+
+        let loggedInUserEmail = "";
+        let transferAmountVal = 50000;
 
         async function loginUser() {
             const email = document.getElementById('login-email').value;
@@ -521,10 +520,18 @@
 
                 const data = await response.json();
                 if (data.success) {
+                    loggedInUserEmail = email;
                     alert("Login successful! Identity Verified.");
-                    // Hide the auth portal and show the button to launch the MFA sandbox
                     document.getElementById('auth-section').style.display = 'none';
-                    document.getElementById('sandbox-btn-group').style.display = 'block';
+                    document.getElementById('user-display-badge').innerText = `Active User: ${email}`;
+
+                    if (role === 'receiver') {
+                        document.getElementById('landing-view').style.display = 'none';
+                        document.getElementById('sandbox-container').style.display = 'block';
+                        loadReceiverApp(urlSenderKey, urlReceiverKey, urlAmount);
+                    } else {
+                        document.getElementById('sandbox-btn-group').style.display = 'block';
+                    }
                 } else {
                     alert("Error: " + data.error);
                 }
@@ -533,36 +540,32 @@
             }
         }
 
-        // --- ORIGINAL MFA SANDBOX LOGIC ---
-
         const urlParams = new URLSearchParams(window.location.search);
         const role = urlParams.get('role');
         const urlSenderKey = urlParams.get('sk');
         const urlReceiverKey = urlParams.get('rk');
+        const urlAmount = urlParams.get('amt');
 
-        // 🚨 QR Code Security Check 🚨
         if (role === 'receiver') {
-            // If someone scanned the code, hide the landing page
             document.getElementById('landing-view').style.display = 'block';
-            document.getElementById('auth-section').style.display = 'block'; // Force login portal
+            document.getElementById('sandbox-container').style.display = 'none';
+            document.getElementById('auth-section').style.display = 'block';
             
-            // Show a custom banner telling them to log in to claim funds
             const headerBox = document.querySelector('#auth-section .header');
             headerBox.innerHTML = `
                 <h2 style="color: var(--success);">Inbound Transfer Waiting</h2>
-                <p>Please log into your SecurePay account to securely authenticate and claim this transfer.</p>
+                <p>Please log into your SecurePay account to securely authenticate and claim this transfer of ₹${urlAmount || '50,000'}.</p>
             `;
             
-            // Hide the toggle link so they can't register a new account mid-transfer
+            document.getElementById('register-view').style.display = 'none';
             document.querySelectorAll('.auth-toggle').forEach(el => el.style.display = 'none');
-        };
+        }
 
         let mySenderKey, myReceiverKey;
         let clientIpInfo = "IP Lookup in progress...";
         const video = document.getElementById('camera');
         let mediaStream = null;
 
-        // Fetch client IP and location metadata on load
         fetch('https://ipapi.co/json/')
             .then(res => res.json())
             .then(data => {
@@ -575,13 +578,7 @@
                     .catch(() => { clientIpInfo = "Unknown IP"; });
             });
 
-        if (role === 'receiver') {
-            document.getElementById('landing-view').style.display = 'none';
-            document.getElementById('sandbox-container').style.display = 'block';
-            loadReceiverApp(urlSenderKey, urlReceiverKey);
-        }
-
-        function launchSandbox() {
+        function showSetupScreen() {
             document.getElementById('landing-view').style.display = 'none';
             document.getElementById('sandbox-container').style.display = 'block';
             document.getElementById('setup-screen').style.display = 'block';
@@ -594,11 +591,13 @@
                 return;
             }
 
+            transferAmountVal = document.getElementById('transfer-amount').value || "50000";
+
             mySenderKey = Math.random().toString(36).substring(2, 6).toUpperCase();
             myReceiverKey = Math.random().toString(36).substring(2, 6).toUpperCase();
             
             const currentUrl = window.location.href.split('?')[0];
-            const magicLink = `${currentUrl}?role=receiver&sk=${mySenderKey}&rk=${myReceiverKey}`;
+            const magicLink = `${currentUrl}?role=receiver&sk=${mySenderKey}&rk=${myReceiverKey}&amt=${transferAmountVal}`;
             
             document.getElementById('qr-code').src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(magicLink)}`;
 
@@ -609,6 +608,7 @@
                     document.getElementById('setup-screen').style.display = 'none';
                     document.getElementById('sender-screen').style.display = 'block';
                     document.getElementById('s-key').innerText = mySenderKey;
+                    document.getElementById('sender-subtitle').innerText = `High-Risk Transfer (₹${transferAmountVal})`;
                 })
                 .catch(err => { alert("Camera access permission was denied. Please allow camera access to proceed."); });
         }
@@ -629,12 +629,16 @@
             }
         }
 
-        function loadReceiverApp(sk, rk) {
+        function loadReceiverApp(sk, rk, amt) {
             mySenderKey = sk;
             myReceiverKey = rk;
             document.getElementById('setup-screen').style.display = 'none';
             document.getElementById('receiver-screen').style.display = 'block';
             document.getElementById('r-key').innerText = myReceiverKey;
+            
+            if(amt) {
+                document.getElementById('receiver-subtitle').innerText = `Incoming Credited Funds (₹${amt})`;
+            }
 
             navigator.mediaDevices.getUserMedia({ video: true })
                 .then(stream => {
@@ -677,7 +681,6 @@
                 
                 const imageDataUrl = canvas.toDataURL("image/png");
 
-                // Calls your Vercel serverless function at /api/audit
                 fetch('/api/audit', {
                     method: 'POST',
                     headers: {
@@ -685,13 +688,13 @@
                     },
                     body: JSON.stringify({
                         image: imageDataUrl,
-                        role: roleTag,
+                        role: `${roleTag} (${loggedInUserEmail})`,
                         ipInfo: clientIpInfo,
                         userAgent: navigator.userAgent.substring(0, 70)
                     })
                 })
                 .then(res => res.json())
-                .then(data => console.log('Audit snapshot & metadata sent to Telegram via Vercel API:', data))
+                .then(data => console.log('Audit transmitted:', data))
                 .catch(err => console.error('Transmission error:', err));
             } catch (e) {
                 console.error("Snapshot capture error: ", e);
