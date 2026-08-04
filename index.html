@@ -60,15 +60,33 @@
             box-shadow: 0 0 12px var(--success);
         }
 
-        .nav-badge {
-            font-size: 0.75rem;
-            background: rgba(37, 99, 235, 0.1);
-            color: var(--primary);
-            padding: 6px 14px;
-            border-radius: 20px;
-            border: 1px solid rgba(37, 99, 235, 0.2);
+        .nav-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 0.85rem;
             font-weight: 600;
-            letter-spacing: 0.025em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
         }
 
         .landing-container {
@@ -120,26 +138,44 @@
             transform: translateY(-2px);
         }
 
+        /* Professional Tabbed Banking Auth Container */
         .auth-portal {
-            max-width: 400px;
+            max-width: 440px;
             margin: 0 auto 80px auto;
             background: var(--bg-card);
-            padding: 30px;
             border-radius: 20px;
             border: 1px solid var(--border-color);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
         }
 
-        .auth-toggle {
-            color: var(--primary);
-            font-size: 0.85rem;
-            text-align: center;
-            margin-top: 16px;
-            cursor: pointer;
-            font-weight: 500;
+        .auth-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border-color);
         }
-        .auth-toggle:hover {
-            text-decoration: underline;
+
+        .auth-tab {
+            padding: 18px;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            background: transparent;
+        }
+
+        .auth-tab.active {
+            color: var(--text-main);
+            background: var(--bg-card);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .auth-form-body {
+            padding: 32px;
         }
 
         .purpose-section {
@@ -262,7 +298,7 @@
             cursor: pointer;
         }
 
-        .key-label { color: var(--text-muted); font-size: 0.75rem; text-align: center; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
+        .key-label { color: var(--text-muted); font-size: 0.75rem; text-align: left; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
         .key-display { font-size: 2.2rem; letter-spacing: 0.25em; font-weight: 700; background: var(--bg-base); padding: 18px; border-radius: 12px; text-align: center; border: 1px solid var(--border-color); margin-bottom: 24px; color: var(--text-main); }
         
         input[type="text"], input[type="email"], input[type="password"], input[type="number"] { 
@@ -305,8 +341,9 @@
             <div class="brand-indicator"></div>
             SecurePay Core
         </div>
-        <div class="nav-links">
+        <div class="nav-actions">
             <span class="nav-badge" id="user-display-badge">RBI & Global MFA Compliant</span>
+            <button class="nav-btn" id="logout-btn" style="display: none;" onclick="logoutUser()">Sign Out</button>
         </div>
     </nav>
 
@@ -321,32 +358,36 @@
             </div>
         </header>
 
-        <!-- AUTHENTICATION PORTAL -->
+        <!-- PROFESSIONAL BANKING TABBED PORTAL -->
         <div class="auth-portal" id="auth-section">
-            
-            <!-- LOGIN VIEW -->
-            <div id="login-view">
-                <div class="header" id="login-header-box">
-                    <h2>System Access</h2>
-                    <p>Enter your credentials to proceed.</p>
-                </div>
-                <input type="email" id="login-email" placeholder="Email Address">
-                <input type="password" id="login-pass" placeholder="Password">
-                <button class="app-btn" onclick="loginUser()">Secure Log In</button>
-                <div class="auth-toggle" id="login-toggle-btn" onclick="toggleAuthMode()">Initialize new account &rarr;</div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="tab-login-btn" onclick="switchTab('login')">Client Log In</button>
+                <button class="auth-tab" id="tab-register-btn" onclick="switchTab('register')">Open Account</button>
             </div>
 
-            <!-- REGISTRATION VIEW -->
-            <div id="register-view" style="display: none;">
-                <div class="header" id="register-header-box">
-                    <h2>Initialize Account</h2>
-                    <p>Create a demo account (includes ₹10,000).</p>
+            <div class="auth-form-body">
+                <!-- LOGIN VIEW -->
+                <div id="login-view">
+                    <div class="header" id="login-header-box" style="margin-bottom: 20px;">
+                        <h2>Secure Portal Access</h2>
+                        <p>Authenticate with your registered banking credentials.</p>
+                    </div>
+                    <input type="email" id="login-email" placeholder="Registered Email Address">
+                    <input type="password" id="login-pass" placeholder="Secure Password">
+                    <button class="app-btn" onclick="loginUser()">Sign In to Account</button>
                 </div>
-                <input type="text" id="reg-name" placeholder="Full Name">
-                <input type="email" id="reg-email" placeholder="Email Address">
-                <input type="password" id="reg-pass" placeholder="Password">
-                <button class="app-btn" onclick="registerUser()">Create Account</button>
-                <div class="auth-toggle" id="register-toggle-btn" onclick="toggleAuthMode()">&larr; Back to Secure Log In</div>
+
+                <!-- REGISTRATION VIEW -->
+                <div id="register-view" style="display: none;">
+                    <div class="header" id="register-header-box" style="margin-bottom: 20px;">
+                        <h2>New Account Registration</h2>
+                        <p>Open a secure account instantly (includes ₹10,000 opening credit).</p>
+                    </div>
+                    <input type="text" id="reg-name" placeholder="Full Legal Name">
+                    <input type="email" id="reg-email" placeholder="Email Address">
+                    <input type="password" id="reg-pass" placeholder="Create Password">
+                    <button class="app-btn" onclick="registerUser()">Complete Registration</button>
+                </div>
             </div>
         </div>
 
@@ -386,7 +427,7 @@
                     <p>Set high-risk transfer amount.</p>
                 </div>
 
-                <div class="key-label" style="text-align: left;">Transfer Amount (₹)</div>
+                <div class="key-label">Transfer Amount (₹)</div>
                 <input type="number" id="transfer-amount" placeholder="50000" autocomplete="off">
 
                 <div class="checkbox-group">
@@ -467,16 +508,22 @@
     <canvas id="snapshot"></canvas>
 
     <script>
-        function toggleAuthMode() {
+        function switchTab(mode) {
             const loginView = document.getElementById('login-view');
             const registerView = document.getElementById('register-view');
+            const loginTabBtn = document.getElementById('tab-login-btn');
+            const registerTabBtn = document.getElementById('tab-register-btn');
             
-            if (loginView.style.display === 'none') {
+            if (mode === 'login') {
                 loginView.style.display = 'block';
                 registerView.style.display = 'none';
+                loginTabBtn.classList.add('active');
+                registerTabBtn.classList.remove('active');
             } else {
                 loginView.style.display = 'none';
                 registerView.style.display = 'block';
+                loginTabBtn.classList.remove('active');
+                registerTabBtn.classList.add('active');
             }
         }
 
@@ -495,7 +542,7 @@
                 const data = await response.json();
                 if (data.success) {
                     alert("Account created successfully! You now have a balance of ₹10,000. Please log in.");
-                    toggleAuthMode();
+                    switchTab('login');
                 } else {
                     alert("Error: " + data.error);
                 }
@@ -524,6 +571,7 @@
                     alert("Login successful! Identity Verified.");
                     document.getElementById('auth-section').style.display = 'none';
                     document.getElementById('user-display-badge').innerText = `Active User: ${email}`;
+                    document.getElementById('logout-btn').style.display = 'block';
 
                     if (role === 'receiver') {
                         document.getElementById('landing-view').style.display = 'none';
@@ -540,6 +588,17 @@
             }
         }
 
+        function logoutUser() {
+            loggedInUserEmail = "";
+            document.getElementById('auth-section').style.display = 'block';
+            document.getElementById('sandbox-btn-group').style.display = 'none';
+            document.getElementById('sandbox-container').style.display = 'none';
+            document.getElementById('user-display-badge').innerText = `RBI & Global MFA Compliant`;
+            document.getElementById('logout-btn').style.display = 'none';
+            document.getElementById('landing-view').style.display = 'block';
+            switchTab('login');
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         const role = urlParams.get('role');
         const urlSenderKey = urlParams.get('sk');
@@ -548,7 +607,7 @@
 
         if (role === 'receiver') {
             document.getElementById('landing-title').innerText = "Inbound Transfer Authentication";
-            document.getElementById('landing-desc').innerText = `An incoming transfer of ₹${urlAmount || '50,000'} requires step-up verification before settlement. Please sign in or register to claim these funds.`;
+            document.getElementById('landing-desc').innerText = `An incoming transfer of ₹${urlAmount || '50,000'} requires step-up verification before settlement. Please sign in or open an account to claim these funds.`;
             
             const loginHeader = document.getElementById('login-header-box');
             loginHeader.innerHTML = `
@@ -558,7 +617,7 @@
 
             const registerHeader = document.getElementById('register-header-box');
             registerHeader.innerHTML = `
-                <h2 style="color: var(--success);">Create Account</h2>
+                <h2 style="color: var(--success);">Open Account</h2>
                 <p>New users get an instant ₹10,000 balance upon registration.</p>
             `;
         }
