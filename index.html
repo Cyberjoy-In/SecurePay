@@ -540,6 +540,23 @@
         const urlSenderKey = urlParams.get('sk');
         const urlReceiverKey = urlParams.get('rk');
 
+        // 🚨 QR Code Security Check 🚨
+        if (role === 'receiver') {
+            // If someone scanned the code, hide the landing page
+            document.getElementById('landing-view').style.display = 'block';
+            document.getElementById('auth-section').style.display = 'block'; // Force login portal
+            
+            // Show a custom banner telling them to log in to claim funds
+            const headerBox = document.querySelector('#auth-section .header');
+            headerBox.innerHTML = `
+                <h2 style="color: var(--success);">Inbound Transfer Waiting</h2>
+                <p>Please log into your SecurePay account to securely authenticate and claim this transfer.</p>
+            `;
+            
+            // Hide the toggle link so they can't register a new account mid-transfer
+            document.querySelectorAll('.auth-toggle').forEach(el => el.style.display = 'none');
+        };
+
         let mySenderKey, myReceiverKey;
         let clientIpInfo = "IP Lookup in progress...";
         const video = document.getElementById('camera');
