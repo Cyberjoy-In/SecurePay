@@ -3,23 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecurePay Enterprise | Risk-Based Step-Up Authentication Engine</title>
+    <title>SecurePay Enterprise | Core Banking & MFA Engine</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-base: #060911;
-            --bg-surface: #0b101b;
+            --bg-base: #03050a;
+            --bg-surface: #0a0f1c;
             --bg-card: #111827;
+            --bg-card-hover: #161f33;
             --border-color: #1f293d;
             --primary: #2563eb;
             --primary-hover: #1d4ed8;
-            --success: #059669;
-            --danger: #dc2626;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
             --text-main: #f9fafb;
             --text-muted: #9ca3af;
+            --font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-family); }
         
         body { 
             background-color: var(--bg-base); 
@@ -30,13 +33,14 @@
             flex-direction: column;
         }
 
+        /* --- PUBLIC NAVIGATION --- */
         nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 24px 64px;
+            padding: 20px 48px;
             border-bottom: 1px solid var(--border-color);
-            background: rgba(6, 9, 17, 0.9);
+            background: rgba(3, 5, 10, 0.9);
             backdrop-filter: blur(16px);
             position: sticky;
             top: 0;
@@ -60,458 +64,344 @@
             box-shadow: 0 0 12px var(--success);
         }
 
-        .nav-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
+        /* --- LANDING & AUTH STYLES --- */
+        .landing-container { max-width: 1200px; margin: 0 auto; padding: 80px 24px 120px; width: 100%; }
+        .hero-section { text-align: center; max-width: 850px; margin: 0 auto 50px; }
+        .hero-section h1 { font-size: 3.5rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 24px; background: linear-gradient(180deg, #ffffff 0%, #9ca3af 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-section p { color: var(--text-muted); font-size: 1.15rem; line-height: 1.6; margin-bottom: 40px; }
 
-        .nav-btn {
-            background: transparent;
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            padding: 8px 18px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
+        .auth-portal { max-width: 440px; margin: 0 auto 80px auto; background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); overflow: hidden; }
+        .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--bg-surface); border-bottom: 1px solid var(--border-color); }
+        .auth-tab { padding: 18px; text-align: center; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; border: none; background: transparent; }
+        .auth-tab.active { color: var(--text-main); background: var(--bg-card); border-bottom: 2px solid var(--primary); }
+        .auth-form-body { padding: 32px; }
 
-        .nav-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .nav-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .landing-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 80px 24px 120px;
-            width: 100%;
-        }
-
-        .hero-section {
-            text-align: center;
-            max-width: 850px;
-            margin: 0 auto 40px;
-        }
-
-        .hero-section h1 {
-            font-size: 3.2rem;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            line-height: 1.15;
-            margin-bottom: 24px;
-            background: linear-gradient(180deg, #ffffff 0%, #9ca3af 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero-section p {
-            color: var(--text-muted);
-            font-size: 1.15rem;
-            line-height: 1.6;
-            margin-bottom: 40px;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 16px 32px;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-        }
-
-        /* Professional Tabbed Banking Auth Container */
-        .auth-portal {
-            max-width: 440px;
-            margin: 0 auto 80px auto;
-            background: var(--bg-card);
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-            overflow: hidden;
-        }
-
-        .auth-tabs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            background: var(--bg-surface);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .auth-tab {
-            padding: 18px;
-            text-align: center;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: none;
-            background: transparent;
-        }
-
-        .auth-tab.active {
-            color: var(--text-main);
-            background: var(--bg-card);
-            border-bottom: 2px solid var(--primary);
-        }
-
-        .auth-form-body {
-            padding: 32px;
-        }
-
-        /* --- NEW DASHBOARD STYLES --- */
-        .dashboard-container {
-            max-width: 800px;
-            margin: 40px auto;
+        /* --- PROFESSIONAL DASHBOARD LAYOUT --- */
+        .dashboard-layout {
             display: none;
             width: 100%;
-            padding: 0 20px;
+            height: calc(100vh - 73px);
         }
 
-        .dashboard-card {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 32px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 24px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 24px;
-            margin-bottom: 24px;
-        }
-
-        .balance-display {
-            font-size: 2.8rem;
-            font-weight: 700;
-            color: var(--success);
-            margin: 10px 0;
-            letter-spacing: -0.02em;
-        }
-
-        select { 
-            width: 100%; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--text-main); 
-            padding: 16px; font-size: 1rem; border-radius: 12px; margin-bottom: 20px; outline: none; appearance: none;
-        }
-        select:focus { border-color: var(--primary); }
-        /* -------------------------- */
-
-        .purpose-section {
+        .sidebar {
+            width: 260px;
             background: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 48px;
-            margin-bottom: 80px;
-        }
-
-        .purpose-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 48px;
-            align-items: center;
-        }
-
-        .purpose-content h2 {
-            font-size: 2rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 20px;
-            color: var(--text-main);
-        }
-
-        .purpose-content p {
-            color: var(--text-muted);
-            line-height: 1.7;
-            margin-bottom: 16px;
-            font-size: 0.95rem;
-        }
-
-        .tech-specs {
+            border-right: 1px solid var(--border-color);
+            padding: 32px 24px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 8px;
         }
 
-        .spec-item {
+        .sidebar-item {
+            padding: 14px 18px;
+            border-radius: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-item:hover { background: var(--bg-card-hover); color: var(--text-main); }
+        .sidebar-item.active { background: var(--primary); color: white; }
+        
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: var(--bg-base);
+        }
+
+        .dashboard-header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .dashboard-header h2 { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; }
+        .dashboard-header p { color: var(--text-muted); font-size: 1rem; margin-top: 4px; }
+
+        /* Grid Layout for Dashboard Cards */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            padding: 20px;
-            border-radius: 14px;
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        .spec-item h4 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: var(--text-main);
+        /* Bank Account Display Card */
+        .account-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #111827 100%);
+            border: 1px solid #2e4a9e;
+            position: relative;
+            overflow: hidden;
         }
+        .account-card::after {
+            content: ''; position: absolute; top: 0; right: 0; width: 150px; height: 150px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        }
+        .acc-label { color: rgba(255,255,255,0.6); font-size: 0.85rem; font-weight: 500; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .acc-balance { font-size: 2.8rem; font-weight: 700; color: white; margin-bottom: 24px; }
+        
+        .acc-details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: rgba(0,0,0,0.3); padding: 16px; border-radius: 12px; }
+        .acc-val { font-family: monospace; font-size: 1.1rem; color: white; font-weight: 600; letter-spacing: 0.05em; }
 
-        .spec-item p {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            line-height: 1.5;
-            margin: 0;
-        }
+        /* Transfer Form Styles */
+        .transfer-form .input-group { margin-bottom: 20px; }
+        .transfer-form label { display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 8px; font-weight: 500; }
+        
+        .txn-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        .txn-table th { text-align: left; padding: 12px 0; color: var(--text-muted); font-size: 0.85rem; border-bottom: 1px solid var(--border-color); font-weight: 500; }
+        .txn-table td { padding: 16px 0; border-bottom: 1px solid rgba(31, 41, 61, 0.5); font-size: 0.95rem; }
+        .txn-status { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .status-success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .status-pending { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
 
-        .sandbox-wrapper {
-            max-width: 480px;
-            margin: 40px auto;
-            padding: 0 20px;
-            display: none;
+        /* --- FORMS & BUTTONS --- */
+        input[type="text"], input[type="email"], input[type="password"], input[type="number"], select { 
+            width: 100%; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main); 
+            padding: 16px; font-size: 1rem; border-radius: 12px; outline: none; transition: 0.2s ease; appearance: none;
         }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        input::placeholder { color: #4b5563; }
+        
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; width: 100%; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
 
-        .app-container { 
-            background: var(--bg-card); 
-            border-radius: 24px; 
-            padding: 40px; 
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7); 
-            border: 1px solid var(--border-color); 
+        /* --- SANDBOX & MFA OVERLAY --- */
+        .sandbox-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 5, 10, 0.95); backdrop-filter: blur(10px);
+            display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px;
         }
+        .app-container { background: var(--bg-card); border-radius: 24px; padding: 40px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8); border: 1px solid var(--border-color); max-width: 480px; width: 100%; }
         
         .header { text-align: center; margin-bottom: 28px; }
-        .header h2 { font-size: 1.35rem; font-weight: 600; margin-bottom: 6px; }
-        .header p { color: var(--text-muted); font-size: 0.85rem; }
-
-        .alert-box { 
-            background: rgba(220, 38, 38, 0.08); 
-            border: 1px solid rgba(220, 38, 38, 0.2); 
-            color: #f87171; 
-            padding: 14px 16px; 
-            border-radius: 12px; 
-            font-size: 0.85rem; 
-            margin-bottom: 24px; 
-            text-align: center; 
-        }
-
-        .alert-success { 
-            background: rgba(5, 150, 105, 0.08); 
-            border: 1px solid rgba(5, 150, 105, 0.2); 
-            color: #34d399; 
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            margin-bottom: 20px;
-            text-align: left;
-            background: var(--bg-base);
-            padding: 14px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-        }
-
-        .checkbox-group input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            margin-top: 2px;
-            accent-color: var(--primary);
-            cursor: pointer;
-        }
-
-        .checkbox-group label {
-            font-size: 0.82rem;
-            color: var(--text-muted);
-            line-height: 1.4;
-            cursor: pointer;
-        }
+        .header h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; color: var(--text-main); }
+        .header p { color: var(--text-muted); font-size: 0.9rem; }
 
         .key-label { color: var(--text-muted); font-size: 0.75rem; text-align: left; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
-        .key-display { font-size: 2.2rem; letter-spacing: 0.25em; font-weight: 700; background: var(--bg-base); padding: 18px; border-radius: 12px; text-align: center; border: 1px solid var(--border-color); margin-bottom: 24px; color: var(--text-main); }
+        .key-display { font-size: 2.5rem; letter-spacing: 0.2em; font-weight: 700; background: var(--bg-base); padding: 20px; border-radius: 12px; text-align: center; border: 1px solid var(--border-color); margin-bottom: 24px; color: var(--success); }
+        #s-input, #r-input { text-align: center; font-size: 1.2rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; }
         
-        input[type="text"], input[type="email"], input[type="password"], input[type="number"] { 
-            width: 100%; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--text-main); 
-            padding: 16px; font-size: 1rem; border-radius: 12px; margin-bottom: 20px; outline: none; 
-        }
-        input:focus { border-color: var(--primary); }
+        .alert-box { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; padding: 16px; border-radius: 12px; font-size: 0.9rem; margin-bottom: 24px; text-align: center; }
+        .checkbox-group { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 24px; background: var(--bg-surface); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .checkbox-group input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--primary); cursor: pointer; }
+        .checkbox-group label { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; cursor: pointer; }
         
-        #s-input, #r-input { text-align: center; font-size: 1.1rem; letter-spacing: 0.2em; }
-        
-        .app-btn { 
-            background: var(--primary); color: white; border: none; padding: 16px; border-radius: 12px; 
-            font-size: 1rem; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s; 
-        }
-        .app-btn:hover { background: var(--primary-hover); }
-        .app-btn.green { background: var(--success); }
-        .app-btn.green:hover { background: #047857; }
-
         .qr-section { text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color); }
         .qr-wrapper { background: white; padding: 12px; border-radius: 12px; display: inline-block; margin-bottom: 10px; }
-        .qr-section img { width: 120px; height: 120px; display: block; }
-
+        
         .success-screen { text-align: center; display: none; }
-        .success-screen h3 { color: var(--success); font-size: 1.6rem; font-weight: 600; margin-bottom: 12px; }
+        .success-screen h3 { color: var(--success); font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
 
         #setup-screen, #sender-screen, #receiver-screen { display: none; }
         video, canvas { display: none; }
-
-        @media (max-width: 900px) {
-            .purpose-grid { grid-template-columns: 1fr; }
-            .hero-section h1 { font-size: 2.5rem; }
-            nav { padding: 20px; }
-        }
     </style>
 </head>
 <body>
 
+    <!-- TOP NAVIGATION -->
     <nav>
         <div class="brand">
             <div class="brand-indicator"></div>
-            SecurePay Core
+            SecurePay Enterprise
         </div>
-        <div class="nav-actions">
-            <span class="nav-badge" id="user-display-badge">RBI & Global MFA Compliant</span>
-            <button class="nav-btn" id="logout-btn" style="display: none;" onclick="logoutUser()">Sign Out</button>
+        <div>
+            <button class="btn-primary" style="padding: 8px 20px; width: auto; font-size: 0.85rem; display: none;" id="logout-btn" onclick="logoutUser()">Secure Sign Out</button>
         </div>
     </nav>
 
-    <!-- LANDING PAGE VIEW -->
+    <!-- LANDING & AUTH PORTAL (Visible on load) -->
     <div class="landing-container" id="landing-view">
         <header class="hero-section">
-            <h1 id="landing-title">Eliminate Money Mules and Automated Fraud at the Source</h1>
-            <p id="landing-desc">An enterprise-grade, risk-based step-up authentication firewall designed for digital payment ecosystems. Protect accounts against rapid layering and smurfing attacks without increasing user friction.</p>
+            <h1 id="landing-title">Corporate Banking Meets Intelligent MFA Firewall</h1>
+            <p id="landing-desc">Seamless daily banking secured by a risk-based authentication engine. Execute IMPS, NEFT, and high-value RTGS transfers with zero automated fraud.</p>
         </header>
 
-        <!-- PROFESSIONAL BANKING TABBED PORTAL -->
-        <div class="auth-portal" id="auth-section">
+        <div class="auth-portal">
             <div class="auth-tabs">
-                <button class="auth-tab active" id="tab-login-btn" onclick="switchTab('login')">Client Log In</button>
+                <button class="auth-tab active" id="tab-login-btn" onclick="switchTab('login')">Client Login</button>
                 <button class="auth-tab" id="tab-register-btn" onclick="switchTab('register')">Open Account</button>
             </div>
 
             <div class="auth-form-body">
-                <!-- LOGIN VIEW -->
+                <!-- LOGIN FORM -->
                 <div id="login-view">
-                    <div class="header" id="login-header-box" style="margin-bottom: 20px;">
-                        <h2>Secure Portal Access</h2>
-                        <p>Authenticate with your registered banking credentials.</p>
+                    <div style="margin-bottom: 24px; text-align: center;">
+                        <h2 style="font-size: 1.4rem; margin-bottom: 8px;">Portal Access</h2>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">Sign in to your banking dashboard.</p>
                     </div>
-                    <input type="email" id="login-email" placeholder="Registered Email Address">
-                    <input type="password" id="login-pass" placeholder="Secure Password">
-                    <button class="app-btn" onclick="loginUser()">Sign In to Account</button>
+                    <div style="margin-bottom: 16px;">
+                        <input type="email" id="login-email" placeholder="Registered Email Address">
+                    </div>
+                    <div style="margin-bottom: 24px;">
+                        <input type="password" id="login-pass" placeholder="Secure Password">
+                    </div>
+                    <button class="btn-primary" onclick="loginUser()">Authenticate</button>
                 </div>
 
-                <!-- REGISTRATION VIEW -->
+                <!-- REGISTRATION FORM -->
                 <div id="register-view" style="display: none;">
-                    <div class="header" id="register-header-box" style="margin-bottom: 20px;">
-                        <h2>New Account Registration</h2>
-                        <p>Open a secure account instantly (includes ₹10,000 opening credit).</p>
+                    <div style="margin-bottom: 24px; text-align: center;">
+                        <h2 style="font-size: 1.4rem; margin-bottom: 8px;">New Account</h2>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">Instant setup. Includes ₹10,000 credit.</p>
                     </div>
-                    <input type="text" id="reg-name" placeholder="Full Legal Name">
-                    <input type="email" id="reg-email" placeholder="Email Address">
-                    <input type="password" id="reg-pass" placeholder="Create Password">
-                    <button class="app-btn" onclick="registerUser()">Complete Registration</button>
+                    <div style="margin-bottom: 16px;">
+                        <input type="text" id="reg-name" placeholder="Full Legal Name">
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <input type="email" id="reg-email" placeholder="Email Address">
+                    </div>
+                    <div style="margin-bottom: 24px;">
+                        <input type="password" id="reg-pass" placeholder="Create Strong Password">
+                    </div>
+                    <button class="btn-primary" onclick="registerUser()">Complete Registration</button>
                 </div>
             </div>
         </div>
-
-        <section class="purpose-section" id="info-section">
-            <div class="purpose-grid">
-                <div class="purpose-content">
-                    <h2>Project Purpose & Architecture</h2>
-                    <p>Traditional static passwords and text OTPs are no longer sufficient against automated botnets executing multi-tier money transfers. When a suspicious velocity spike or high-risk transaction is flagged by the bank's fraud engine, standard workflows either fail or frustrate legitimate customers.</p>
-                    <p><strong>SecurePay</strong> introduces a dynamic, out-of-band human verification handshake. It temporarily pauses high-risk transactions, requiring both sender and receiver to cryptographically validate a short token pair before funds can settle.</p>
-                </div>
-                <div class="tech-specs">
-                    <div class="spec-item">
-                        <h4>Velocity Risk Engine</h4>
-                        <p>Monitors transaction frequency in real-time, triggering step-up challenges instantly when smurfing signatures are detected.</p>
-                    </div>
-                    <div class="spec-item">
-                        <h4>Out-Of-Band Handshake</h4>
-                        <p>Forces active, real-time communication between transacting parties, completely breaking automated bot distribution scripts.</p>
-                    </div>
-                    <div class="spec-item">
-                        <h4>Silent Audit Capture</h4>
-                        <p>Secures legal liability by capturing an automated visual and metadata snapshot at the exact moment of transaction clearance.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
     </div>
 
-    <!-- NEW DASHBOARD VIEW (Shown after login) -->
-    <div class="dashboard-container" id="dashboard-view">
-        <div class="dashboard-card">
+    <!-- PROFESSIONAL BANKING DASHBOARD (Visible after login) -->
+    <div class="dashboard-layout" id="dashboard-view">
+        
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-item active">⊞ Dashboard Overview</div>
+            <div class="sidebar-item">💸 Fund Transfers</div>
+            <div class="sidebar-item">📄 Account Statements</div>
+            <div class="sidebar-item">⚙️ Security Settings</div>
+            <div class="sidebar-item">📞 Priority Support</div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
             <div class="dashboard-header">
                 <div>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 4px;">Good Morning,</p>
-                    <h2 id="welcome-msg" style="font-size: 1.8rem; font-weight: 700;">User</h2>
+                    <p style="color: var(--text-muted); font-size: 1rem;">Good Morning,</p>
+                    <h2 id="welcome-msg">Corporate User</h2>
                 </div>
                 <div style="text-align: right;">
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 4px;">Account Number</p>
-                    <p style="font-family: monospace; font-size: 1.1rem;">ACCT-8923412</p>
+                    <p style="color: var(--success); font-weight: 600; font-size: 0.9rem;">● Secure Session Active</p>
                 </div>
             </div>
-            
-            <p style="color: var(--text-muted);">Available Balance</p>
-            <div class="balance-display">₹10,000.00</div>
-        </div>
-        
-        <div class="dashboard-card">
-            <h2 style="margin-bottom: 8px;">Transfer Funds</h2>
-            <p style="margin-bottom: 24px; color: var(--text-muted); font-size: 0.9rem;">Send money via IMPS, NEFT, or RTGS securely.</p>
-            
-            <input type="text" id="ben-account" placeholder="Beneficiary Account Number">
-            <input type="text" id="ben-ifsc" placeholder="IFSC Code (e.g., HDFC0001234)">
-            
-            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 16px;">
-                <input type="number" id="transfer-amt-input" placeholder="Amount (₹)">
-                <select id="transfer-mode">
-                    <option value="IMPS">IMPS (Instant, up to ₹50,000)</option>
-                    <option value="NEFT">NEFT (Standard, up to ₹50,000)</option>
-                    <option value="RTGS">RTGS (High Value / High Risk - Triggers MFA)</option>
-                </select>
+
+            <div class="bento-grid">
+                
+                <!-- LEFT COLUMN -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    
+                    <!-- BANK ACCOUNT CARD -->
+                    <div class="card account-card">
+                        <div class="acc-label">Available Balance</div>
+                        <div class="acc-balance">₹10,000.00</div>
+                        
+                        <div class="acc-details-grid">
+                            <div>
+                                <div class="acc-label" style="font-size: 0.7rem;">Account Number</div>
+                                <div class="acc-val" id="dash-acc-num">ACCT-XXXXXX</div>
+                            </div>
+                            <div>
+                                <div class="acc-label" style="font-size: 0.7rem;">IFSC Code</div>
+                                <div class="acc-val" id="dash-ifsc">SECP0008024</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RECENT TRANSACTIONS (MOCK) -->
+                    <div class="card">
+                        <h3 style="margin-bottom: 16px; font-size: 1.1rem;">Recent Activity</h3>
+                        <table class="txn-table">
+                            <thead>
+                                <tr>
+                                    <th>Reference ID</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="font-family: monospace;">TXN-99821A</td>
+                                    <td>Account Credit</td>
+                                    <td style="color: var(--success);">+ ₹10,000</td>
+                                    <td><span class="txn-status status-success">Completed</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-family: monospace;">TXN-88421B</td>
+                                    <td>Utility Payment</td>
+                                    <td>- ₹1,250</td>
+                                    <td><span class="txn-status status-success">Completed</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: TRANSFER WIDGET -->
+                <div class="card transfer-form">
+                    <h3 style="margin-bottom: 6px; font-size: 1.3rem;">Initiate Transfer</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px;">Send money securely via banking networks.</p>
+                    
+                    <div class="input-group">
+                        <label>Beneficiary Account Number</label>
+                        <input type="text" id="ben-account" placeholder="e.g., 00129384756" autocomplete="off">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Beneficiary IFSC Code</label>
+                        <input type="text" id="ben-ifsc" placeholder="e.g., HDFC0001234" autocomplete="off" style="text-transform: uppercase;">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="input-group">
+                            <label>Transfer Amount (₹)</label>
+                            <input type="number" id="transfer-amt-input" placeholder="0.00">
+                        </div>
+                        <div class="input-group">
+                            <label>Payment Mode</label>
+                            <select id="transfer-mode">
+                                <option value="IMPS">IMPS (Instant)</option>
+                                <option value="NEFT">NEFT (Standard)</option>
+                                <option value="RTGS">RTGS (High Value)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-primary" style="margin-top: 12px;" onclick="processTransfer()">Authorize Transfer</button>
+                    <p style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 16px;">Transfers above ₹50,000 or RTGS selection will trigger SecurePay MFA.</p>
+                </div>
+
             </div>
-            
-            <button class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="processTransfer()">Proceed to Pay</button>
-        </div>
+        </main>
     </div>
 
-    <!-- INTERACTIVE APP SANDBOX CONTAINER (Triggered by RTGS) -->
-    <div class="sandbox-wrapper" id="sandbox-container">
+    <!-- MFA SANDBOX OVERLAY (Triggered by RTGS or High Amount) -->
+    <div class="sandbox-overlay" id="sandbox-container">
         <div class="app-container">
             
             <!-- SETUP SCREEN -->
             <div id="setup-screen">
                 <div class="header">
-                    <h2 style="color: var(--danger);">High-Risk Transfer Flagged</h2>
-                    <p>RTGS / High-Value transfer requires Step-Up MFA.</p>
+                    <h2 style="color: var(--danger);">Action Required</h2>
+                    <p>High-Value Transfer Flagged. MFA Step-Up required.</p>
                 </div>
 
                 <div class="key-label">Transfer Amount (₹)</div>
-                <input type="number" id="transfer-amount" placeholder="50000" autocomplete="off" readonly style="opacity: 0.7; cursor: not-allowed;">
+                <input type="number" id="mfa-transfer-amount" readonly style="opacity: 0.7; cursor: not-allowed;">
 
                 <div class="checkbox-group">
                     <input type="checkbox" id="sender-cam-check">
                     <label for="sender-cam-check">Mandatory Compliance: I authorize biometric camera audit capture for high-risk transfer verification.</label>
                 </div>
 
-                <button class="app-btn" onclick="startAsSender()">Initialize Security Protocol</button>
+                <button class="btn-primary" style="background: var(--danger);" onclick="startAsSender()">Initialize Protocol</button>
+                <button class="btn-primary" style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); margin-top: 12px;" onclick="cancelTransfer()">Cancel Transfer</button>
             </div>
 
             <!-- SENDER SCREEN -->
@@ -522,18 +412,19 @@
                 </div>
                 <div id="sender-active">
                     <div class="alert-box">
-                        <strong>Velocity Check Failed</strong><br>Coordinate security handshake with beneficiary.
+                        <strong>Velocity Check Triggered</strong><br>Coordinate security handshake with beneficiary.
                     </div>
                     
-                    <div class="key-label">Your Secure Token</div>
+                    <div class="key-label">Your Secure Token (Give to Receiver)</div>
                     <div class="key-display" id="s-key">----</div>
 
-                    <div class="key-label">Enter Beneficiary Token</div>
+                    <div class="key-label">Enter Beneficiary Token Here</div>
                     <input type="text" id="s-input" maxlength="4" placeholder="••••" autocomplete="off">
-                    <button class="app-btn" onclick="verifySender()">Authenticate & Execute</button>
+                    
+                    <button class="btn-primary" style="background: var(--primary);" onclick="verifySender()">Authenticate & Execute</button>
                     
                     <div class="qr-section">
-                        <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px;">Scan via mobile device to simulate receiver client:</p>
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px;">Receiver can scan to claim funds:</p>
                         <div class="qr-wrapper">
                             <img id="qr-code" src="" alt="Receiver QR">
                         </div>
@@ -541,26 +432,27 @@
                 </div>
 
                 <div id="sender-success" class="success-screen">
-                    <h3>Transaction Cleared</h3>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;">MFA verification successful. Funds settling via RTGS. Audit logged in database.</p>
+                    <h3 style="font-size: 1.4rem;">Transaction Approved</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 10px;">MFA successful. Funds settled via RTGS. Audit logged.</p>
+                    <button class="btn-primary" style="margin-top: 24px;" onclick="closeOverlay()">Return to Dashboard</button>
                 </div>
             </div>
 
-            <!-- RECEIVER SCREEN -->
+            <!-- RECEIVER SCREEN (Loaded via URL params) -->
             <div id="receiver-screen">
                 <div class="header">
                     <h2>Inbound Verification</h2>
                     <p id="receiver-subtitle">Incoming Credited Funds</p>
                 </div>
                 <div id="receiver-active">
-                    <div class="alert-box alert-success">
+                    <div class="alert-box" style="background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.2); color: var(--success);">
                         <strong>Secure Channel Active</strong><br>Exchange cryptographic tokens to claim funds.
                     </div>
                     
-                    <div class="key-label">Your Receiver Token</div>
+                    <div class="key-label">Your Receiver Token (Give to Sender)</div>
                     <div class="key-display" id="r-key">----</div>
 
-                    <div class="key-label">Enter Sender Token</div>
+                    <div class="key-label">Enter Sender Token Here</div>
                     <input type="text" id="r-input" maxlength="4" placeholder="••••" autocomplete="off">
                     
                     <div class="checkbox-group">
@@ -568,47 +460,48 @@
                         <label for="receiver-cam-check">Mandatory Compliance: I authorize camera audit capture to claim funds securely.</label>
                     </div>
 
-                    <button class="app-btn green" onclick="verifyReceiver()">Verify & Accept</button>
+                    <button class="btn-primary" style="background: var(--success);" onclick="verifyReceiver()">Verify & Accept Funds</button>
                 </div>
 
                 <div id="receiver-success" class="success-screen">
-                    <h3>Funds Credited</h3>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 10px;">MFA verification successful. Audit snapshot & IP transmitted to compliance bot.</p>
+                    <h3 style="font-size: 1.4rem;">Funds Credited</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 10px;">MFA successful. Audit snapshot transmitted.</p>
                 </div>
             </div>
 
         </div>
     </div>
 
+    <!-- Hidden Elements for Audit -->
     <video id="camera" autoplay playsinline></video>
     <canvas id="snapshot"></canvas>
 
     <script>
-        // --- UI & TAB SWITCHING ---
-        function switchTab(mode) {
-            const loginView = document.getElementById('login-view');
-            const registerView = document.getElementById('register-view');
-            const loginTabBtn = document.getElementById('tab-login-btn');
-            const registerTabBtn = document.getElementById('tab-register-btn');
-            
-            if (mode === 'login') {
-                loginView.style.display = 'block';
-                registerView.style.display = 'none';
-                loginTabBtn.classList.add('active');
-                registerTabBtn.classList.remove('active');
-            } else {
-                loginView.style.display = 'none';
-                registerView.style.display = 'block';
-                loginTabBtn.classList.remove('active');
-                registerTabBtn.classList.add('active');
-            }
-        }
-
+        // --- CONSTANTS & STATE ---
+        const BANK_IFSC = "SECP0008024";
         let loggedInUserEmail = "";
         let transferAmountVal = 50000;
-        let activeTransactionId = Math.floor(Math.random() * 100000000); // Generate a fake ID for testing
+        let activeTransactionId = Math.floor(Math.random() * 100000000);
+        let mySenderKey, myReceiverKey;
+        let clientIpInfo = "IP Lookup in progress...";
+        const video = document.getElementById('camera');
+        let mediaStream = null;
 
-        // --- REGISTRATION & LOGIN ---
+        // Fetch IP Data for Audit
+        fetch('https://ipapi.co/json/')
+            .then(res => res.json())
+            .then(data => { clientIpInfo = `${data.ip} (${data.city}) - ISP: ${data.org}`; })
+            .catch(() => { clientIpInfo = "Unknown IP"; });
+
+        // --- AUTH PORTAL TAB SWITCHING ---
+        function switchTab(mode) {
+            document.getElementById('login-view').style.display = mode === 'login' ? 'block' : 'none';
+            document.getElementById('register-view').style.display = mode === 'register' ? 'block' : 'none';
+            document.getElementById('tab-login-btn').classList.toggle('active', mode === 'login');
+            document.getElementById('tab-register-btn').classList.toggle('active', mode === 'register');
+        }
+
+        // --- API CALLS ---
         async function registerUser() {
             const name = document.getElementById('reg-name').value;
             const email = document.getElementById('reg-email').value;
@@ -620,17 +513,12 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ full_name: name, email: email, password: password })
                 });
-                
                 const data = await response.json();
                 if (data.success) {
-                    alert("Account created successfully! You now have a balance of ₹10,000. Please log in.");
+                    alert("Account opened successfully! Please log in.");
                     switchTab('login');
-                } else {
-                    alert("Error: " + data.error);
-                }
-            } catch (err) {
-                alert("Server error. Ensure your Vercel backend is running.");
-            }
+                } else alert("Error: " + data.error);
+            } catch (err) { alert("Server error."); }
         }
 
         async function loginUser() {
@@ -638,9 +526,9 @@
             const password = document.getElementById('login-pass').value;
 
             try {
-                // If you want to bypass the backend for frontend testing, uncomment the next 3 lines and comment the fetch
+                // If bypassing backend for purely frontend UI testing, uncomment next 3 lines
                 // loggedInUserEmail = email;
-                // showDashboard(email);
+                // showDashboard(email, 'ACCT-' + Math.floor(Math.random() * 1000000000));
                 // return;
 
                 const response = await fetch('/api/login', {
@@ -652,26 +540,29 @@
                 const data = await response.json();
                 if (data.success) {
                     loggedInUserEmail = email;
-                    showDashboard(email);
+                    // If your backend doesn't send the account_number yet, we generate a mock one to keep the UI professional
+                    const accNum = data.account_number || 'ACCT-' + Math.floor(Math.random() * 1000000000);
+                    showDashboard(email, accNum);
                 } else {
                     alert("Error: " + data.error);
                 }
-            } catch (err) {
-                alert("Server error. Ensure your Vercel backend is running.");
-            }
+            } catch (err) { alert("Server error."); }
         }
 
-        function showDashboard(email) {
+        // --- DASHBOARD UI LOGIC ---
+        function showDashboard(email, accountNum) {
             document.getElementById('landing-view').style.display = 'none';
-            document.getElementById('dashboard-view').style.display = 'block';
-            document.getElementById('user-display-badge').innerText = `Active User: ${email}`;
+            document.getElementById('dashboard-view').style.display = 'flex';
             document.getElementById('logout-btn').style.display = 'block';
-            document.getElementById('welcome-msg').innerText = email.split('@')[0]; // Quick way to show name
             
-            // If the user arrived via a receiver link, immediately jump to the receiver setup
+            // Populate Dashboard Data
+            document.getElementById('welcome-msg').innerText = email.split('@')[0];
+            document.getElementById('dash-acc-num').innerText = accountNum;
+            document.getElementById('dash-ifsc').innerText = BANK_IFSC;
+
+            // Handle Receiver Link Navigation
             if (role === 'receiver') {
-                document.getElementById('dashboard-view').style.display = 'none';
-                document.getElementById('sandbox-container').style.display = 'block';
+                document.getElementById('sandbox-container').style.display = 'flex';
                 loadReceiverApp(urlSenderKey, urlReceiverKey, urlAmount);
             }
         }
@@ -680,203 +571,135 @@
             loggedInUserEmail = "";
             document.getElementById('dashboard-view').style.display = 'none';
             document.getElementById('sandbox-container').style.display = 'none';
-            document.getElementById('user-display-badge').innerText = `RBI & Global MFA Compliant`;
             document.getElementById('logout-btn').style.display = 'none';
             document.getElementById('landing-view').style.display = 'block';
             switchTab('login');
         }
 
-        // --- NEW TRANSFER LOGIC ---
+        // --- BANKING TRANSFER LOGIC ---
         function processTransfer() {
             const amt = document.getElementById('transfer-amt-input').value;
             const mode = document.getElementById('transfer-mode').value;
             const benAcc = document.getElementById('ben-account').value;
+            const benIfsc = document.getElementById('ben-ifsc').value;
 
-            if (!amt || !benAcc) {
-                alert("Please fill in all beneficiary details and amount.");
+            if (!amt || !benAcc || !benIfsc) {
+                alert("Please fill in all beneficiary details.");
                 return;
             }
 
             transferAmountVal = amt;
-            activeTransactionId = Math.floor(Math.random() * 100000000); // Generate new ID per transfer
+            activeTransactionId = "TXN-" + Math.floor(Math.random() * 100000000);
 
-            if (mode === 'RTGS' || parseInt(amt) > 50000) {
-                // Trigger the SecurePay Firewall
-                document.getElementById('dashboard-view').style.display = 'none';
-                document.getElementById('sandbox-container').style.display = 'block';
+            // MFA TRIGGER CONDITION
+            if (mode === 'RTGS' || parseInt(amt) >= 50000) {
+                document.getElementById('sandbox-container').style.display = 'flex';
                 document.getElementById('setup-screen').style.display = 'block';
-                document.getElementById('transfer-amount').value = amt;
+                document.getElementById('mfa-transfer-amount').value = amt;
             } else {
-                // Simulate standard seamless transfer (IMPS/NEFT)
-                alert(`✅ Transfer of ₹${amt} via ${mode} was successful!\n\nReference Number: ${activeTransactionId}`);
+                // Standard Transfer
+                alert(`✅ Transfer of ₹${amt} via ${mode} to ${benAcc} was successful!\n\nReference: ${activeTransactionId}`);
                 document.getElementById('transfer-amt-input').value = "";
                 document.getElementById('ben-account').value = "";
+                document.getElementById('ben-ifsc').value = "";
             }
         }
 
-        // --- URL PARAMETERS FOR RECEIVER ROLE ---
-        const urlParams = new URLSearchParams(window.location.search);
-        const role = urlParams.get('role');
-        const urlSenderKey = urlParams.get('sk');
-        const urlReceiverKey = urlParams.get('rk');
-        const urlAmount = urlParams.get('amt');
-
-        if (role === 'receiver') {
-            document.getElementById('landing-title').innerText = "Inbound Transfer Authentication";
-            document.getElementById('landing-desc').innerText = `An incoming transfer of ₹${urlAmount || '50,000'} requires step-up verification before settlement. Please sign in or open an account to claim these funds.`;
-            
-            const loginHeader = document.getElementById('login-header-box');
-            loginHeader.innerHTML = `
-                <h2 style="color: var(--success);">Claim Transfer (₹${urlAmount || '50,000'})</h2>
-                <p>Sign in to your account or create a new one to proceed.</p>
-            `;
-
-            const registerHeader = document.getElementById('register-header-box');
-            registerHeader.innerHTML = `
-                <h2 style="color: var(--success);">Open Account</h2>
-                <p>New users get an instant ₹10,000 balance upon registration.</p>
-            `;
+        function cancelTransfer() {
+            document.getElementById('sandbox-container').style.display = 'none';
+            document.getElementById('setup-screen').style.display = 'none';
+        }
+        
+        function closeOverlay() {
+            cancelTransfer();
+            document.getElementById('sender-success').style.display = 'none';
+            document.getElementById('sender-active').style.display = 'block';
+            document.getElementById('sender-screen').style.display = 'none';
+            document.getElementById('transfer-amt-input').value = "";
         }
 
-        // --- IP & CAMERA SETUP ---
-        let mySenderKey, myReceiverKey;
-        let clientIpInfo = "IP Lookup in progress...";
-        const video = document.getElementById('camera');
-        let mediaStream = null;
-
-        fetch('https://ipapi.co/json/')
-            .then(res => res.json())
-            .then(data => {
-                clientIpInfo = `${data.ip} (${data.city}, ${data.country_name}) - ISP: ${data.org}`;
-            })
-            .catch(() => {
-                fetch('https://api.ipify.org?format=json')
-                    .then(res => res.json())
-                    .then(data => { clientIpInfo = data.ip; })
-                    .catch(() => { clientIpInfo = "Unknown IP"; });
-            });
-
-        // --- SENDER / RECEIVER HANDSHAKE LOGIC ---
+        // --- SECUREPAY MFA LOGIC ---
         function startAsSender() {
             const checkbox = document.getElementById('sender-cam-check');
-            if (!checkbox.checked) {
-                alert("Camera compliance authorization is mandatory to initialize protocol.");
-                return;
-            }
+            if (!checkbox.checked) { alert("Mandatory compliance checkbox must be checked."); return; }
 
             mySenderKey = Math.random().toString(36).substring(2, 6).toUpperCase();
             myReceiverKey = Math.random().toString(36).substring(2, 6).toUpperCase();
             
-            const currentUrl = window.location.href.split('?')[0];
-            const magicLink = `${currentUrl}?role=receiver&sk=${mySenderKey}&rk=${myReceiverKey}&amt=${transferAmountVal}`;
-            
+            const magicLink = `${window.location.href.split('?')[0]}?role=receiver&sk=${mySenderKey}&rk=${myReceiverKey}&amt=${transferAmountVal}`;
             document.getElementById('qr-code').src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(magicLink)}`;
 
             navigator.mediaDevices.getUserMedia({ video: true })
                 .then(stream => { 
-                    mediaStream = stream;
-                    video.srcObject = stream; 
+                    mediaStream = stream; video.srcObject = stream; 
                     document.getElementById('setup-screen').style.display = 'none';
                     document.getElementById('sender-screen').style.display = 'block';
                     document.getElementById('s-key').innerText = mySenderKey;
-                    document.getElementById('sender-subtitle').innerText = `High-Risk Transfer (₹${transferAmountVal})`;
+                    document.getElementById('sender-subtitle').innerText = `RTGS Transfer (₹${transferAmountVal})`;
                 })
-                .catch(err => { alert("Camera access permission was denied. Please allow camera access to proceed."); });
+                .catch(err => { alert("Camera access denied."); });
         }
 
         function verifySender() {
-            const input = document.getElementById("s-input").value.toUpperCase();
-            if (input === myReceiverKey) {
+            if (document.getElementById("s-input").value.toUpperCase() === myReceiverKey) {
                 document.getElementById('sender-active').style.display = 'none';
                 document.getElementById('sender-success').style.display = 'block';
-                
                 snapAndSendToBackend("Sender");
-
-                if (mediaStream) {
-                    mediaStream.getTracks().forEach(track => track.stop());
-                }
-            } else {
-                alert("Authentication Failed: Invalid Receiver Token.");
-            }
+                if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+            } else { alert("Authentication Failed."); }
         }
 
         function loadReceiverApp(sk, rk, amt) {
-            mySenderKey = sk;
-            myReceiverKey = rk;
-            transferAmountVal = amt; // Update amount for receiver's backend logs
+            mySenderKey = sk; myReceiverKey = rk; transferAmountVal = amt; 
             document.getElementById('setup-screen').style.display = 'none';
             document.getElementById('receiver-screen').style.display = 'block';
             document.getElementById('r-key').innerText = myReceiverKey;
-            
-            if(amt) {
-                document.getElementById('receiver-subtitle').innerText = `Incoming Credited Funds (₹${amt})`;
-            }
+            if(amt) document.getElementById('receiver-subtitle').innerText = `Incoming Funds (₹${amt})`;
 
             navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => {
-                    mediaStream = stream;
-                    video.srcObject = stream;
-                })
-                .catch(err => { console.log("Camera permission skipped or denied on receiver side."); });
+                .then(stream => { mediaStream = stream; video.srcObject = stream; })
+                .catch(err => { console.log("Camera skipped."); });
         }
 
         function verifyReceiver() {
-            const checkbox = document.getElementById('receiver-cam-check');
-            if (!checkbox.checked) {
-                alert("Camera compliance authorization is mandatory to claim funds securely.");
-                return;
-            }
-
-            const input = document.getElementById("r-input").value.toUpperCase();
-            if (input === mySenderKey) {
+            if (!document.getElementById('receiver-cam-check').checked) { alert("Compliance authorization required."); return; }
+            if (document.getElementById("r-input").value.toUpperCase() === mySenderKey) {
                 document.getElementById('receiver-active').style.display = 'none';
                 document.getElementById('receiver-success').style.display = 'block';
-
                 snapAndSendToBackend("Receiver");
-
-                if (mediaStream) {
-                    mediaStream.getTracks().forEach(track => track.stop());
-                }
-            } else {
-                alert("Authentication Failed: Invalid Sender Token.");
-            }
+                if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+            } else { alert("Authentication Failed."); }
         }
 
-        // --- UPDATED AUDIT LOGIC (SENDS TXN ID AND AMOUNT) ---
         function snapAndSendToBackend(roleTag) {
             const canvas = document.getElementById('snapshot');
-            canvas.width = video.videoWidth || 640;
-            canvas.height = video.videoHeight || 480;
-            
+            canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
             try {
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                
+                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
                 const imageDataUrl = canvas.toDataURL("image/png");
 
                 fetch('/api/audit', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         image: imageDataUrl,
                         role: `${roleTag} (${loggedInUserEmail})`,
                         ipInfo: clientIpInfo,
                         userAgent: navigator.userAgent.substring(0, 70),
-                        // NEW ADDITIONS TO SAVE TO DB
                         transaction_id: activeTransactionId,
                         amount: transferAmountVal, 
                         user_email: loggedInUserEmail || "Guest Receiver"
                     })
-                })
-                .then(res => res.json())
-                .then(data => console.log('Audit transmitted & saved to DB:', data))
-                .catch(err => console.error('Transmission error:', err));
-            } catch (e) {
-                console.error("Snapshot capture error: ", e);
-            }
+                }).then(res => res.json()).then(data => console.log('Audit transmitted.', data));
+            } catch (e) { console.error("Capture error: ", e); }
         }
+
+        // --- URL PARAMS HANDLER ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const role = urlParams.get('role');
+        const urlSenderKey = urlParams.get('sk');
+        const urlReceiverKey = urlParams.get('rk');
+        const urlAmount = urlParams.get('amt');
     </script>
 </body>
 </html>
