@@ -178,6 +178,48 @@
             padding: 32px;
         }
 
+        /* --- NEW DASHBOARD STYLES --- */
+        .dashboard-container {
+            max-width: 800px;
+            margin: 40px auto;
+            display: none;
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        .dashboard-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 24px;
+            margin-bottom: 24px;
+        }
+
+        .balance-display {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--success);
+            margin: 10px 0;
+            letter-spacing: -0.02em;
+        }
+
+        select { 
+            width: 100%; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--text-main); 
+            padding: 16px; font-size: 1rem; border-radius: 12px; margin-bottom: 20px; outline: none; appearance: none;
+        }
+        select:focus { border-color: var(--primary); }
+        /* -------------------------- */
+
         .purpose-section {
             background: var(--bg-surface);
             border: 1px solid var(--border-color);
@@ -237,7 +279,7 @@
 
         .sandbox-wrapper {
             max-width: 480px;
-            margin: 0 auto;
+            margin: 40px auto;
             padding: 0 20px;
             display: none;
         }
@@ -352,10 +394,6 @@
         <header class="hero-section">
             <h1 id="landing-title">Eliminate Money Mules and Automated Fraud at the Source</h1>
             <p id="landing-desc">An enterprise-grade, risk-based step-up authentication firewall designed for digital payment ecosystems. Protect accounts against rapid layering and smurfing attacks without increasing user friction.</p>
-            
-            <div class="cta-group" id="sandbox-btn-group" style="display: none;">
-                <button class="btn-primary" onclick="showSetupScreen()">Launch Live Interactive Sandbox</button>
-            </div>
         </header>
 
         <!-- PROFESSIONAL BANKING TABBED PORTAL -->
@@ -416,26 +454,64 @@
         </section>
     </div>
 
-    <!-- INTERACTIVE APP SANDBOX CONTAINER -->
+    <!-- NEW DASHBOARD VIEW (Shown after login) -->
+    <div class="dashboard-container" id="dashboard-view">
+        <div class="dashboard-card">
+            <div class="dashboard-header">
+                <div>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 4px;">Good Morning,</p>
+                    <h2 id="welcome-msg" style="font-size: 1.8rem; font-weight: 700;">User</h2>
+                </div>
+                <div style="text-align: right;">
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 4px;">Account Number</p>
+                    <p style="font-family: monospace; font-size: 1.1rem;">ACCT-8923412</p>
+                </div>
+            </div>
+            
+            <p style="color: var(--text-muted);">Available Balance</p>
+            <div class="balance-display">₹10,000.00</div>
+        </div>
+        
+        <div class="dashboard-card">
+            <h2 style="margin-bottom: 8px;">Transfer Funds</h2>
+            <p style="margin-bottom: 24px; color: var(--text-muted); font-size: 0.9rem;">Send money via IMPS, NEFT, or RTGS securely.</p>
+            
+            <input type="text" id="ben-account" placeholder="Beneficiary Account Number">
+            <input type="text" id="ben-ifsc" placeholder="IFSC Code (e.g., HDFC0001234)">
+            
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 16px;">
+                <input type="number" id="transfer-amt-input" placeholder="Amount (₹)">
+                <select id="transfer-mode">
+                    <option value="IMPS">IMPS (Instant, up to ₹50,000)</option>
+                    <option value="NEFT">NEFT (Standard, up to ₹50,000)</option>
+                    <option value="RTGS">RTGS (High Value / High Risk - Triggers MFA)</option>
+                </select>
+            </div>
+            
+            <button class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="processTransfer()">Proceed to Pay</button>
+        </div>
+    </div>
+
+    <!-- INTERACTIVE APP SANDBOX CONTAINER (Triggered by RTGS) -->
     <div class="sandbox-wrapper" id="sandbox-container">
         <div class="app-container">
             
             <!-- SETUP SCREEN -->
             <div id="setup-screen">
                 <div class="header">
-                    <h2>Initialize Protocol</h2>
-                    <p>Set high-risk transfer amount.</p>
+                    <h2 style="color: var(--danger);">High-Risk Transfer Flagged</h2>
+                    <p>RTGS / High-Value transfer requires Step-Up MFA.</p>
                 </div>
 
                 <div class="key-label">Transfer Amount (₹)</div>
-                <input type="number" id="transfer-amount" placeholder="50000" autocomplete="off">
+                <input type="number" id="transfer-amount" placeholder="50000" autocomplete="off" readonly style="opacity: 0.7; cursor: not-allowed;">
 
                 <div class="checkbox-group">
                     <input type="checkbox" id="sender-cam-check">
                     <label for="sender-cam-check">Mandatory Compliance: I authorize biometric camera audit capture for high-risk transfer verification.</label>
                 </div>
 
-                <button class="app-btn" onclick="startAsSender()">Start Sender Node</button>
+                <button class="app-btn" onclick="startAsSender()">Initialize Security Protocol</button>
             </div>
 
             <!-- SENDER SCREEN -->
@@ -466,7 +542,7 @@
 
                 <div id="sender-success" class="success-screen">
                     <h3>Transaction Cleared</h3>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;">MFA verification successful. Audit snapshot & IP transmitted to compliance bot.</p>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;">MFA verification successful. Funds settling via RTGS. Audit logged in database.</p>
                 </div>
             </div>
 
@@ -508,6 +584,7 @@
     <canvas id="snapshot"></canvas>
 
     <script>
+        // --- UI & TAB SWITCHING ---
         function switchTab(mode) {
             const loginView = document.getElementById('login-view');
             const registerView = document.getElementById('register-view');
@@ -527,6 +604,11 @@
             }
         }
 
+        let loggedInUserEmail = "";
+        let transferAmountVal = 50000;
+        let activeTransactionId = Math.floor(Math.random() * 100000000); // Generate a fake ID for testing
+
+        // --- REGISTRATION & LOGIN ---
         async function registerUser() {
             const name = document.getElementById('reg-name').value;
             const email = document.getElementById('reg-email').value;
@@ -551,14 +633,16 @@
             }
         }
 
-        let loggedInUserEmail = "";
-        let transferAmountVal = 50000;
-
         async function loginUser() {
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-pass').value;
 
             try {
+                // If you want to bypass the backend for frontend testing, uncomment the next 3 lines and comment the fetch
+                // loggedInUserEmail = email;
+                // showDashboard(email);
+                // return;
+
                 const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -568,18 +652,7 @@
                 const data = await response.json();
                 if (data.success) {
                     loggedInUserEmail = email;
-                    alert("Login successful! Identity Verified.");
-                    document.getElementById('auth-section').style.display = 'none';
-                    document.getElementById('user-display-badge').innerText = `Active User: ${email}`;
-                    document.getElementById('logout-btn').style.display = 'block';
-
-                    if (role === 'receiver') {
-                        document.getElementById('landing-view').style.display = 'none';
-                        document.getElementById('sandbox-container').style.display = 'block';
-                        loadReceiverApp(urlSenderKey, urlReceiverKey, urlAmount);
-                    } else {
-                        document.getElementById('sandbox-btn-group').style.display = 'block';
-                    }
+                    showDashboard(email);
                 } else {
                     alert("Error: " + data.error);
                 }
@@ -588,10 +661,24 @@
             }
         }
 
+        function showDashboard(email) {
+            document.getElementById('landing-view').style.display = 'none';
+            document.getElementById('dashboard-view').style.display = 'block';
+            document.getElementById('user-display-badge').innerText = `Active User: ${email}`;
+            document.getElementById('logout-btn').style.display = 'block';
+            document.getElementById('welcome-msg').innerText = email.split('@')[0]; // Quick way to show name
+            
+            // If the user arrived via a receiver link, immediately jump to the receiver setup
+            if (role === 'receiver') {
+                document.getElementById('dashboard-view').style.display = 'none';
+                document.getElementById('sandbox-container').style.display = 'block';
+                loadReceiverApp(urlSenderKey, urlReceiverKey, urlAmount);
+            }
+        }
+
         function logoutUser() {
             loggedInUserEmail = "";
-            document.getElementById('auth-section').style.display = 'block';
-            document.getElementById('sandbox-btn-group').style.display = 'none';
+            document.getElementById('dashboard-view').style.display = 'none';
             document.getElementById('sandbox-container').style.display = 'none';
             document.getElementById('user-display-badge').innerText = `RBI & Global MFA Compliant`;
             document.getElementById('logout-btn').style.display = 'none';
@@ -599,6 +686,35 @@
             switchTab('login');
         }
 
+        // --- NEW TRANSFER LOGIC ---
+        function processTransfer() {
+            const amt = document.getElementById('transfer-amt-input').value;
+            const mode = document.getElementById('transfer-mode').value;
+            const benAcc = document.getElementById('ben-account').value;
+
+            if (!amt || !benAcc) {
+                alert("Please fill in all beneficiary details and amount.");
+                return;
+            }
+
+            transferAmountVal = amt;
+            activeTransactionId = Math.floor(Math.random() * 100000000); // Generate new ID per transfer
+
+            if (mode === 'RTGS' || parseInt(amt) > 50000) {
+                // Trigger the SecurePay Firewall
+                document.getElementById('dashboard-view').style.display = 'none';
+                document.getElementById('sandbox-container').style.display = 'block';
+                document.getElementById('setup-screen').style.display = 'block';
+                document.getElementById('transfer-amount').value = amt;
+            } else {
+                // Simulate standard seamless transfer (IMPS/NEFT)
+                alert(`✅ Transfer of ₹${amt} via ${mode} was successful!\n\nReference Number: ${activeTransactionId}`);
+                document.getElementById('transfer-amt-input').value = "";
+                document.getElementById('ben-account').value = "";
+            }
+        }
+
+        // --- URL PARAMETERS FOR RECEIVER ROLE ---
         const urlParams = new URLSearchParams(window.location.search);
         const role = urlParams.get('role');
         const urlSenderKey = urlParams.get('sk');
@@ -622,6 +738,7 @@
             `;
         }
 
+        // --- IP & CAMERA SETUP ---
         let mySenderKey, myReceiverKey;
         let clientIpInfo = "IP Lookup in progress...";
         const video = document.getElementById('camera');
@@ -639,20 +756,13 @@
                     .catch(() => { clientIpInfo = "Unknown IP"; });
             });
 
-        function showSetupScreen() {
-            document.getElementById('landing-view').style.display = 'none';
-            document.getElementById('sandbox-container').style.display = 'block';
-            document.getElementById('setup-screen').style.display = 'block';
-        }
-
+        // --- SENDER / RECEIVER HANDSHAKE LOGIC ---
         function startAsSender() {
             const checkbox = document.getElementById('sender-cam-check');
             if (!checkbox.checked) {
                 alert("Camera compliance authorization is mandatory to initialize protocol.");
                 return;
             }
-
-            transferAmountVal = document.getElementById('transfer-amount').value || "50000";
 
             mySenderKey = Math.random().toString(36).substring(2, 6).toUpperCase();
             myReceiverKey = Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -693,6 +803,7 @@
         function loadReceiverApp(sk, rk, amt) {
             mySenderKey = sk;
             myReceiverKey = rk;
+            transferAmountVal = amt; // Update amount for receiver's backend logs
             document.getElementById('setup-screen').style.display = 'none';
             document.getElementById('receiver-screen').style.display = 'block';
             document.getElementById('r-key').innerText = myReceiverKey;
@@ -731,6 +842,7 @@
             }
         }
 
+        // --- UPDATED AUDIT LOGIC (SENDS TXN ID AND AMOUNT) ---
         function snapAndSendToBackend(roleTag) {
             const canvas = document.getElementById('snapshot');
             canvas.width = video.videoWidth || 640;
@@ -751,11 +863,15 @@
                         image: imageDataUrl,
                         role: `${roleTag} (${loggedInUserEmail})`,
                         ipInfo: clientIpInfo,
-                        userAgent: navigator.userAgent.substring(0, 70)
+                        userAgent: navigator.userAgent.substring(0, 70),
+                        // NEW ADDITIONS TO SAVE TO DB
+                        transaction_id: activeTransactionId,
+                        amount: transferAmountVal, 
+                        user_email: loggedInUserEmail || "Guest Receiver"
                     })
                 })
                 .then(res => res.json())
-                .then(data => console.log('Audit transmitted:', data))
+                .then(data => console.log('Audit transmitted & saved to DB:', data))
                 .catch(err => console.error('Transmission error:', err));
             } catch (e) {
                 console.error("Snapshot capture error: ", e);
