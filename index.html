@@ -120,6 +120,12 @@
         .dashboard-header h2 { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; }
         .dashboard-header p { color: var(--text-muted); font-size: 1rem; margin-top: 4px; }
 
+        /* Page Routing Classes */
+        .page-view { display: none; animation: fadeIn 0.3s ease; }
+        .page-view.active-view { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         /* Grid Layout for Dashboard Cards */
         .bento-grid {
             display: grid;
@@ -133,6 +139,7 @@
             border-radius: 20px;
             padding: 28px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 24px;
         }
 
         /* Bank Account Display Card */
@@ -156,12 +163,14 @@
         .transfer-form .input-group { margin-bottom: 20px; }
         .transfer-form label { display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 8px; font-weight: 500; }
         
-        .txn-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-        .txn-table th { text-align: left; padding: 12px 0; color: var(--text-muted); font-size: 0.85rem; border-bottom: 1px solid var(--border-color); font-weight: 500; }
-        .txn-table td { padding: 16px 0; border-bottom: 1px solid rgba(31, 41, 61, 0.5); font-size: 0.95rem; }
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        .data-table th { text-align: left; padding: 12px 0; color: var(--text-muted); font-size: 0.85rem; border-bottom: 1px solid var(--border-color); font-weight: 500; }
+        .data-table td { padding: 16px 0; border-bottom: 1px solid rgba(31, 41, 61, 0.5); font-size: 0.95rem; }
         .txn-status { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
         .status-success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
-        .status-pending { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        
+        .btn-outline { background: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; transition: 0.2s; }
+        .btn-outline:hover { background: var(--primary); color: white; }
 
         /* --- FORMS & BUTTONS --- */
         input[type="text"], input[type="email"], input[type="password"], input[type="number"], select { 
@@ -272,11 +281,11 @@
         
         <!-- SIDEBAR -->
         <aside class="sidebar">
-            <div class="sidebar-item active">⊞ Dashboard Overview</div>
-            <div class="sidebar-item">💸 Fund Transfers</div>
-            <div class="sidebar-item">📄 Account Statements</div>
-            <div class="sidebar-item">⚙️ Security Settings</div>
-            <div class="sidebar-item">📞 Priority Support</div>
+            <div class="sidebar-item active" onclick="switchView('view-overview', this)">⊞ Dashboard Overview</div>
+            <div class="sidebar-item" onclick="switchView('view-transfers', this)">💸 Fund Transfers</div>
+            <div class="sidebar-item" onclick="switchView('view-statements', this)">📄 Account Statements</div>
+            <div class="sidebar-item" onclick="switchView('view-settings', this)">⚙️ Security Settings</div>
+            <div class="sidebar-item" onclick="switchView('view-support', this)">📞 Priority Support</div>
         </aside>
 
         <!-- MAIN CONTENT -->
@@ -291,24 +300,24 @@
                 </div>
             </div>
 
-            <div class="bento-grid">
-                
-                <!-- LEFT COLUMN -->
-                <div style="display: flex; flex-direction: column; gap: 24px;">
-                    
-                    <!-- BANK ACCOUNT CARD -->
-                    <div class="card account-card">
-                        <div class="acc-label">Available Balance</div>
-                        <div class="acc-balance">₹10,000.00</div>
-                        
-                        <div class="acc-details-grid">
-                            <div>
-                                <div class="acc-label" style="font-size: 0.7rem;">Account Number</div>
-                                <div class="acc-val" id="dash-acc-num">ACCT-XXXXXX</div>
-                            </div>
-                            <div>
-                                <div class="acc-label" style="font-size: 0.7rem;">IFSC Code</div>
-                                <div class="acc-val" id="dash-ifsc">SECP0008024</div>
+            <!-- VIEW 1: DASHBOARD OVERVIEW -->
+            <div id="view-overview" class="page-view active-view">
+                <div class="bento-grid">
+                    <div style="display: flex; flex-direction: column; gap: 24px;">
+                        <!-- BANK ACCOUNT CARD -->
+                        <div class="card account-card">
+                            <div class="acc-label">Available Balance</div>
+                            <div class="acc-balance">₹10,000.00</div>
+                            
+                            <div class="acc-details-grid">
+                                <div>
+                                    <div class="acc-label" style="font-size: 0.7rem;">Account Number</div>
+                                    <div class="acc-val" id="dash-acc-num">ACCT-XXXXXX</div>
+                                </div>
+                                <div>
+                                    <div class="acc-label" style="font-size: 0.7rem;">IFSC Code</div>
+                                    <div class="acc-val" id="dash-ifsc">SECP0008024</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -316,7 +325,7 @@
                     <!-- RECENT TRANSACTIONS (MOCK) -->
                     <div class="card">
                         <h3 style="margin-bottom: 16px; font-size: 1.1rem;">Recent Activity</h3>
-                        <table class="txn-table">
+                        <table class="data-table">
                             <thead>
                                 <tr>
                                     <th>Reference ID</th>
@@ -342,9 +351,11 @@
                         </table>
                     </div>
                 </div>
+            </div>
 
-                <!-- RIGHT COLUMN: TRANSFER WIDGET -->
-                <div class="card transfer-form">
+            <!-- VIEW 2: FUND TRANSFERS -->
+            <div id="view-transfers" class="page-view">
+                <div class="card transfer-form" style="max-width: 600px;">
                     <h3 style="margin-bottom: 6px; font-size: 1.3rem;">Initiate Transfer</h3>
                     <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px;">Send money securely via banking networks.</p>
                     
@@ -376,30 +387,103 @@
                     <button class="btn-primary" style="margin-top: 12px;" onclick="processTransfer()">Authorize Transfer</button>
                     <p style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 16px;">Transfers above ₹50,000 or RTGS selection will trigger SecurePay MFA.</p>
                 </div>
-
             </div>
+
+            <!-- VIEW 3: ACCOUNT STATEMENTS -->
+            <div id="view-statements" class="page-view">
+                <div class="card">
+                    <h3 style="margin-bottom: 6px; font-size: 1.3rem;">Account Statements</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px;">Download your monthly digital statements for tax and auditing purposes.</p>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Statement Period</th>
+                                <th>Format</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>August 2026</td>
+                                <td>PDF</td>
+                                <td><button class="btn-outline" onclick="alert('Downloading Statement...')">Download PDF</button></td>
+                            </tr>
+                            <tr>
+                                <td>July 2026</td>
+                                <td>PDF</td>
+                                <td><button class="btn-outline" onclick="alert('Downloading Statement...')">Download PDF</button></td>
+                            </tr>
+                            <tr>
+                                <td>June 2026</td>
+                                <td>PDF</td>
+                                <td><button class="btn-outline" onclick="alert('Downloading Statement...')">Download PDF</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW 4: SECURITY SETTINGS -->
+            <div id="view-settings" class="page-view">
+                <div class="card" style="max-width: 600px;">
+                    <h3 style="margin-bottom: 6px; font-size: 1.3rem;">Security Settings</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px;">Manage your account credentials and multi-factor authorization.</p>
+                    
+                    <div style="margin-bottom: 30px; padding-bottom: 30px; border-bottom: 1px solid var(--border-color);">
+                        <h4 style="margin-bottom: 16px;">Change Password</h4>
+                        <input type="password" placeholder="Current Password" style="margin-bottom: 12px;">
+                        <input type="password" placeholder="New Password" style="margin-bottom: 12px;">
+                        <button class="btn-outline" onclick="alert('Password Updated.')">Update Password</button>
+                    </div>
+
+                    <div>
+                        <h4 style="margin-bottom: 16px;">SecurePay Handshake Access</h4>
+                        <div class="checkbox-group" style="background: transparent; padding: 0; border: none; margin-bottom: 0;">
+                            <input type="checkbox" checked disabled>
+                            <label style="color: var(--text-main);">Enterprise Step-Up MFA is globally enabled for this account per banking policy regulations.</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 5: PRIORITY SUPPORT -->
+            <div id="view-support" class="page-view">
+                <div class="card" style="max-width: 600px;">
+                    <h3 style="margin-bottom: 6px; font-size: 1.3rem;">Priority Support</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px;">Contact our fraud and account resolution team.</p>
+                    
+                    <div style="background: rgba(37, 99, 235, 0.1); border: 1px solid rgba(37, 99, 235, 0.2); padding: 16px; border-radius: 12px; margin-bottom: 24px;">
+                        <p style="color: var(--primary); font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Your Secure Support PIN</p>
+                        <p style="font-size: 1.8rem; font-family: monospace; font-weight: 700;">8492</p>
+                    </div>
+
+                    <label style="display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 8px; font-weight: 500;">Describe Your Issue</label>
+                    <input type="text" placeholder="Subject" style="margin-bottom: 12px;">
+                    <textarea placeholder="Message..." style="width: 100%; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main); padding: 16px; font-size: 1rem; border-radius: 12px; outline: none; margin-bottom: 16px; min-height: 120px;"></textarea>
+                    
+                    <button class="btn-primary" onclick="alert('Ticket submitted. A representative will contact you shortly.')">Submit Ticket</button>
+                </div>
+            </div>
+
         </main>
     </div>
 
     <!-- MFA SANDBOX OVERLAY (Triggered by RTGS or High Amount) -->
     <div class="sandbox-overlay" id="sandbox-container">
         <div class="app-container">
-            
             <!-- SETUP SCREEN -->
             <div id="setup-screen">
                 <div class="header">
                     <h2 style="color: var(--danger);">Action Required</h2>
                     <p>High-Value Transfer Flagged. MFA Step-Up required.</p>
                 </div>
-
                 <div class="key-label">Transfer Amount (₹)</div>
                 <input type="number" id="mfa-transfer-amount" readonly style="opacity: 0.7; cursor: not-allowed;">
-
                 <div class="checkbox-group">
                     <input type="checkbox" id="sender-cam-check">
                     <label for="sender-cam-check">Mandatory Compliance: I authorize biometric camera audit capture for high-risk transfer verification.</label>
                 </div>
-
                 <button class="btn-primary" style="background: var(--danger);" onclick="startAsSender()">Initialize Protocol</button>
                 <button class="btn-primary" style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); margin-top: 12px;" onclick="cancelTransfer()">Cancel Transfer</button>
             </div>
@@ -414,15 +498,11 @@
                     <div class="alert-box">
                         <strong>Velocity Check Triggered</strong><br>Coordinate security handshake with beneficiary.
                     </div>
-                    
                     <div class="key-label">Your Secure Token (Give to Receiver)</div>
                     <div class="key-display" id="s-key">----</div>
-
                     <div class="key-label">Enter Beneficiary Token Here</div>
                     <input type="text" id="s-input" maxlength="4" placeholder="••••" autocomplete="off">
-                    
                     <button class="btn-primary" style="background: var(--primary);" onclick="verifySender()">Authenticate & Execute</button>
-                    
                     <div class="qr-section">
                         <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px;">Receiver can scan to claim funds:</p>
                         <div class="qr-wrapper">
@@ -430,7 +510,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div id="sender-success" class="success-screen">
                     <h3 style="font-size: 1.4rem;">Transaction Approved</h3>
                     <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 10px;">MFA successful. Funds settled via RTGS. Audit logged.</p>
@@ -438,7 +517,7 @@
                 </div>
             </div>
 
-            <!-- RECEIVER SCREEN (Loaded via URL params) -->
+            <!-- RECEIVER SCREEN -->
             <div id="receiver-screen">
                 <div class="header">
                     <h2>Inbound Verification</h2>
@@ -448,27 +527,21 @@
                     <div class="alert-box" style="background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.2); color: var(--success);">
                         <strong>Secure Channel Active</strong><br>Exchange cryptographic tokens to claim funds.
                     </div>
-                    
                     <div class="key-label">Your Receiver Token (Give to Sender)</div>
                     <div class="key-display" id="r-key">----</div>
-
                     <div class="key-label">Enter Sender Token Here</div>
                     <input type="text" id="r-input" maxlength="4" placeholder="••••" autocomplete="off">
-                    
                     <div class="checkbox-group">
                         <input type="checkbox" id="receiver-cam-check">
                         <label for="receiver-cam-check">Mandatory Compliance: I authorize camera audit capture to claim funds securely.</label>
                     </div>
-
                     <button class="btn-primary" style="background: var(--success);" onclick="verifyReceiver()">Verify & Accept Funds</button>
                 </div>
-
                 <div id="receiver-success" class="success-screen">
                     <h3 style="font-size: 1.4rem;">Funds Credited</h3>
                     <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 10px;">MFA successful. Audit snapshot transmitted.</p>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -499,6 +572,23 @@
             document.getElementById('register-view').style.display = mode === 'register' ? 'block' : 'none';
             document.getElementById('tab-login-btn').classList.toggle('active', mode === 'login');
             document.getElementById('tab-register-btn').classList.toggle('active', mode === 'register');
+        }
+
+        // --- SIDEBAR PAGE ROUTING ---
+        function switchView(viewId, element) {
+            // Hide all pages
+            document.querySelectorAll('.page-view').forEach(view => {
+                view.classList.remove('active-view');
+            });
+            
+            // Show selected page
+            document.getElementById(viewId).classList.add('active-view');
+            
+            // Update sidebar highlight
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            element.classList.add('active');
         }
 
         // --- API CALLS ---
@@ -540,7 +630,6 @@
                 const data = await response.json();
                 if (data.success) {
                     loggedInUserEmail = email;
-                    // If your backend doesn't send the account_number yet, we generate a mock one to keep the UI professional
                     const accNum = data.account_number || 'ACCT-' + Math.floor(Math.random() * 1000000000);
                     showDashboard(email, accNum);
                 } else {
@@ -559,6 +648,9 @@
             document.getElementById('welcome-msg').innerText = email.split('@')[0];
             document.getElementById('dash-acc-num').innerText = accountNum;
             document.getElementById('dash-ifsc').innerText = BANK_IFSC;
+
+            // Ensure the Overview view is active upon login
+            document.querySelectorAll('.sidebar-item')[0].click();
 
             // Handle Receiver Link Navigation
             if (role === 'receiver') {
@@ -616,6 +708,8 @@
             document.getElementById('sender-active').style.display = 'block';
             document.getElementById('sender-screen').style.display = 'none';
             document.getElementById('transfer-amt-input').value = "";
+            // Switch back to overview tab to simulate a refresh
+            document.querySelectorAll('.sidebar-item')[0].click();
         }
 
         // --- SECUREPAY MFA LOGIC ---
