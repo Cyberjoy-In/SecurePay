@@ -455,8 +455,11 @@
         }
 
         // --- LIVE SYNC ENGINE ---
+       // --- UPGRADED LIVE SYNC ENGINE (SHOWS ERRORS ON SCREEN) ---
         async function syncDashboardData() {
             if (!loggedInUserEmail) return;
+
+            const tbody = document.getElementById('txn-list-body');
 
             try {
                 const response = await fetch('/api/sync', {
@@ -464,13 +467,18 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: loggedInUserEmail })
                 });
+                
+                // If Vercel returns a 404 Not Found
+                if (!response.ok) {
+                    throw new Error(`Server returned status: ${response.status}`);
+                }
+
                 const data = await response.json();
 
                 if (data.success) {
                     currentBalance = data.balance;
                     updateDashboardBalance();
 
-                    const tbody = document.getElementById('txn-list-body');
                     tbody.innerHTML = '';
 
                     if (!data.transactions || data.transactions.length === 0) {
@@ -496,9 +504,14 @@
                         `;
                         tbody.appendChild(row);
                     });
+                } else {
+                    // SHOW DATABASE ERRORS IN THE TABLE
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--danger);">Backend Error: ${data.error}</td></tr>`;
                 }
             } catch (err) {
-                console.log("Auto-sync error (waiting for backend):", err);
+                // SHOW CONNECTION/VERCEL ERRORS IN THE TABLE
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--danger);">API Error: Missing or broken /api/sync file</td></tr>`;
+                console.log("Auto-sync error details:", err);
             }
         }
 
