@@ -1,6 +1,5 @@
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
-
 const pool = new Pool({
   connectionString: process.env.POSTGRES_URL,
 });
@@ -27,6 +26,12 @@ module.exports = async (req, res) => {
     );
 
     return res.status(200).json({ success: true, message: 'Account created successfully!' });
+    
+    await pool.query(
+  'INSERT INTO accounts (user_id, account_number, balance) VALUES ($1, $2, $3)',
+  [userId, accountNumber, 10000.00]
+);
+
   } catch (error) {
     // 🚨 THIS IS THE MAGIC LINE WE CHANGED 🚨
     // It will now spit out the EXACT reason it is failing!
