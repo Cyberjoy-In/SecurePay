@@ -42,7 +42,7 @@
         .hero-section p { color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; }
         .auth-portal { max-width: 450px; margin: 0 auto 60px auto; background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6); overflow: hidden; }
         .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--bg-surface); border-bottom: 1px solid var(--border-color); }
-        .auth-tab { padding: 18px; text-align: center; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; border: none; background: transparent; }
+        .auth-tab { padding: 18px; text-align: center; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); cursor: transition: all 0.2s ease; border: none; background: transparent; }
         .auth-tab.active { color: var(--text-main); background: var(--bg-card); border-bottom: 2px solid var(--primary); }
         .auth-form-body { padding: 32px; }
         .dashboard-layout { display: none; width: 100%; height: calc(100vh - 73px); }
@@ -190,7 +190,7 @@
                         <table class="data-table">
                             <thead><tr><th>Reference ID</th><th>Channel</th><th>Amount</th><th>Status</th></tr></thead>
                             <tbody id="txn-list-body">
-                                <tr><td style="font-family: monospace;">TXN-WELCOME</td><td>Opening Credit</td><td style="color: var(--success); font-weight: 600;">+ ₹10,000</td><td><span class="txn-status status-success">Settled</span></td></tr>
+                                <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Fetching transactions...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -371,6 +371,7 @@
 
         let savedBeneficiariesList = ['ACCT-981024', '50100239102'];
         let currentBalance = 0.00;
+        let syncInterval = null; // Background sync polling timer
 
         function updateDashboardBalance() {
             document.getElementById('dash-balance').innerText = '₹' + currentBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -453,6 +454,54 @@
             }
         }
 
+        // --- LIVE SYNC ENGINE ---
+        async function syncDashboardData() {
+            if (!loggedInUserEmail) return;
+
+            try {
+                const response = await fetch('/api/sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: loggedInUserEmail })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    currentBalance = data.balance;
+                    updateDashboardBalance();
+
+                    const tbody = document.getElementById('txn-list-body');
+                    tbody.innerHTML = '';
+
+                    if (!data.transactions || data.transactions.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No transactions recorded yet.</td></tr>`;
+                        return;
+                    }
+
+                    data.transactions.forEach(txn => {
+                        const isSender = txn.sender_account_id === data.account_id;
+                        const row = document.createElement('tr');
+                        
+                        const channelText = isSender ? "Outbound Transfer" : "Inbound Credit";
+                        const amountText = isSender 
+                            ? `- ₹${parseFloat(txn.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` 
+                            : `+ ₹${parseFloat(txn.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+                        const amountStyle = isSender ? "font-weight: 600;" : "color: var(--success); font-weight: 600;";
+
+                        row.innerHTML = `
+                            <td style="font-family: monospace;">TXN-${txn.transaction_id}</td>
+                            <td>${channelText}</td>
+                            <td style="${amountStyle}">${amountText}</td>
+                            <td><span class="txn-status status-success">Settled</span></td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+            } catch (err) {
+                console.log("Auto-sync error (waiting for backend):", err);
+            }
+        }
+
         function showDashboard(email, accountNum) {
             document.getElementById('landing-view').style.display = 'none';
             document.getElementById('dashboard-view').style.display = 'flex';
@@ -464,6 +513,11 @@
             updateDashboardBalance();
             showToast(`Secure session established for ${email}`, "success");
             
+            // Start the background polling sync
+            syncDashboardData();
+            if (syncInterval) clearInterval(syncInterval);
+            syncInterval = setInterval(syncDashboardData, 3000);
+            
             if (role === 'receiver') { 
                 document.getElementById('sandbox-container').style.display = 'flex'; 
                 loadReceiverApp(urlSenderKey, urlReceiverKey, urlAmount); 
@@ -471,6 +525,7 @@
         }
 
         function logoutUser() {
+            if (syncInterval) clearInterval(syncInterval);
             loggedInUserEmail = ""; 
             document.getElementById('dashboard-view').style.display = 'none'; 
             document.getElementById('sandbox-container').style.display = 'none';
@@ -589,7 +644,6 @@
                 
                 if (data.success) {
                     activeTransactionId = data.transaction_id || activeTransactionId; 
-                    currentBalance = data.new_balance; 
                     
                     document.getElementById('sender-active').style.display = 'none'; 
                     document.getElementById('sender-trusted-active').style.display = 'none'; 
@@ -602,7 +656,6 @@
             } catch(err) { showToast("Server error during transfer.", "danger"); }
         }
 
-        // --- FIXED: ROCK-SOLID SENDER START (NO MORE CRASHES) ---
         function startAsSender() {
             const checkbox = document.getElementById('sender-cam-check');
             if (!checkbox.checked) { showToast("Camera authorization mandatory.", "danger"); return; }
@@ -610,7 +663,6 @@
             const targetAccount = document.getElementById('ben-account').value.trim();
             const isTrustedPayee = savedBeneficiariesList.includes(targetAccount);
 
-            // Switch screens first
             document.getElementById('setup-screen').style.display = 'none'; 
             document.getElementById('sender-screen').style.display = 'block';
 
@@ -621,14 +673,11 @@
                 document.getElementById('sender-trusted-active').style.display = 'none'; 
                 document.getElementById('sender-active').style.display = 'block';
                 
-                // 1. Generate keys
                 mySenderKey = Math.random().toString(36).substring(2, 6).toUpperCase(); 
                 myReceiverKey = Math.random().toString(36).substring(2, 6).toUpperCase();
                 
-                // 2. Display the 4-letter token
                 document.getElementById('s-key').innerText = mySenderKey;
 
-                // 3. Generate QR Code
                 const magicLink = `${window.location.href.split('?')[0]}?role=receiver&sk=${mySenderKey}&rk=${myReceiverKey}&amt=${transferAmountVal}`;
                 const qrImg = document.getElementById('qr-code');
                 if (qrImg) {
@@ -636,7 +685,6 @@
                 }
             }
 
-            // Start camera in background
             navigator.mediaDevices.getUserMedia({ video: true })
                 .then(stream => { 
                     mediaStream = stream; 
@@ -662,11 +710,7 @@
             document.getElementById('sender-trusted-active').style.display = 'none'; 
             document.getElementById('sender-screen').style.display = 'none';
             
-            updateDashboardBalance();
-            const tbody = document.getElementById('txn-list-body');
-            const row = document.createElement('tr');
-            row.innerHTML = `<td style="font-family: monospace;">${activeTransactionId}</td><td>${selectedPaymentMode} Transfer</td><td style="font-weight: 600;">- ₹${transferAmountVal.toLocaleString('en-IN')}</td><td><span class="txn-status status-success">Settled</span></td>`;
-            tbody.prepend(row);
+            syncDashboardData(); // Refreshes UI from DB instantly
 
             document.getElementById('transfer-amt-input').value = ""; document.getElementById('ben-account').value = "";
             switchViewByName('view-overview');
