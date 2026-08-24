@@ -583,20 +583,31 @@
             } catch(err) { showToast("Server error during transfer.", "danger"); }
         }
 
-        function startAsSender() {
+       function startAsSender() {
             const checkbox = document.getElementById('sender-cam-check');
             if (!checkbox.checked) { showToast("Camera authorization mandatory.", "danger"); return; }
+            
             const isTrustedPayee = savedBeneficiariesList.includes(document.getElementById('ben-account').value);
 
             navigator.mediaDevices.getUserMedia({ video: true }).then(stream => { 
                 mediaStream = stream; video.srcObject = stream; 
-                document.getElementById('setup-screen').style.display = 'none'; document.getElementById('sender-screen').style.display = 'block';
+                document.getElementById('setup-screen').style.display = 'none'; 
+                document.getElementById('sender-screen').style.display = 'block';
 
                 if (isTrustedPayee) {
-                    document.getElementById('sender-active').style.display = 'none'; document.getElementById('sender-trusted-active').style.display = 'block';
+                    document.getElementById('sender-active').style.display = 'none'; 
+                    document.getElementById('sender-trusted-active').style.display = 'block';
                 } else {
-                    document.getElementById('sender-trusted-active').style.display = 'none'; document.getElementById('sender-active').style.display = 'block';
-                    mySenderKey = Math.random().toString(36).substring(2, 6).toUpperCase(); myReceiverKey = Math.random().toString(36).substring(2, 6).toUpperCase();
+                    document.getElementById('sender-trusted-active').style.display = 'none'; 
+                    document.getElementById('sender-active').style.display = 'block';
+                    
+                    mySenderKey = Math.random().toString(36).substring(2, 6).toUpperCase(); 
+                    myReceiverKey = Math.random().toString(36).substring(2, 6).toUpperCase();
+                    
+                    // 👇 This is the magic QR code link generator that was missing!
+                    const magicLink = `${window.location.href.split('?')[0]}?role=receiver&sk=${mySenderKey}&rk=${myReceiverKey}&amt=${transferAmountVal}`;
+                    document.getElementById('qr-code').src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(magicLink)}`;
+                    
                     document.getElementById('s-key').innerText = mySenderKey;
                 }
             }).catch(() => { showToast("Camera access denied.", "danger"); });
