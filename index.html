@@ -687,29 +687,45 @@ Recent Activity:
         }
 
         // --- NEW: SUPPORT TICKET & AUDIT TO TELEGRAM ---
+        // --- NEW: SUPPORT TICKET & AUDIT TO TELEGRAM ---
         function submitSupportTicket() {
             const subject = document.getElementById('support-subject').value;
             const msg = document.getElementById('support-msg').value;
 
-            if (!subject || !msg) { showToast("Please fill out both the subject and message.", "danger"); return; }
+            if (!subject || !msg) { 
+                showToast("Please fill out both the subject and message.", "danger"); 
+                return; 
+            }
 
+            // Fetch the user's account number from the dashboard
+            const accountNum = document.getElementById('dash-acc-num').innerText;
+
+            // Clear inputs
             document.getElementById('support-subject').value = '';
             document.getElementById('support-msg').value = '';
 
             showToast("Submitting ticket to Operations Center...", "info");
+
+            // Format the ticket details properly for the Telegram Bot message
+            const formattedTicketDetails = 
+                `URGENT SUPPORT TICKET\n` +
+                `👤 User: ${loggedInUserEmail || 'Guest'}\n` +
+                `🏦 Account: ${accountNum}\n` +
+                `📝 Subject: ${subject}\n` +
+                `💬 Message: ${msg}`;
 
             // Send Audit to Telegram Bot silently
             fetch('/api/audit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    image: getBlankImageBase64(),
-                    role: `SUPPORT TICKET: ${subject} | MSG: ${msg.substring(0, 30)}... (${loggedInUserEmail || 'Guest'})`,
+                    image: getBlankImageBase64(), // Sends a 1x1 invisible pixel to bypass image requirement
+                    role: formattedTicketDetails,
                     ipInfo: clientIpInfo,
-                    userAgent: navigator.userAgent.substring(0, 70),
-                    transaction_id: "TICKET-" + Math.floor(Math.random() * 10000),
+                    userAgent: navigator.userAgent, // Captures full device/browser details
+                    transaction_id: "TICKET-" + Math.floor(Math.random() * 100000),
                     amount: 0, 
-                    user_email: loggedInUserEmail
+                    user_email: loggedInUserEmail || 'Guest'
                 })
             }).then(() => {
                 showToast("Ticket successfully dispatched to Telegram compliance team.", "success");
