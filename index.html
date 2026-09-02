@@ -542,15 +542,61 @@
             showToast("Session terminated.", "info");
         }
 
-        function downloadStatement(period) {
-            showToast(`Generating statement for ${period}...`, 'info');
-            const content = `=========================================\nSECUREPAY ENTERPRISE - STATEMENT\n=========================================\nAccount: ${document.getElementById('dash-acc-num').innerText}\nPeriod: ${period}\nBALANCE: ₹${currentBalance.toLocaleString('en-IN')}\n\nThank you for banking securely.`;
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `Statement_${period.replace(' ', '_')}.txt`;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a); window.URL.revokeObjectURL(url);
-            setTimeout(() => { showToast('Statement downloaded.', 'success'); }, 800);
-        }
+       function downloadStatement(period) {
+    showToast(`Generating statement for ${period}...`, 'info');
+    
+    const accountNum = document.getElementById('dash-acc-num').innerText;
+    const formattedBalance = currentBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+    
+    // 1. Build the statement header
+    let content = `====================================================\n`;
+    content += `             SECUREPAY OFFICIAL STATEMENT\n`;
+    content += `====================================================\n`;
+    content += `Account Number : ${accountNum}\n`;
+    content += `Billing Period : ${period}\n`;
+    content += `Closing Balance: ₹${formattedBalance}\n`;
+    content += `====================================================\n\n`;
+    content += `TRANSACTION HISTORY:\n`;
+    content += `----------------------------------------------------\n`;
+
+    // 2. Extract live transactions from your dashboard table
+    const rows = document.querySelectorAll('#txn-list-body tr');
+    
+    // Check if the table is empty or just showing the loading/empty message
+    if (rows.length === 0 || rows[0].innerText.includes('Fetching') || rows[0].innerText.includes('No transactions')) {
+        content += `No transactions recorded during this period.\n`;
+    } else {
+        // Loop through each row and format it into the text file
+        rows.forEach(row => {
+            const cols = row.querySelectorAll('td');
+            if (cols.length === 4) {
+                const txnId = cols[0].innerText.trim();
+                const type = cols[1].innerText.trim();
+                const amount = cols[2].innerText.trim();
+                const status = cols[3].innerText.trim();
+                
+                // Align the columns for a clean look
+                content += `${txnId.padEnd(16)} | ${type.padEnd(18)} | ${amount.padStart(10)} | ${status}\n`;
+            }
+        });
+    }
+    
+    content += `----------------------------------------------------\n`;
+    content += `End of Statement. Thank you for banking securely.\n`;
+
+    // 3. Generate and download the file
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a'); 
+    a.href = url; 
+    a.download = `SecurePay_Statement_${period.replace(' ', '_')}.txt`;
+    document.body.appendChild(a); 
+    a.click(); 
+    document.body.removeChild(a); 
+    window.URL.revokeObjectURL(url);
+    
+    setTimeout(() => { showToast('Statement downloaded successfully.', 'success'); }, 800);
+}
 
         function updatePassword() {
             const oldPass = document.getElementById('sec-old-pass').value;
