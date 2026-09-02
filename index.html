@@ -42,7 +42,7 @@
         .hero-section p { color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; }
         .auth-portal { max-width: 450px; margin: 0 auto 60px auto; background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6); overflow: hidden; }
         .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--bg-surface); border-bottom: 1px solid var(--border-color); }
-        .auth-tab { padding: 18px; text-align: center; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); cursor: transition: all 0.2s ease; border: none; background: transparent; }
+        .auth-tab { padding: 18px; text-align: center; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; border: none; background: transparent; }
         .auth-tab.active { color: var(--text-main); background: var(--bg-card); border-bottom: 2px solid var(--primary); }
         .auth-form-body { padding: 32px; }
         .dashboard-layout { display: none; width: 100%; height: calc(100vh - 73px); }
@@ -454,8 +454,6 @@
             }
         }
 
-        // --- LIVE SYNC ENGINE ---
-       // --- UPGRADED LIVE SYNC ENGINE (SHOWS ERRORS ON SCREEN) ---
         async function syncDashboardData() {
             if (!loggedInUserEmail) return;
 
@@ -468,7 +466,6 @@
                     body: JSON.stringify({ email: loggedInUserEmail })
                 });
                 
-                // If Vercel returns a 404 Not Found
                 if (!response.ok) {
                     throw new Error(`Server returned status: ${response.status}`);
                 }
@@ -505,11 +502,9 @@
                         tbody.appendChild(row);
                     });
                 } else {
-                    // SHOW DATABASE ERRORS IN THE TABLE
                     tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--danger);">Backend Error: ${data.error}</td></tr>`;
                 }
             } catch (err) {
-                // SHOW CONNECTION/VERCEL ERRORS IN THE TABLE
                 tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--danger);">API Error: Missing or broken /api/sync file</td></tr>`;
                 console.log("Auto-sync error details:", err);
             }
@@ -526,7 +521,6 @@
             updateDashboardBalance();
             showToast(`Secure session established for ${email}`, "success");
             
-            // Start the background polling sync
             syncDashboardData();
             if (syncInterval) clearInterval(syncInterval);
             syncInterval = setInterval(syncDashboardData, 3000);
@@ -658,6 +652,9 @@
                 if (data.success) {
                     activeTransactionId = data.transaction_id || activeTransactionId; 
                     
+                    currentBalance = data.new_balance;
+                    updateDashboardBalance();
+                    
                     document.getElementById('sender-active').style.display = 'none'; 
                     document.getElementById('sender-trusted-active').style.display = 'none'; 
                     document.getElementById('sender-success').style.display = 'block';
@@ -723,7 +720,7 @@
             document.getElementById('sender-trusted-active').style.display = 'none'; 
             document.getElementById('sender-screen').style.display = 'none';
             
-            syncDashboardData(); // Refreshes UI from DB instantly
+            syncDashboardData(); 
 
             document.getElementById('transfer-amt-input').value = ""; document.getElementById('ben-account').value = "";
             switchViewByName('view-overview');
