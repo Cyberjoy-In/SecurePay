@@ -21,20 +21,13 @@ module.exports = async (req, res) => {
     const accountNumber = 'ACCT-' + Math.floor(Math.random() * 1000000000); 
 
     await pool.query(
-      'INSERT INTO accounts (user_id, account_number) VALUES ($1, $2)',
-      [userId, accountNumber]
+      'INSERT INTO accounts (user_id, account_number, balance) VALUES ($1, $2, $3)',
+      [userId, accountNumber, 10000.00]
     );
 
     return res.status(200).json({ success: true, message: 'Account created successfully!' });
-    
-    await pool.query(
-  'INSERT INTO accounts (user_id, account_number, balance) VALUES ($1, $2, $3)',
-  [userId, accountNumber, 10000.00]
-);
 
   } catch (error) {
-    // 🚨 THIS IS THE MAGIC LINE WE CHANGED 🚨
-    // It will now spit out the EXACT reason it is failing!
     return res.status(500).json({ error: error.message });
   }
 };
