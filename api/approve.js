@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
   const { transaction_id } = req.body;
 
   try {
-    // Update the transaction status to officially settle the funds
+    // 🚨 Updates the status to COMPLETED after the receiver passes the camera audit 🚨
     await pool.query(`
       UPDATE transactions 
       SET status = 'COMPLETED' 
