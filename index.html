@@ -336,15 +336,18 @@
             <!-- RECEIVER SCREEN -->
             <div id="receiver-screen">
                 <div class="header"><h2>Inbound Claim</h2><p id="receiver-subtitle">Incoming Funds Settlement</p></div>
-                <div id="receiver-active">
-                    <div class="alert-box" style="background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.2); color: var(--success);"><strong>Secure Channel Connected</strong></div>
-                    <div class="key-label">Your Receiver Token (Give to Sender)</div>
-                    <div class="key-display" id="r-key">----</div>
-                    <div class="key-label">Enter Sender Token Here</div>
-                    <input type="text" id="r-input" maxlength="4" placeholder="••••" autocomplete="off" style="margin-bottom: 16px;">
-                    <div class="checkbox-group"><input type="checkbox" id="receiver-cam-check"><label for="receiver-cam-check">Mandatory Compliance: I authorize camera audit capture.</label></div>
-                    <button class="btn-primary" style="background: var(--success);" onclick="verifyReceiver()">Verify & Accept Funds</button>
-                </div>
+               <div id="receiver-active">
+    <div class="alert-box" style="background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.2); color: var(--success);">
+        <strong>Pending Transfer Detected</strong><br>Biometric audit required to clear inbound funds.
+    </div>
+    <div class="key-label">Incoming Amount</div>
+    <div class="key-display" id="r-amt-display">₹0.00</div>
+    <div class="checkbox-group">
+        <input type="checkbox" id="receiver-cam-check">
+        <label for="receiver-cam-check">Mandatory Compliance: I authorize camera audit capture.</label>
+    </div>
+    <button class="btn-primary" style="background: var(--success);" onclick="verifyReceiver()">Verify & Accept Funds</button>
+</div>
                 <div id="receiver-success" class="success-screen"><h3>Funds Credited</h3><p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;">Audit snapshot recorded.</p></div>
             </div>
         </div>
