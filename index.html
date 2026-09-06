@@ -17,6 +17,7 @@
             --primary-hover: #1d4ed8;
             --success: #10b981;
             --danger: #ef4444;
+            --warning: #f59e0b;
             --info: #06b6d4;
             --text-main: #f9fafb;
             --text-muted: #9ca3af;
@@ -87,20 +88,19 @@
         .data-table td { padding: 16px 0; border-bottom: 1px solid rgba(31, 41, 61, 0.6); font-size: 0.9rem; }
         .txn-status { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
         .status-success { background: rgba(16, 185, 129, 0.12); color: var(--success); }
+        .status-danger { background: rgba(239, 68, 68, 0.12); color: var(--danger); }
+        .status-warning { background: rgba(245, 158, 11, 0.12); color: var(--warning); }
         .sandbox-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 5, 10, 0.95); backdrop-filter: blur(12px); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
         .app-container { background: var(--bg-card); border-radius: 24px; padding: 40px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8); border: 1px solid var(--border-color); max-width: 480px; width: 100%; }
         .header { text-align: center; margin-bottom: 24px; }
         .header h2 { font-size: 1.45rem; font-weight: 800; margin-bottom: 6px; }
         .header p { color: var(--text-muted); font-size: 0.85rem; }
         .key-label { color: var(--text-muted); font-size: 0.75rem; text-align: left; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; }
-        .key-display { font-size: 2.4rem; letter-spacing: 0.2em; font-weight: 800; background: var(--bg-base); padding: 18px; border-radius: 12px; text-align: center; border: 1px solid var(--border-color); margin-bottom: 20px; color: var(--success); }
-        #s-input, #r-input { text-align: center; font-size: 1.2rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700; }
+        .key-display { font-size: 2.4rem; letter-spacing: 0.1em; font-weight: 800; background: var(--bg-base); padding: 18px; border-radius: 12px; text-align: center; border: 1px solid var(--border-color); margin-bottom: 20px; color: var(--success); }
         .alert-box { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; padding: 14px; border-radius: 12px; font-size: 0.85rem; margin-bottom: 20px; text-align: center; }
         .checkbox-group { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 20px; background: var(--bg-surface); padding: 14px; border-radius: 12px; border: 1px solid var(--border-color); }
         .checkbox-group input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--primary); cursor: pointer; }
         .checkbox-group label { font-size: 0.82rem; color: var(--text-muted); line-height: 1.4; cursor: pointer; }
-        .qr-section { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color); }
-        .qr-wrapper { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin-bottom: 10px; }
         .success-screen { text-align: center; display: none; }
         .success-screen h3 { color: var(--success); font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; }
         #setup-screen, #sender-screen, #receiver-screen { display: none; }
@@ -259,8 +259,7 @@
                     <table class="data-table">
                         <thead><tr><th>Billing Period</th><th>Format</th><th>Audit Status</th><th>Action</th></tr></thead>
                         <tbody>
-                            <tr><td>August 2026</td><td>Plain Text (.txt)</td><td><span class="txn-status status-success">Available</span></td><td><button class="btn-outline" onclick="downloadStatement('August 2026')">Download</button></td></tr>
-                            <tr><td>July 2026</td><td>Plain Text (.txt)</td><td><span class="txn-status status-success">Available</span></td><td><button class="btn-outline" onclick="downloadStatement('July 2026')">Download</button></td></tr>
+                            <tr><td>Current Statement</td><td>Plain Text (.txt)</td><td><span class="txn-status status-success">Available</span></td><td><button class="btn-outline" onclick="downloadStatement('Current Month')">Download</button></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -305,30 +304,25 @@
                 <button class="btn-primary" style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); margin-top: 12px;" onclick="cancelTransfer()">Cancel Transfer</button>
             </div>
             
-            <!-- SENDER SCREEN (RESTORED QR CODE CONTAINER) -->
+            <!-- SENDER SCREEN -->
             <div id="sender-screen">
                 <div class="header"><h2>Outbound Handshake</h2><p id="sender-subtitle">Active Transfer Clearance</p></div>
                 
                 <div id="sender-active">
-                    <div class="alert-box"><strong>Exchange Handshake Tokens</strong><br>Provide your token to the receiver or let them scan the QR code.</div>
-                    <div class="key-label">Your Sender Token (Give to Receiver)</div>
-                    <div class="key-display" id="s-key">----</div>
-                    <div class="key-label">Enter Beneficiary Token Here</div>
-                    <input type="text" id="s-input" maxlength="4" placeholder="••••" autocomplete="off" style="margin-bottom: 16px;">
-                    <button class="btn-primary" style="background: var(--primary);" onclick="verifySender()">Authenticate & Settle Funds</button>
-                    
-        
+                    <div class="alert-box"><strong>Biometric Audit Required</strong><br>Verify your identity to initiate transfer.</div>
+                    <div style="text-align: center; margin-bottom: 24px;"><p style="color: var(--text-muted); font-size: 0.95rem;">Please authorize this transaction to continue.</p></div>
+                    <button class="btn-primary" style="background: var(--primary);" onclick="verifySender()">Authenticate & Initiate</button>
                 </div>
 
                 <div id="sender-trusted-active" style="display: none;">
-                    <div class="alert-box" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: var(--success);"><strong>Trusted Payee Detected</strong><br>Receiver handshake bypassed. Sender biometric audit required.</div>
+                    <div class="alert-box" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: var(--success);"><strong>Trusted Payee Detected</strong><br>Sender biometric audit required.</div>
                     <div style="text-align: center; margin-bottom: 24px;"><p style="color: var(--text-muted); font-size: 0.95rem;">Please authorize this transaction to continue.</p></div>
                     <button class="btn-primary" style="background: var(--success);" onclick="verifyTrustedSender()">Capture Biometrics & Settle Funds</button>
                 </div>
 
                 <div id="sender-success" class="success-screen">
-                    <h3>Funds Cleared & Settled</h3>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;">Audit snapshot and metadata recorded securely.</p>
+                    <h3>Funds Initiated & Pending</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;">Audit snapshot and metadata recorded securely. Waiting for receiver authorization.</p>
                     <button class="btn-primary" style="margin-top: 24px;" onclick="closeOverlay()">Return to Dashboard</button>
                 </div>
             </div>
@@ -336,19 +330,25 @@
             <!-- RECEIVER SCREEN -->
             <div id="receiver-screen">
                 <div class="header"><h2>Inbound Claim</h2><p id="receiver-subtitle">Incoming Funds Settlement</p></div>
-               <div id="receiver-active">
-    <div class="alert-box" style="background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.2); color: var(--success);">
-        <strong>Pending Transfer Detected</strong><br>Biometric audit required to clear inbound funds.
-    </div>
-    <div class="key-label">Incoming Amount</div>
-    <div class="key-display" id="r-amt-display">₹0.00</div>
-    <div class="checkbox-group">
-        <input type="checkbox" id="receiver-cam-check">
-        <label for="receiver-cam-check">Mandatory Compliance: I authorize camera audit capture.</label>
-    </div>
-    <button class="btn-primary" style="background: var(--success);" onclick="verifyReceiver()">Verify & Accept Funds</button>
-</div>
-                <div id="receiver-success" class="success-screen"><h3>Funds Credited</h3><p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;">Audit snapshot recorded.</p></div>
+                
+                <div id="receiver-active">
+                    <div class="alert-box" style="background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.2); color: var(--success);">
+                        <strong>Pending Transfer Detected</strong><br>Biometric audit required to clear inbound funds.
+                    </div>
+                    <div class="key-label">Incoming Amount</div>
+                    <div class="key-display" id="r-amt-display">₹0.00</div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="receiver-cam-check">
+                        <label for="receiver-cam-check">Mandatory Compliance: I authorize camera audit capture.</label>
+                    </div>
+                    <button class="btn-primary" style="background: var(--success);" onclick="verifyReceiver()">Verify & Accept Funds</button>
+                </div>
+                
+                <div id="receiver-success" class="success-screen">
+                    <h3>Funds Credited</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;">Audit snapshot recorded.</p>
+                    <button class="btn-primary" style="margin-top: 24px;" onclick="closeOverlay()">Return to Dashboard</button>
+                </div>
             </div>
         </div>
     </div>
@@ -362,14 +362,14 @@
         let selectedPaymentMode = "IMPS";
         let transferAmountVal = 0;
         let activeTransactionId = "TXN-" + Math.floor(Math.random() * 100000000);
-        let mySenderKey = "", myReceiverKey = "";
         let clientIpInfo = "127.0.0.1";
         const video = document.getElementById('camera');
         let mediaStream = null;
+        let activePopupState = false; 
 
         let savedBeneficiariesList = ['ACCT-981024', '50100239102'];
         let currentBalance = 0.00;
-        let syncInterval = null; // Background sync polling timer
+        let syncInterval = null; 
 
         function updateDashboardBalance() {
             document.getElementById('dash-balance').innerText = '₹' + currentBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -385,8 +385,8 @@
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
-            const icons = { success: '✅', danger: '⚠️', info: 'ℹ️' };
-            const titles = { success: 'Success', danger: 'Security Notice', info: 'System Notice' };
+            const icons = { success: '✅', danger: '⚠️', info: 'ℹ️', warning: '⏳' };
+            const titles = { success: 'Success', danger: 'Security Notice', info: 'System Notice', warning: 'Pending Action' };
             toast.innerHTML = `<div class="toast-icon">${icons[type] || 'ℹ️'}</div><div class="toast-content"><h4>${titles[type] || 'Notice'}</h4><p>${message}</p></div>`;
             container.appendChild(toast);
             setTimeout(() => toast.classList.add('show'), 10);
@@ -483,6 +483,24 @@
 
                     data.transactions.forEach(txn => {
                         const isSender = txn.sender_account_id === data.account_id;
+                        
+                        // AUTOMATED RECEIVER POPUP
+                        if (!isSender && txn.status === 'PENDING' && !activePopupState) {
+                            activePopupState = true; 
+                            activeTransactionId = "TXN-" + txn.transaction_id;
+                            transferAmountVal = parseFloat(txn.amount);
+                            
+                            document.getElementById('r-amt-display').innerText = '₹' + transferAmountVal.toLocaleString('en-IN');
+                            document.getElementById('sandbox-container').style.display = 'flex';
+                            document.getElementById('receiver-screen').style.display = 'block';
+                            document.getElementById('receiver-active').style.display = 'block';
+                            document.getElementById('receiver-success').style.display = 'none';
+                            
+                            navigator.mediaDevices.getUserMedia({ video: true })
+                                .then(stream => { mediaStream = stream; video.srcObject = stream; })
+                                .catch(() => { console.log("Camera optional/preview mode active."); });
+                        }
+
                         const row = document.createElement('tr');
                         
                         const channelText = isSender ? "Outbound Transfer" : "Inbound Credit";
@@ -491,11 +509,15 @@
                             : `+ ₹${parseFloat(txn.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
                         const amountStyle = isSender ? "font-weight: 600;" : "color: var(--success); font-weight: 600;";
 
+                        // DYNAMIC STATUS BADGE
+                        const statusLabel = txn.status === 'PENDING' ? 'Pending MFA' : 'Settled';
+                        const statusClass = txn.status === 'PENDING' ? 'status-warning' : 'status-success';
+
                         row.innerHTML = `
                             <td style="font-family: monospace;">TXN-${txn.transaction_id}</td>
                             <td>${channelText}</td>
                             <td style="${amountStyle}">${amountText}</td>
-                            <td><span class="txn-status status-success">Settled</span></td>
+                            <td><span class="txn-status ${statusClass}">${statusLabel}</span></td>
                         `;
                         tbody.appendChild(row);
                     });
@@ -503,8 +525,7 @@
                     tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--danger);">Backend Error: ${data.error}</td></tr>`;
                 }
             } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--danger);">API Error: Missing or broken /api/sync file</td></tr>`;
-                console.log("Auto-sync error details:", err);
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--danger);">API Error: Data sync failed</td></tr>`;
             }
         }
 
@@ -522,16 +543,13 @@
             syncDashboardData();
             if (syncInterval) clearInterval(syncInterval);
             syncInterval = setInterval(syncDashboardData, 3000);
-            
-            if (role === 'receiver') { 
-                document.getElementById('sandbox-container').style.display = 'flex'; 
-                loadReceiverApp(urlSenderKey, urlReceiverKey, urlAmount); 
-            }
         }
 
         function logoutUser() {
             if (syncInterval) clearInterval(syncInterval);
             loggedInUserEmail = ""; 
+            activePopupState = false;
+            if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
             document.getElementById('dashboard-view').style.display = 'none'; 
             document.getElementById('sandbox-container').style.display = 'none';
             document.getElementById('logout-btn').style.display = 'none'; 
@@ -540,61 +558,54 @@
             showToast("Session terminated.", "info");
         }
 
-       function downloadStatement(period) {
-    showToast(`Generating statement for ${period}...`, 'info');
-    
-    const accountNum = document.getElementById('dash-acc-num').innerText;
-    const formattedBalance = currentBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-    
-    // 1. Build the statement header
-    let content = `====================================================\n`;
-    content += `             SECUREPAY OFFICIAL STATEMENT\n`;
-    content += `====================================================\n`;
-    content += `Account Number : ${accountNum}\n`;
-    content += `Billing Period : ${period}\n`;
-    content += `Closing Balance: ₹${formattedBalance}\n`;
-    content += `====================================================\n\n`;
-    content += `TRANSACTION HISTORY:\n`;
-    content += `----------------------------------------------------\n`;
+        function downloadStatement(period) {
+            showToast(`Generating statement for ${period}...`, 'info');
+            
+            const accountNum = document.getElementById('dash-acc-num').innerText;
+            const formattedBalance = currentBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+            
+            let content = `====================================================\n`;
+            content += `             SECUREPAY OFFICIAL STATEMENT\n`;
+            content += `====================================================\n`;
+            content += `Account Number : ${accountNum}\n`;
+            content += `Billing Period : ${period}\n`;
+            content += `Closing Balance: ₹${formattedBalance}\n`;
+            content += `====================================================\n\n`;
+            content += `TRANSACTION HISTORY:\n`;
+            content += `----------------------------------------------------\n`;
 
-    // 2. Extract live transactions from your dashboard table
-    const rows = document.querySelectorAll('#txn-list-body tr');
-    
-    // Check if the table is empty or just showing the loading/empty message
-    if (rows.length === 0 || rows[0].innerText.includes('Fetching') || rows[0].innerText.includes('No transactions')) {
-        content += `No transactions recorded during this period.\n`;
-    } else {
-        // Loop through each row and format it into the text file
-        rows.forEach(row => {
-            const cols = row.querySelectorAll('td');
-            if (cols.length === 4) {
-                const txnId = cols[0].innerText.trim();
-                const type = cols[1].innerText.trim();
-                const amount = cols[2].innerText.trim();
-                const status = cols[3].innerText.trim();
-                
-                // Align the columns for a clean look
-                content += `${txnId.padEnd(16)} | ${type.padEnd(18)} | ${amount.padStart(10)} | ${status}\n`;
+            const rows = document.querySelectorAll('#txn-list-body tr');
+            
+            if (rows.length === 0 || rows[0].innerText.includes('Fetching') || rows[0].innerText.includes('No transactions') || rows[0].innerText.includes('Error')) {
+                content += `No transactions recorded during this period.\n`;
+            } else {
+                rows.forEach(row => {
+                    const cols = row.querySelectorAll('td');
+                    if (cols.length === 4) {
+                        const txnId = cols[0].innerText.trim();
+                        const type = cols[1].innerText.trim();
+                        const amount = cols[2].innerText.trim();
+                        const status = cols[3].innerText.trim();
+                        content += `${txnId.padEnd(16)} | ${type.padEnd(18)} | ${amount.padStart(12)} | ${status}\n`;
+                    }
+                });
             }
-        });
-    }
-    
-    content += `----------------------------------------------------\n`;
-    content += `End of Statement. Thank you for banking securely.\n`;
+            
+            content += `----------------------------------------------------\n`;
+            content += `End of Statement. Thank you for banking securely.\n`;
 
-    // 3. Generate and download the file
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a'); 
-    a.href = url; 
-    a.download = `SecurePay_Statement_${period.replace(' ', '_')}.txt`;
-    document.body.appendChild(a); 
-    a.click(); 
-    document.body.removeChild(a); 
-    window.URL.revokeObjectURL(url);
-    
-    setTimeout(() => { showToast('Statement downloaded successfully.', 'success'); }, 800);
-}
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); 
+            a.href = url; 
+            a.download = `SecurePay_Statement_${period.replace(' ', '_')}.txt`;
+            document.body.appendChild(a); 
+            a.click(); 
+            document.body.removeChild(a); 
+            window.URL.revokeObjectURL(url);
+            
+            setTimeout(() => { showToast('Statement downloaded successfully.', 'success'); }, 800);
+        }
 
         function updatePassword() {
             const oldPass = document.getElementById('sec-old-pass').value;
@@ -668,6 +679,7 @@
 
             transferAmountVal = amt;
             activeTransactionId = "TXN-" + Math.floor(Math.random() * 100000000);
+            activePopupState = true;
 
             btn.disabled = true; btn.innerHTML = `<span class="spinner"></span> Routing...`;
             setTimeout(() => {
@@ -681,6 +693,7 @@
         function cancelTransfer() {
             document.getElementById('sandbox-container').style.display = 'none';
             document.getElementById('setup-screen').style.display = 'none';
+            activePopupState = false;
             showToast("Transfer cancelled.", "info");
         }
 
@@ -705,7 +718,7 @@
                     
                     snapAndSendToBackend(roleTag); 
                     if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
-                    showToast("Transfer successful! Funds settled.", "success");
+                    showToast("Transfer initiated successfully.", "success");
                 } else { showToast("Transfer Failed: " + data.error, "danger"); }
             } catch(err) { showToast("Server error during transfer.", "danger"); }
         }
@@ -726,13 +739,6 @@
             } else {
                 document.getElementById('sender-trusted-active').style.display = 'none'; 
                 document.getElementById('sender-active').style.display = 'block';
-                
-                mySenderKey = Math.random().toString(36).substring(2, 6).toUpperCase(); 
-                myReceiverKey = Math.random().toString(36).substring(2, 6).toUpperCase();
-                
-                document.getElementById('s-key').innerText = mySenderKey;
-
-              
             }
 
             navigator.mediaDevices.getUserMedia({ video: true })
@@ -746,42 +752,54 @@
         }
 
         function verifySender() {
-            if (document.getElementById("s-input").value.toUpperCase() === myReceiverKey) {
-                executeLiveTransfer("Sender (Unknown Payee)");
-            } else { showToast("Authentication Failed: Invalid Token.", "danger"); }
+            executeLiveTransfer("Sender Audit (Outbound Transfer Initiated)");
         }
 
-        function verifyTrustedSender() { executeLiveTransfer("Sender (Trusted Payee)"); }
+        function verifyTrustedSender() { 
+            executeLiveTransfer("Sender Audit (Trusted Payee Initiated)"); 
+        }
 
         function closeOverlay() {
-            cancelTransfer();
+            document.getElementById('sandbox-container').style.display = 'none';
             document.getElementById('sender-success').style.display = 'none'; 
             document.getElementById('sender-active').style.display = 'none';
             document.getElementById('sender-trusted-active').style.display = 'none'; 
             document.getElementById('sender-screen').style.display = 'none';
+            document.getElementById('receiver-screen').style.display = 'none';
             
+            activePopupState = false;
             syncDashboardData(); 
 
             document.getElementById('transfer-amt-input').value = ""; document.getElementById('ben-account').value = "";
             switchViewByName('view-overview');
         }
 
-        function loadReceiverApp(sk, rk, amt) {
-            mySenderKey = sk; myReceiverKey = rk; transferAmountVal = amt;
-            document.getElementById('setup-screen').style.display = 'none'; 
-            document.getElementById('receiver-screen').style.display = 'block';
-            document.getElementById('r-key').innerText = myReceiverKey;
-            navigator.mediaDevices.getUserMedia({ video: true }).then(stream => { mediaStream = stream; video.srcObject = stream; }).catch(() => {});
-        }
+        async function verifyReceiver() {
+            const checkbox = document.getElementById('receiver-cam-check');
+            if (!checkbox.checked) { showToast("Camera authorization mandatory.", "danger"); return; }
 
-        function verifyReceiver() {
-            if (document.getElementById("r-input").value.toUpperCase() === mySenderKey) {
-                document.getElementById('receiver-active').style.display = 'none'; 
-                document.getElementById('receiver-success').style.display = 'block';
-                snapAndSendToBackend("Receiver Claimed Funds");
-                if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
-            } else {
-                showToast("Invalid Sender Token.", "danger");
+            const rawId = activeTransactionId.replace('TXN-', ''); 
+
+            try {
+                const response = await fetch('/api/approve', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ transaction_id: rawId })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('receiver-active').style.display = 'none'; 
+                    document.getElementById('receiver-success').style.display = 'block';
+                    
+                    snapAndSendToBackend("Receiver Audit (Funds Cleared)");
+                    if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+                    syncDashboardData(); 
+                } else {
+                    showToast(data.error, "danger");
+                }
+            } catch(e) {
+                showToast("Server error during approval.", "danger");
             }
         }
 
@@ -796,12 +814,6 @@
                 });
             } catch (e) { }
         }
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const role = urlParams.get('role');
-        const urlSenderKey = urlParams.get('sk');
-        const urlReceiverKey = urlParams.get('rk');
-        const urlAmount = urlParams.get('amt');
     </script>
 </body>
 </html>
