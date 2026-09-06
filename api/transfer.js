@@ -51,7 +51,7 @@ module.exports = async (req, res) => {
     // 5. Insert into Transactions table to create the receipt
     const txnRes = await client.query(`
       INSERT INTO transactions (sender_account_id, receiver_account_id, amount, status)
-      VALUES ($1, $2, $3, 'COMPLETED')
+      VALUES ($1, $2, $3, 'PENDING')
       RETURNING transaction_id
     `, [sender.account_id, receiver.account_id, transferAmount]);
 
