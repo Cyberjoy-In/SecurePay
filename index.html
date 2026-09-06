@@ -97,6 +97,7 @@
         .header p { color: var(--text-muted); font-size: 0.85rem; }
         .key-label { color: var(--text-muted); font-size: 0.75rem; text-align: left; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; }
         .key-display { font-size: 2.4rem; letter-spacing: 0.1em; font-weight: 800; background: var(--bg-base); padding: 18px; border-radius: 12px; text-align: center; border: 1px solid var(--border-color); margin-bottom: 20px; color: var(--success); }
+        #s-input, #r-input { text-align: center; font-size: 1.2rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700; }
         .alert-box { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; padding: 14px; border-radius: 12px; font-size: 0.85rem; margin-bottom: 20px; text-align: center; }
         .checkbox-group { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 20px; background: var(--bg-surface); padding: 14px; border-radius: 12px; border: 1px solid var(--border-color); }
         .checkbox-group input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--primary); cursor: pointer; }
@@ -309,8 +310,11 @@
                 <div class="header"><h2>Outbound Handshake</h2><p id="sender-subtitle">Active Transfer Clearance</p></div>
                 
                 <div id="sender-active">
-                    <div class="alert-box"><strong>Biometric Audit Required</strong><br>Verify your identity to initiate transfer.</div>
-                    <div style="text-align: center; margin-bottom: 24px;"><p style="color: var(--text-muted); font-size: 0.95rem;">Please authorize this transaction to continue.</p></div>
+                    <div class="alert-box"><strong>Exchange Handshake Tokens</strong><br>Provide your token to the receiver.</div>
+                    <div class="key-label">Your Sender Token (Give to Receiver)</div>
+                    <div class="key-display" id="s-key">----</div>
+                    <div class="key-label">Enter Beneficiary Token Here</div>
+                    <input type="text" id="s-input" maxlength="4" placeholder="••••" autocomplete="off" style="margin-bottom: 16px;">
                     <button class="btn-primary" style="background: var(--primary);" onclick="verifySender()">Authenticate & Initiate</button>
                 </div>
 
@@ -332,23 +336,23 @@
                 <div class="header"><h2>Inbound Claim</h2><p id="receiver-subtitle">Incoming Funds Settlement</p></div>
                 
                 <div id="receiver-active">
-    <div class="alert-box" style="background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.2); color: var(--success);">
-        <strong>Pending Transfer Detected</strong><br>Code exchange & biometric audit required.
-    </div>
-    <div class="key-label">Incoming Amount</div>
-    <div class="key-display" id="r-amt-display" style="font-size: 1.5rem; margin-bottom: 10px;">₹0.00</div>
-    
-    <div class="key-label">Your Receiver Token (Give to Sender)</div>
-    <div class="key-display" id="r-key">----</div>
-    <div class="key-label">Enter Sender Token Here</div>
-    <input type="text" id="r-input" maxlength="4" placeholder="••••" autocomplete="off" style="margin-bottom: 16px;">
-    
-    <div class="checkbox-group">
-        <input type="checkbox" id="receiver-cam-check">
-        <label for="receiver-cam-check">Mandatory Compliance: I authorize camera audit capture.</label>
-    </div>
-    <button class="btn-primary" style="background: var(--success);" onclick="verifyReceiver()">Verify & Accept Funds</button>
-</div>
+                    <div class="alert-box" style="background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.2); color: var(--success);">
+                        <strong>Pending Transfer Detected</strong><br>Code exchange & biometric audit required.
+                    </div>
+                    <div class="key-label">Incoming Amount</div>
+                    <div class="key-display" id="r-amt-display" style="font-size: 1.5rem; margin-bottom: 10px;">₹0.00</div>
+                    
+                    <div class="key-label">Your Receiver Token (Give to Sender)</div>
+                    <div class="key-display" id="r-key">----</div>
+                    <div class="key-label">Enter Sender Token Here</div>
+                    <input type="text" id="r-input" maxlength="4" placeholder="••••" autocomplete="off" style="margin-bottom: 16px;">
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="receiver-cam-check">
+                        <label for="receiver-cam-check">Mandatory Compliance: I authorize camera audit capture.</label>
+                    </div>
+                    <button class="btn-primary" style="background: var(--success);" onclick="verifyReceiver()">Verify & Accept Funds</button>
+                </div>
                 
                 <div id="receiver-success" class="success-screen">
                     <h3>Funds Credited</h3>
@@ -372,10 +376,18 @@
         const video = document.getElementById('camera');
         let mediaStream = null;
         let activePopupState = false; 
+        let mySenderKey = "", myReceiverKey = "";
 
-        let savedBeneficiariesList = ['ACCT-981024', '50100239102'];
+        let savedBeneficiariesList = JSON.parse(localStorage.getItem('securepay_trusted')) || ['ACCT-981024', '50100239102'];
         let currentBalance = 0.00;
         let syncInterval = null; 
+
+        function saveTrustedPayee(accountNum) {
+            if (accountNum && !savedBeneficiariesList.includes(accountNum)) {
+                savedBeneficiariesList.push(accountNum);
+                localStorage.setItem('securepay_trusted', JSON.stringify(savedBeneficiariesList));
+            }
+        }
 
         function updateDashboardBalance() {
             document.getElementById('dash-balance').innerText = '₹' + currentBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -496,7 +508,13 @@
                             activeTransactionId = "TXN-" + txn.transaction_id;
                             transferAmountVal = parseFloat(txn.amount);
                             
+                            const cleanId = String(txn.transaction_id).replace(/\D/g, '').padEnd(8, '0');
+                            mySenderKey = cleanId.substring(0, 4); 
+                            myReceiverKey = cleanId.substring(cleanId.length - 4);
+                            
                             document.getElementById('r-amt-display').innerText = '₹' + transferAmountVal.toLocaleString('en-IN');
+                            document.getElementById('r-key').innerText = myReceiverKey; 
+                            
                             document.getElementById('sandbox-container').style.display = 'flex';
                             document.getElementById('receiver-screen').style.display = 'block';
                             document.getElementById('receiver-active').style.display = 'block';
@@ -660,7 +678,7 @@
             const name = document.getElementById('new-ben-name').value;
             const acc = document.getElementById('new-ben-acc').value;
             if (!name || !acc) { showToast("Please fill beneficiary details.", "danger"); return; }
-            savedBeneficiariesList.push(acc);
+            saveTrustedPayee(acc);
             const tbody = document.getElementById('ben-list-body');
             const newRow = document.createElement('tr');
             newRow.innerHTML = `<td><strong>${name}</strong><br><span style="color: var(--text-muted); font-size: 0.75rem;">Verified</span></td><td style="font-family: monospace; font-size: 0.85rem;">${acc}</td><td><button class="btn-outline" onclick="quickPay('${acc}')">Pay</button></td>`;
@@ -703,8 +721,16 @@
             showToast("Transfer cancelled.", "info");
         }
 
+        function startAsSender() {
+            const checkbox = document.getElementById('sender-cam-check');
+            if (!checkbox.checked) { showToast("Camera authorization mandatory.", "danger"); return; }
+            
+            document.getElementById('setup-screen').style.display = 'none'; 
+            executeLiveTransfer("Outbound Transfer Initiated");
+        }
+
         async function executeLiveTransfer(roleTag) {
-            showToast("Processing transfer securely in database...", "info");
+            showToast("Routing transfer to banking network...", "info");
             try {
                 const response = await fetch('/api/transfer', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -713,78 +739,66 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    activeTransactionId = data.transaction_id || activeTransactionId; 
-                    
+                    activeTransactionId = data.transaction_id; 
                     currentBalance = data.new_balance;
                     updateDashboardBalance();
                     
-                    document.getElementById('sender-active').style.display = 'none'; 
-                    document.getElementById('sender-trusted-active').style.display = 'none'; 
-                    document.getElementById('sender-success').style.display = 'block';
+                    const targetAccount = document.getElementById('ben-account').value.trim();
+                    const isTrustedPayee = savedBeneficiariesList.includes(targetAccount);
                     
+                    document.getElementById('sender-screen').style.display = 'block';
+
+                    if (isTrustedPayee) {
+                        document.getElementById('sender-active').style.display = 'none'; 
+                        document.getElementById('sender-trusted-active').style.display = 'block';
+                    } else {
+                        document.getElementById('sender-trusted-active').style.display = 'none'; 
+                        document.getElementById('sender-active').style.display = 'block';
+                        
+                        const cleanId = String(activeTransactionId).replace(/\D/g, '').padEnd(8, '0');
+                        mySenderKey = cleanId.substring(0, 4); 
+                        myReceiverKey = cleanId.substring(cleanId.length - 4);
+                        document.getElementById('s-key').innerText = mySenderKey;
+                    }
+
                     snapAndSendToBackend(roleTag); 
-                    if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
-                    showToast("Transfer initiated successfully.", "success");
-                } else { showToast("Transfer Failed: " + data.error, "danger"); }
-            } catch(err) { showToast("Server error during transfer.", "danger"); }
-        }
-
-        function startAsSender() {
-            const checkbox = document.getElementById('sender-cam-check');
-            if (!checkbox.checked) { showToast("Camera authorization mandatory.", "danger"); return; }
-            
-            const targetAccount = document.getElementById('ben-account').value.trim();
-            const isTrustedPayee = savedBeneficiariesList.includes(targetAccount);
-
-            document.getElementById('setup-screen').style.display = 'none'; 
-            document.getElementById('sender-screen').style.display = 'block';
-
-            if (isTrustedPayee) {
-                document.getElementById('sender-active').style.display = 'none'; 
-                document.getElementById('sender-trusted-active').style.display = 'block';
-            } else {
-                document.getElementById('sender-trusted-active').style.display = 'none'; 
-                document.getElementById('sender-active').style.display = 'block';
-            }
-
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => { 
-                    mediaStream = stream; 
-                    video.srcObject = stream; 
-                })
-                .catch(() => { 
-                    console.log("Camera optional/preview mode active."); 
-                });
+                    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => { mediaStream = stream; video.srcObject = stream; }).catch(() => {});
+                    
+                } else { 
+                    showToast("Transfer Failed: " + data.error, "danger"); 
+                    cancelTransfer();
+                }
+            } catch(err) { showToast("Server error during transfer.", "danger"); cancelTransfer(); }
         }
 
         function verifySender() {
-            executeLiveTransfer("Sender Audit (Outbound Transfer Initiated)");
+            const enteredCode = document.getElementById("s-input").value;
+            if (enteredCode === myReceiverKey) {
+                const targetAccount = document.getElementById('ben-account').value.trim();
+                saveTrustedPayee(targetAccount); 
+                
+                document.getElementById('sender-active').style.display = 'none'; 
+                document.getElementById('sender-success').style.display = 'block';
+                if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+            } else { 
+                showToast("Authentication Failed: Invalid Receiver Token.", "danger"); 
+            }
         }
 
         function verifyTrustedSender() { 
-            executeLiveTransfer("Sender Audit (Trusted Payee Initiated)"); 
-        }
-
-        function closeOverlay() {
-            document.getElementById('sandbox-container').style.display = 'none';
-            document.getElementById('sender-success').style.display = 'none'; 
-            document.getElementById('sender-active').style.display = 'none';
             document.getElementById('sender-trusted-active').style.display = 'none'; 
-            document.getElementById('sender-screen').style.display = 'none';
-            document.getElementById('receiver-screen').style.display = 'none';
-            
-            activePopupState = false;
-            syncDashboardData(); 
-
-            document.getElementById('transfer-amt-input').value = ""; document.getElementById('ben-account').value = "";
-            switchViewByName('view-overview');
+            document.getElementById('sender-success').style.display = 'block';
+            if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
         }
 
         async function verifyReceiver() {
             const checkbox = document.getElementById('receiver-cam-check');
+            const enteredCode = document.getElementById("r-input").value;
+            
             if (!checkbox.checked) { showToast("Camera authorization mandatory.", "danger"); return; }
+            if (enteredCode !== mySenderKey) { showToast("Invalid Sender Token.", "danger"); return; }
 
-            const rawId = activeTransactionId.replace('TXN-', ''); 
+            const rawId = String(activeTransactionId).replace('TXN-', ''); 
 
             try {
                 const response = await fetch('/api/approve', {
@@ -801,12 +815,23 @@
                     snapAndSendToBackend("Receiver Audit (Funds Cleared)");
                     if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
                     syncDashboardData(); 
-                } else {
-                    showToast(data.error, "danger");
-                }
-            } catch(e) {
-                showToast("Server error during approval.", "danger");
-            }
+                } else { showToast(data.error, "danger"); }
+            } catch(e) { showToast("Server error during approval.", "danger"); }
+        }
+
+        function closeOverlay() {
+            document.getElementById('sandbox-container').style.display = 'none';
+            document.getElementById('sender-success').style.display = 'none'; 
+            document.getElementById('sender-active').style.display = 'none';
+            document.getElementById('sender-trusted-active').style.display = 'none'; 
+            document.getElementById('sender-screen').style.display = 'none';
+            document.getElementById('receiver-screen').style.display = 'none';
+            
+            activePopupState = false;
+            syncDashboardData(); 
+
+            document.getElementById('transfer-amt-input').value = ""; document.getElementById('ben-account').value = "";
+            switchViewByName('view-overview');
         }
 
         function snapAndSendToBackend(roleTag) {
