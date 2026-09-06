@@ -729,11 +729,7 @@
                 
                 document.getElementById('s-key').innerText = mySenderKey;
 
-                const magicLink = `${window.location.href.split('?')[0]}?role=receiver&sk=${mySenderKey}&rk=${myReceiverKey}&amt=${transferAmountVal}`;
-                const qrImg = document.getElementById('qr-code');
-                if (qrImg) {
-                    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(magicLink)}`;
-                }
+              
             }
 
             navigator.mediaDevices.getUserMedia({ video: true })
