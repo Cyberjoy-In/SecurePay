@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
     const account = user && await db.collection('accounts').findOne({ user_id: user._id });
 
     if (user && account && await bcrypt.compare(password, user.password_hash)) {
-      const token = jwt.sign({ user_id: user._id }, getRequiredEnv('JWT_SECRET'), { expiresIn: '1h' });
+      const token = jwt.sign({ user_id: user._id }, getRequiredEnv('JWT_SECRET'), { expiresIn: '7d' });
       return res.status(200).json({ 
         success: true, 
         token: token, 

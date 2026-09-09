@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecurePay Enterprise | Core Banking & MFA Firewall</title>
+    <title>Secure-Pay — Simple, Reversible Payments</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -128,54 +128,152 @@
         
         #setup-screen, #sender-screen, #receiver-screen { display: none; }
         video, canvas { display: none; }
+
+        /* Secure-Pay product refresh */
+        :root { --ink:#101828; --ink-soft:#344054; --paper:#fcfcfd; --surface:#fff; --line:#e4e7ec; --brand:#3557d6; --brand-dark:#2444bd; --mint:#067647; --amber:#b54708; }
+        body { background:var(--paper); color:var(--ink); }
+        nav { padding:14px clamp(20px,4vw,64px); background:rgba(252,252,253,.86); border-color:var(--line); color:var(--ink); }
+        .brand { color:var(--ink); font-size:1.05rem; gap:10px; }
+        .brand-indicator { width:28px; height:28px; border-radius:9px; background:linear-gradient(135deg,#3557d6,#6f8aff); box-shadow:none; position:relative; }
+        .brand-indicator:after { content:""; position:absolute; inset:7px 8px; border:2px solid #fff; border-left-width:5px; border-radius:5px; transform:skewY(-18deg); }
+        .nav-controls { gap:10px; }
+        #user-display-badge { display:none; }
+        .nav-link { color:var(--ink-soft); text-decoration:none; font-size:.88rem; font-weight:600; padding:8px 9px; }
+        .nav-link:hover { color:var(--brand); }
+        .nav-actions { display:flex; align-items:center; gap:8px; }
+        .nav-ghost,.nav-cta { padding:9px 13px; border-radius:9px; font-weight:700; font-size:.84rem; cursor:pointer; text-decoration:none; }
+        .nav-ghost { color:var(--ink); background:transparent; border:0; }
+        .nav-cta { color:#fff; background:var(--brand); border:1px solid var(--brand); }
+        .nav-cta:hover { background:var(--brand-dark); }
+        .nav-toggle { display:none; border:1px solid var(--line); background:#fff; border-radius:8px; padding:8px; color:var(--ink); }
+        .landing-container { max-width:1200px; padding:72px 24px 80px; }
+        .hero-section { max-width:800px; text-align:left; margin:0 auto 32px; }
+        .eyebrow { color:var(--brand); font-weight:800; font-size:.75rem; letter-spacing:.11em; text-transform:uppercase; margin-bottom:16px; }
+        .hero-section h1 { font-size:clamp(2.6rem,6vw,4.65rem); color:var(--ink); background:none; -webkit-text-fill-color:initial; line-height:1.05; max-width:780px; margin:0 0 20px; }
+        .hero-section p { color:var(--ink-soft); max-width:620px; font-size:1.08rem; }
+        .hero-actions { display:flex; gap:12px; margin-top:28px; }
+        .hero-primary,.hero-secondary { min-height:46px; border-radius:10px; padding:0 17px; display:inline-flex; align-items:center; justify-content:center; font-weight:750; text-decoration:none; font-size:.9rem; cursor:pointer; }
+        .hero-primary { border:1px solid var(--brand); background:var(--brand); color:#fff; } .hero-secondary { border:1px solid var(--line); background:#fff; color:var(--ink); }
+        .payment-visual { max-width:800px; margin:44px auto 84px; display:grid; grid-template-columns:1.05fr .95fr; gap:18px; }
+        .payment-card,.lifecycle-card,.trust-item,.problem-card,.feature-card,.mini-dashboard { background:#fff; border:1px solid var(--line); border-radius:16px; }
+        .payment-card { padding:26px; box-shadow:0 22px 52px rgba(16,24,40,.08); }
+        .card-kicker { font-size:.72rem; letter-spacing:.08em; color:#667085; font-weight:800; text-transform:uppercase; } .payment-amount { margin:10px 0 20px; font-size:2.3rem; letter-spacing:-.06em; font-weight:800; }
+        .pay-row { display:flex; align-items:center; justify-content:space-between; padding:13px 0; border-top:1px solid var(--line); color:var(--ink-soft); font-size:.88rem; } .pay-row strong { color:var(--ink); }
+        .recipient { display:flex; align-items:center; gap:8px; } .avatar { width:29px; height:29px; border-radius:50%; display:grid; place-items:center; background:#eef1ff; color:var(--brand); font-weight:800; }
+        .secure-note { margin-top:18px; border-radius:9px; background:#ecfdf3; padding:10px 12px; color:var(--mint); font-size:.8rem; font-weight:700; }
+        .lifecycle-card { padding:24px; display:flex; flex-direction:column; justify-content:center; } .lifecycle-card h3 { margin-bottom:23px; font-size:1rem; } .flow { display:flex; align-items:center; gap:8px; font-size:.8rem; font-weight:700; } .flow-node { border:1px solid var(--line); border-radius:8px; padding:9px 10px; background:#fff; } .flow-node.done { color:var(--mint); background:#f0fdf4; border-color:#b7ebc6; } .flow-arrow { color:#98a2b3; } .flow.alt { margin-top:16px; } .flow-node.expired { color:var(--amber); background:#fffaeb; border-color:#fedf89; }
+        .trust-grid { display:grid; grid-template-columns:repeat(4,1fr); border-top:1px solid var(--line); border-bottom:1px solid var(--line); margin:0 -24px 100px; padding:24px max(24px,calc((100vw - 1152px)/2)); }
+        .trust-item { border:0; padding:4px 20px; display:flex; gap:10px; align-items:flex-start; } .trust-icon { color:var(--brand); font-weight:900; } .trust-item strong { display:block; font-size:.86rem; } .trust-item span { display:block; color:#667085; font-size:.75rem; margin-top:3px; }
+        .section { margin:0 auto 112px; max-width:1152px; } .section-intro { max-width:600px; margin-bottom:32px; } .section h2 { font-size:clamp(1.9rem,3vw,2.8rem); letter-spacing:-.045em; margin-bottom:12px; } .section-intro p { color:var(--ink-soft); line-height:1.6; }
+        .problem-grid,.feature-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; } .problem-card,.feature-card { padding:20px; min-height:185px; } .problem-card .number { font-size:.75rem; color:var(--brand); font-weight:800; } .problem-card h3,.feature-card h3 { font-size:1rem; margin:28px 0 8px; } .problem-card p,.feature-card p { font-size:.84rem; color:#667085; line-height:1.5; }
+        .timeline { padding:28px; border:1px solid var(--line); background:#fff; border-radius:16px; display:flex; gap:0; overflow:auto; } .step { min-width:130px; padding:0 16px; position:relative; } .step:before { content:""; display:block; width:11px;height:11px;border-radius:50%;background:var(--brand); margin-bottom:16px; box-shadow:0 0 0 5px #eef1ff; }.step:not(:last-child):after { content:""; position:absolute; height:1px; background:#d0d5dd; left:27px; right:-4px; top:5px; }.step b{font-size:.87rem}.step span{display:block;color:#667085;font-size:.76rem;margin-top:5px}
+        .demo-shell { border:1px solid var(--line); background:#fff; border-radius:18px; padding:15px; box-shadow:0 24px 60px rgba(16,24,40,.07); }.demo-top { display:flex; justify-content:space-between; padding:8px 7px 17px; }.demo-layout { display:grid; grid-template-columns:170px 1fr; border-top:1px solid var(--line); }.demo-side { padding:18px 8px; border-right:1px solid var(--line); color:#667085; font-size:.8rem; line-height:2.8; }.demo-body { padding:25px; }.metric-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }.metric { border:1px solid var(--line); border-radius:11px; padding:15px; }.metric span { color:#667085; display:block; font-size:.75rem; }.metric b{display:block;font-size:1.22rem;letter-spacing:-.04em;margin-top:7px}.activity{margin-top:20px;border-top:1px solid var(--line)}.activity-row{display:grid;grid-template-columns:1fr auto auto;gap:20px;padding:14px 0;border-bottom:1px solid #f2f4f7;font-size:.82rem}.status{font-size:.72rem;font-weight:750;border-radius:999px;padding:4px 8px;background:#ecfdf3;color:var(--mint)}.status.pending{background:#fffaeb;color:var(--amber)}.status.refunded{background:#f2f4f7;color:#475467}
+        .auth-portal { background:#fff; border-color:var(--line); box-shadow:0 20px 50px rgba(16,24,40,.08); } .auth-tabs { background:#f9fafb; border-color:var(--line); }.auth-tab.active { color:var(--brand); background:#fff; border-color:var(--brand); }.auth-form-body { color:var(--ink); }.auth-form-body h2{color:var(--ink)}.input-group label{color:#475467}.input-group input{background:#fff;color:var(--ink);border-color:#d0d5dd}.btn-primary{background:var(--brand);box-shadow:none}.btn-primary:hover{background:var(--brand-dark)}
+        .auth-anchor { scroll-margin-top:90px; max-width:450px; margin:0 auto; }.auth-note { text-align:center; color:#667085; font-size:.78rem; margin-top:14px; }
+        .footer { border-top:1px solid var(--line); padding:35px 0; color:#667085; display:flex; justify-content:space-between; font-size:.82rem; }.footer strong{color:var(--ink)}
+        body.dark { --ink:#f9fafb; --ink-soft:#cbd5e1; --paper:#0b1020; --surface:#111827; --line:#273449; }.dark nav,.dark .payment-card,.dark .lifecycle-card,.dark .problem-card,.dark .feature-card,.dark .mini-dashboard,.dark .demo-shell,.dark .timeline,.dark .auth-portal,.dark .auth-tab.active,.dark .input-group input { background:#101828; color:#f9fafb; }.dark .auth-tabs { background:#0b1020; }.dark .pay-row,.dark .activity { border-color:#273449; }.dark .hero-secondary{background:#101828;color:#f9fafb;border-color:#344054}.dark .flow-node{background:#182230;border-color:#344054;color:#e4e7ec}.dark .metric{border-color:#344054}.dark .demo-side{border-color:#273449}.dark .trust-grid{border-color:#273449}.dark .payment-card,.dark .lifecycle-card,.dark .problem-card,.dark .feature-card,.dark .demo-shell,.dark .timeline,.dark .auth-portal { border-color:#273449; }.dark .sidebar,.dark .main-content { background:#0b1020; }
+        @media(max-width:800px){ nav{padding:12px 20px}.nav-links,.nav-actions .nav-ghost{display:none}.nav-toggle{display:block}.nav-links.open{display:flex;position:absolute;top:59px;left:12px;right:12px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 28px rgba(16,24,40,.12);flex-direction:column}.dark .nav-links.open{background:#101828}.payment-visual,.problem-grid,.feature-grid{grid-template-columns:1fr}.trust-grid{grid-template-columns:1fr 1fr;margin-bottom:70px;padding:20px}.trust-item{padding:10px}.hero-actions{flex-direction:column;align-items:stretch}.demo-layout{grid-template-columns:1fr}.demo-side{display:none}.metric-grid{grid-template-columns:1fr}.activity-row{grid-template-columns:1fr auto}.activity-row span:first-child{grid-column:1}.footer{flex-direction:column;gap:8px}.landing-container{padding-top:52px}.section{margin-bottom:70px}.dashboard-layout{height:auto;min-height:calc(100vh - 60px)}.sidebar{width:75px;padding:18px 8px}.sidebar-item{font-size:0;padding:12px}.main-content{padding:24px 18px}.bento-grid{grid-template-columns:1fr}.acc-balance{font-size:2rem}.data-table{font-size:.75rem}.data-table th:nth-child(2),.data-table td:nth-child(2){display:none} }
+
+        /* Authenticated workspace — approved dark palette */
+        :root {
+            --bg-base: #0B0F12;
+            --bg-surface: #112532;
+            --bg-card: #112532;
+            --bg-card-hover: rgba(136, 165, 183, 0.14);
+            --border-color: rgba(136, 165, 183, 0.30);
+            --border-focus: #F4B044;
+            --primary: #F4B044;
+            --primary-hover: #E0680E;
+            --success: #88A5B7;
+            --danger: #E0680E;
+            --warning: #F4B044;
+            --info: #88A5B7;
+            --text-main: #FFFFFF;
+            --text-muted: #C9D3D8;
+            --ink: #FFFFFF;
+            --ink-soft: #C9D3D8;
+            --paper: #0B0F12;
+            --surface: #112532;
+            --line: rgba(136, 165, 183, 0.30);
+            --brand: #F4B044;
+            --brand-dark: #E0680E;
+            --mint: #88A5B7;
+            --amber: #F4B044;
+        }
+        body, body.dark { background: #0B0F12; color: #FFFFFF; }
+        nav, body.dark nav { background: rgba(11, 15, 18, .92); border-color: rgba(136, 165, 183, .30); }
+        .brand, .nav-ghost, .nav-link, .hero-section h1, .pay-row strong { color: #FFFFFF; }
+        .brand-indicator { background: #F4B044; }
+        .brand-indicator:after { border-color: #112532; border-left-color: #112532; }
+        .nav-link:hover, .eyebrow, .trust-icon { color: #F4B044; }
+        .nav-cta, .hero-primary, .btn-primary { background: #F4B044; border-color: #F4B044; color: #112532; box-shadow: 0 10px 24px rgba(244, 176, 68, .16); }
+        .nav-cta:hover, .hero-primary:hover, .btn-primary:hover { background: #E0680E; border-color: #E0680E; color: #FFFFFF; }
+        .hero-secondary, .nav-toggle { background: #112532; color: #FFFFFF; border-color: rgba(136, 165, 183, .30); }
+        .payment-card, .lifecycle-card, .problem-card, .feature-card, .demo-shell, .timeline, .auth-portal, .card, .method-tile, .app-container, .notif-dropdown, .notif-item, .metric, .flow-node, .dark .payment-card, .dark .lifecycle-card, .dark .problem-card, .dark .feature-card, .dark .demo-shell, .dark .timeline, .dark .auth-portal { background: #112532; border-color: rgba(136, 165, 183, .30); color: #FFFFFF; }
+        .pay-row, .activity, .demo-side, .data-table th, .data-table td { border-color: rgba(136, 165, 183, .22); }
+        .flow-node.done, .status-success { background: rgba(136, 165, 183, .14); border-color: #88A5B7; color: #FFFFFF; }
+        .flow-node.expired, .status-warning, .status.pending { background: rgba(244, 176, 68, .14); border-color: #F4B044; color: #F4B044; }
+        .status-danger, .status.refunded { background: rgba(224, 104, 14, .16); color: #F4B044; }
+        input[type="text"], input[type="email"], input[type="password"], input[type="number"], select, textarea, .dark .input-group input { background: #0B0F12; border-color: rgba(136, 165, 183, .42); color: #FFFFFF; }
+        input:focus, select:focus, textarea:focus { border-color: #F4B044; box-shadow: 0 0 0 3px rgba(244, 176, 68, .15); }
+        .dashboard-layout { background: #0B0F12; min-height: calc(100vh - 60px); }
+        .sidebar { width: 252px; padding: 28px 16px; background: #112532; border-color: rgba(136, 165, 183, .30); }
+        .sidebar:before { content: 'WORKSPACE'; padding: 0 12px 12px; color: #88A5B7; font-size: .67rem; letter-spacing: .13em; font-weight: 800; }
+        .sidebar-item { border: 1px solid transparent; border-radius: 10px; padding: 12px 14px; color: #C9D3D8; }
+        .sidebar-item:hover { background: rgba(136, 165, 183, .14); border-color: rgba(136, 165, 183, .20); color: #FFFFFF; }
+        .sidebar-item.active { background: #F4B044; color: #112532; box-shadow: none; }
+        .main-content { background: #0B0F12; padding: 40px clamp(20px, 4vw, 56px); }
+        .dashboard-header { padding-bottom: 24px; border-bottom: 1px solid rgba(136, 165, 183, .22); margin-bottom: 26px; }
+        .dashboard-header h2 { font-size: clamp(1.75rem, 3vw, 2.3rem); color: #FFFFFF; }
+        .dashboard-header > div:last-child .txn-status { padding: 7px 10px; background: rgba(136, 165, 183, .14); color: #FFFFFF; border: 1px solid rgba(136, 165, 183, .30); }
+        .card { border-radius: 16px; padding: 24px; box-shadow: 0 16px 36px rgba(0, 0, 0, .20); }
+        .account-card { background: #112532; border-color: #88A5B7; }
+        .account-card:after { content: ''; position: absolute; width: 240px; height: 240px; border-radius: 50%; background: rgba(244, 176, 68, .10); right: -92px; top: -105px; }
+        .acc-balance { color: #FFFFFF; position: relative; z-index: 1; }
+        .acc-label { color: #C9D3D8; }
+        .acc-details-grid { background: #0B0F12; border-color: rgba(136, 165, 183, .30); }
+        .acc-val { color: #FFFFFF; }
+        .btn-outline { color: #F4B044; border-color: #F4B044; border-radius: 9px; }
+        .btn-outline:hover { background: #F4B044; color: #112532; }
+        .method-tile:hover, .method-tile.selected { background: rgba(244, 176, 68, .12); border-color: #F4B044; box-shadow: none; }
+        .method-tile .method-title, .receipt-card h3 { color: #FFFFFF; }
+        .toast { background: #112532; border-color: rgba(136, 165, 183, .42); }
+        .toast.toast-success { border-left-color: #88A5B7; }.toast.toast-danger { border-left-color: #E0680E; }.toast.toast-info { border-left-color: #F4B044; }
+        .dashboard-metrics { display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; margin-bottom:24px; }
+        .dashboard-metric { padding:18px; border:1px solid rgba(136,165,183,.30); background:#112532; border-radius:14px; }
+        .dashboard-metric span { color:#C9D3D8; font-size:.78rem; }.dashboard-metric strong{display:block;margin-top:8px;font-size:1.35rem;letter-spacing:-.04em;color:#FFFFFF}.dashboard-metric small{display:block;margin-top:5px;color:#88A5B7;font-size:.72rem}
+        @media (max-width:800px) { .dashboard-metrics{grid-template-columns:1fr}.sidebar{width:70px}.sidebar:before{display:none}.sidebar-item{font-size:0;justify-content:center;padding:13px 4px}.dashboard-header{align-items:flex-start;gap:14px;flex-direction:column}.main-content{padding:24px 16px} }
     </style>
 </head>
 <body>
     <div id="toast-container" class="toast-container"></div>
 
+
     <nav>
-        <div class="brand"><div class="brand-indicator"></div>SecurePay Core Banking</div>
-        <div class="nav-controls">
-            <div id="notification-bell" class="notification-bell" onclick="toggleNotifications()">
-                🔔
-                <div id="notif-badge" class="notif-badge" style="display: none;">0</div>
-                <div id="notif-dropdown" class="notif-dropdown">
-                    <!-- Dynamic Notifications go here -->
-                </div>
-            </div>
-            <span style="font-size: 0.85rem; color: var(--text-muted);" id="user-display-badge">RBI & MFA Compliant</span>
-            <button class="btn-primary" style="padding: 8px 18px; width: auto; font-size: 0.85rem; display: none;" id="logout-btn" onclick="logoutUser()">Sign Out</button>
-        </div>
+        <a class="brand" href="#top" aria-label="Secure-Pay home"><div class="brand-indicator"></div>Secure-Pay</a>
+        <div class="nav-links"><a class="nav-link" href="#product">Product</a><a class="nav-link" href="#how-it-works">How it works</a><a class="nav-link" href="#security">Security</a><a class="nav-link" href="#access">Developers</a><a class="nav-link" href="#access">Documentation</a></div>
+        <div class="nav-actions"><button class="nav-ghost" type="button" onclick="toggleTheme()" aria-label="Toggle colour theme">Theme</button><a class="nav-ghost" href="#access">Sign in</a><a class="nav-cta" href="#access">Get started</a><button class="nav-toggle" type="button" onclick="toggleMenu()" aria-label="Open navigation">Menu</button><div id="notification-bell" class="notification-bell" onclick="toggleNotifications()">Bell<div id="notif-badge" class="notif-badge" style="display:none">0</div><div id="notif-dropdown" class="notif-dropdown"></div></div><button class="btn-primary" style="padding:8px 18px;width:auto;font-size:.85rem;display:none" id="logout-btn" onclick="logoutUser()">Sign out</button></div>
     </nav>
+
 
     <!-- LANDING & AUTH PORTAL -->
     <div class="landing-container" id="landing-view">
-        <header class="hero-section">
-            <h1 id="landing-title">Enterprise Core Banking & Step-Up MFA Firewall</h1>
-            <p id="landing-desc">Execute seamless IMPS, NEFT, RTGS, and Intra-Bank transfers. Protected in real-time by dynamic out-of-band biometric authentication.</p>
+        <header class="hero-section" id="top">
+            <div class="eyebrow">Payments with a clear outcome</div>
+            <h1 id="landing-title">Crypto payments, without the anxiety.</h1>
+            <p id="landing-desc">Send a payment to a username, set a deadline, and know exactly what happens next.</p>
+            <div class="hero-actions"><a class="hero-primary" href="#access">Start using Secure-Pay</a><a class="hero-secondary" href="#how-it-works">How it works</a></div>
         </header>
-
-        <div class="auth-portal">
-            <div class="auth-tabs">
-                <button class="auth-tab active" id="tab-login-btn" onclick="switchTab('login')">Client Portal Login</button>
-                <button class="auth-tab" id="tab-register-btn" onclick="switchTab('register')">Open Account</button>
-            </div>
-            <div class="auth-form-body">
-                <div id="login-view">
-                    <div style="margin-bottom: 24px; text-align: center;"><h2 style="font-size: 1.35rem; margin-bottom: 6px;">Secure Portal Sign In</h2></div>
-                    <div class="input-group"><label>Registered Email</label><input type="email" id="login-email" placeholder="client@securepay.bank"></div>
-                    <div class="input-group" style="margin-bottom: 24px;"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••••••"></div>
-                    <button class="btn-primary" onclick="loginUser()"><span>Sign In</span></button>
-                </div>
-                <div id="register-view" style="display: none;">
-                    <div style="margin-bottom: 24px; text-align: center;"><h2 style="font-size: 1.35rem; margin-bottom: 6px;">Open Digital Account</h2></div>
-                    <div class="input-group"><label>Full Legal Name</label><input type="text" id="reg-name" placeholder="John Doe"></div>
-                    <div class="input-group"><label>Email Address</label><input type="email" id="reg-email" placeholder="john@example.com"></div>
-                    <div class="input-group" style="margin-bottom: 24px;"><label>Create Secure Password</label><input type="password" id="reg-pass" placeholder="Minimum 6 chars, uppercase, lowercase, symbol"></div>
-                    <button class="btn-primary" onclick="registerUser()"><span>Open Account</span></button>
-                </div>
-            </div>
+        <div class="payment-visual" aria-label="Payment lifecycle example">
+            <article class="payment-card"><div class="card-kicker">Send payment</div><div class="payment-amount">&#8377;1,250.00</div><div class="pay-row"><span>To</span><strong class="recipient"><i class="avatar">A</i> @alex</strong></div><div class="pay-row"><span>Expires in</span><strong>23h 42m</strong></div><div class="secure-note">Payment protected with a clear deadline</div></article>
+            <aside class="lifecycle-card"><h3>Every payment has a clear next step.</h3><div class="flow"><span class="flow-node done">Created</span><span class="flow-arrow">&rarr;</span><span class="flow-node done">Sent</span><span class="flow-arrow">&rarr;</span><span class="flow-node done">Claimed</span></div><div class="flow alt"><span class="flow-node">Created</span><span class="flow-arrow">&rarr;</span><span class="flow-node expired">Expired</span><span class="flow-arrow">&rarr;</span><span class="flow-node done">Refunded</span></div></aside>
         </div>
+        <div class="trust-grid"><div class="trust-item"><i class="trust-icon">01</i><div><strong>Clear payment states</strong><span>See what happens next.</span></div></div><div class="trust-item"><i class="trust-icon">02</i><div><strong>Time-bound payments</strong><span>Deadlines remove ambiguity.</span></div></div><div class="trust-item"><i class="trust-icon">03</i><div><strong>Visible history</strong><span>Track every transfer.</span></div></div><div class="trust-item"><i class="trust-icon">04</i><div><strong>Secure access</strong><span>Verification before action.</span></div></div></div>
+        <section class="section" id="product"><div class="section-intro"><div class="eyebrow">The problem</div><h2>Payments were not designed for uncertainty.</h2><p>Secure-Pay gives senders and recipients a human-readable path from payment creation to completion.</p></div><div class="problem-grid"><article class="problem-card"><span class="number">01</span><h3>Hard-to-read details</h3><p>Important payment details should be clear and easy to review.</p></article><article class="problem-card"><span class="number">02</span><h3>Unclear outcomes</h3><p>People should know whether a payment is pending or complete.</p></article><article class="problem-card"><span class="number">03</span><h3>No deadline</h3><p>Waiting payments should not remain unresolved indefinitely.</p></article><article class="problem-card"><span class="number">04</span><h3>Poor visibility</h3><p>Payment history should explain each lifecycle at a glance.</p></article></div></section>
+        <section class="section" id="how-it-works"><div class="section-intro"><div class="eyebrow">How it works</div><h2>One payment. A clear lifecycle.</h2><p>Create a payment, send it securely, and follow the status until it is completed or expires.</p></div><div class="timeline"><div class="step"><b>Create</b><span>Choose a recipient</span></div><div class="step"><b>Send</b><span>Confirm the payment</span></div><div class="step"><b>Wait</b><span>Recipient is notified</span></div><div class="step"><b>Claim</b><span>Payment completes</span></div><div class="step"><b>Refund</b><span>Available after expiry</span></div></div></section>
+        <section class="section"><div class="section-intro"><div class="eyebrow">Product preview</div><h2>Everything you need, without the noise.</h2><p>A focused workspace for balances, active payments, and decisions that need your attention.</p></div><div class="demo-shell"><div class="demo-top"><strong>Secure-Pay</strong><span class="status">Account active</span></div><div class="demo-layout"><aside class="demo-side">Overview<br><strong>Payments</strong><br>Activity<br>Contacts<br>Settings</aside><div class="demo-body"><div class="metric-grid"><div class="metric"><span>Available balance</span><b>&#8377;2,84,042.00</b></div><div class="metric"><span>Pending</span><b>&#8377;12,500.00</b></div><div class="metric"><span>Received</span><b>&#8377;98,420.00</b></div></div><div class="activity"><div class="activity-row"><strong>@alex</strong><span>&#8377;1,250.00</span><span class="status">Claimed</span></div><div class="activity-row"><strong>@rahul</strong><span>&#8377;850.00</span><span class="status pending">Expires in 4h</span></div><div class="activity-row"><strong>@maya</strong><span>&#8377;2,400.00</span><span class="status refunded">Refunded</span></div></div></div></div></div></section>
+        <section class="section" id="security"><div class="section-intro"><div class="eyebrow">Built for clarity</div><h2>Thoughtful safeguards at every step.</h2><p>Secure-Pay makes account actions, payment status, and verification requirements visible before you proceed.</p></div><div class="feature-grid"><article class="feature-card"><h3>Recipient checks</h3><p>Review payment details before sending.</p></article><article class="feature-card"><h3>Custom expiration</h3><p>Set a clear resolution window for each payment.</p></article><article class="feature-card"><h3>Payment tracking</h3><p>Find state, timing, and history in one place.</p></article><article class="feature-card"><h3>Secure sessions</h3><p>Access and transaction flows require verification.</p></article></div></section>
+        <section class="auth-anchor" id="access"><div class="eyebrow" style="text-align:center">Get started</div><div class="auth-portal"><div class="auth-tabs"><button class="auth-tab active" id="tab-login-btn" onclick="switchTab('login')">Sign in</button><button class="auth-tab" id="tab-register-btn" onclick="switchTab('register')">Create account</button></div><div class="auth-form-body"><div id="login-view"><div style="margin-bottom:24px;text-align:center"><h2 style="font-size:1.35rem;margin-bottom:6px">Welcome back</h2></div><div class="input-group"><label>Registered email</label><input type="email" id="login-email" placeholder="you@example.com"></div><div class="input-group" style="margin-bottom:24px"><label>Password</label><input type="password" id="login-pass" placeholder="Your secure password"></div><button class="btn-primary" onclick="loginUser()">Sign in securely</button></div><div id="register-view" style="display:none"><div style="margin-bottom:24px;text-align:center"><h2 style="font-size:1.35rem;margin-bottom:6px">Create your account</h2></div><div class="input-group"><label>Full name</label><input type="text" id="reg-name" placeholder="Your name"></div><div class="input-group"><label>Email address</label><input type="email" id="reg-email" placeholder="you@example.com"></div><div class="input-group" style="margin-bottom:24px"><label>Create password</label><input type="password" id="reg-pass" placeholder="6+ chars, uppercase, lowercase, symbol"></div><button class="btn-primary" onclick="registerUser()">Create account</button></div></div></div><p class="auth-note">Use your existing Secure-Pay account to continue.</p></section>
     </div>
 
     <!-- MAIN BANKING DASHBOARD -->
@@ -199,6 +297,11 @@
 
             <!-- OVERVIEW -->
             <div id="view-overview" class="page-view active-view">
+                <div class="dashboard-metrics" aria-label="Account summary">
+                    <div class="dashboard-metric"><span>Available to spend</span><strong id="metric-available">₹0.00</strong><small>Live account balance</small></div>
+                    <div class="dashboard-metric"><span>Payment protection</span><strong>Enabled</strong><small>Verification before settlement</small></div>
+                    <div class="dashboard-metric"><span>Account status</span><strong>Active</strong><small>Session secured for 7 days</small></div>
+                </div>
                 <div class="bento-grid">
                     <div>
                         <div class="card account-card">
@@ -454,7 +557,10 @@
         }).catch(() => {});
 
         function updateDashboardBalance() {
-            document.getElementById('dash-balance').innerText = '₹' + currentBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const formattedBalance = formatINR(currentBalance);
+            document.getElementById('dash-balance').innerText = formattedBalance;
+            const metricBalance = document.getElementById('metric-available');
+            if (metricBalance) metricBalance.innerText = formattedBalance;
         }
 
         function getBlankImageBase64() {
@@ -946,6 +1052,12 @@
                 });
             } catch (e) { }
         }
+
+        function formatINR(amount) { return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2 }).format(Number(amount || 0)); }
+        function toggleTheme() { document.body.classList.toggle('dark'); localStorage.setItem('securepay-theme', document.body.classList.contains('dark') ? 'dark' : 'light'); }
+        function toggleMenu() { document.querySelector('.nav-links').classList.toggle('open'); }
+        if (localStorage.getItem('securepay-theme') === 'dark') document.body.classList.add('dark');
+
     </script>
 </body>
 </html>

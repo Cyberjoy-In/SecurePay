@@ -1,4 +1,5 @@
 const { getDatabase } = require('./_db');
+const { getRequiredEnv } = require('./_config');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
