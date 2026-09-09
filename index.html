@@ -3,294 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecurePay Banking Prototype</title>
+    <title>SecurePay Dashboard</title>
     <style>
-        /* Basic Reset & Clean Styling */
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            background-color: #f4f7f6;
-            color: #333;
+        body { 
+            margin: 0; 
+            font-family: Arial, sans-serif; 
+            display: flex; 
+            background: #0f172a; 
+            color: white; 
         }
-
-        /* Sidebar Styling (Matching your image) */
-        .sidebar {
-            width: 250px;
-            background-color: #0f172a;
-            color: #94a3b8;
-            height: 100vh;
-            padding-top: 20px;
-            position: fixed;
+        .sidebar { 
+            width: 250px; 
+            background: #0b1120; 
+            padding-top: 20px; 
+            height: 100vh; 
+            position: fixed; 
         }
-        .sidebar-item {
-            padding: 15px 25px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 500;
+        .sidebar div { 
+            padding: 15px 25px; 
+            cursor: pointer; 
+            color: #cbd5e1; 
         }
-        .sidebar-item:hover, .sidebar-item.active {
-            background-color: #3b82f6;
-            color: white;
-            border-radius: 8px;
-            margin: 0 10px;
+        .sidebar div:hover, .sidebar .active { 
+            background: #3b82f6; 
+            color: white; 
+            border-radius: 8px; 
+            margin: 0 10px; 
         }
-
-        /* Main Content Area */
-        .main-content {
-            margin-left: 250px;
-            padding: 40px;
-            flex-grow: 1;
+        .main { 
+            margin-left: 250px; 
+            padding: 30px; 
+            flex-grow: 1; 
+            background: #0f172a; 
+            min-height: 100vh; 
         }
-        .header {
-            margin-bottom: 30px;
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 20px; 
         }
-
-        /* Card Styling */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+        .card { 
+            background: #1e293b; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
         }
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        .card h3 { 
+            margin-top: 0; 
+            color: #f8fafc; 
         }
-        .card h3 {
-            margin-top: 0;
-            color: #1e293b;
-            font-size: 1.2rem;
-            margin-bottom: 15px;
+        input, select { 
+            width: 100%; 
+            padding: 10px; 
+            margin-bottom: 10px; 
+            border-radius: 5px; 
+            border: 1px solid #475569; 
+            background: #334155; 
+            color: white; 
+            box-sizing: border-box; 
         }
-
-        /* Form Elements */
-        input, select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            box-sizing: border-box;
+        button { 
+            width: 100%; 
+            padding: 10px; 
+            background: #3b82f6; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
         }
-        button {
-            background-color: #3b82f6;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-        }
-        button:hover {
-            background-color: #2563eb;
-        }
-        
-        /* Result Text */
-        .result-text {
-            margin-top: 15px;
-            font-size: 0.9rem;
-            color: #059669;
-        }
-        .ticket-list {
-            margin-top: 15px;
-            font-size: 0.9rem;
-            list-style: none;
-            padding: 0;
-        }
-        .ticket-list li {
-            padding: 8px 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
+        button:hover { background: #2563eb; }
+        .result { margin-top: 10px; font-size: 0.9em; color: #10b981; }
+        .error { color: #ef4444; }
+        ul { list-style: none; padding: 0; margin-top: 10px; font-size: 0.9em; }
+        li { padding: 8px 0; border-bottom: 1px solid #334155; }
     </style>
 </head>
 <body>
 
-    <!-- Sidebar Layout -->
+    <!-- Sidebar Structure -->
     <div class="sidebar">
-        <div class="sidebar-item">⊞ Overview</div>
-        <div class="sidebar-item">💸 Transfer Funds</div>
-        <div class="sidebar-item">👥 Beneficiaries</div>
-        <div class="sidebar-item">💳 Cards & Limits</div>
-        <div class="sidebar-item active">💰 Loans & Deposits</div>
-        <div class="sidebar-item">📄 Statements</div>
-        <div class="sidebar-item">⚙️ Security Settings</div>
-        <div class="sidebar-item">📞 Priority Support</div>
+        <div>⊞ Overview</div>
+        <div>💸 Transfer Funds</div>
+        <div>👥 Beneficiaries</div>
+        <div>💳 Cards & Limits</div>
+        <div class="active">💰 Loans & Deposits</div>
+        <div>📄 Statements</div>
+        <div>⚙️ Security Settings</div>
+        <div>📞 Priority Support</div>
     </div>
 
-    <!-- Main Content Area -->
-    <div class="main-content">
-        <div class="header">
-            <h2>Welcome to SecurePay Dashboard</h2>
-            <p>Manage your everyday banking, investments, and requests.</p>
-        </div>
-
-        <div class="dashboard-grid">
+    <!-- Main Content -->
+    <div class="main">
+        <h2>SecurePay Dashboard</h2>
+        <div class="grid">
+            
+            <!-- EXISTING FEATURE MOCKUP -->
+            <div class="card">
+                <h3>💸 Quick Transfer</h3>
+                <input type="text" placeholder="Recipient Account Number">
+                <input type="number" placeholder="Amount (₹)">
+                <button onclick="alert('Transfer backend pending integration.')">Send Money</button>
+            </div>
 
             <!-- 1. BBPS Bill Payments -->
-            <div id="bbps-section" class="card">
-                <h3>Pay Bills & Recharge</h3>
+            <div class="card">
+                <h3>📱 Pay Bills & Recharge</h3>
                 <select id="bill-type">
                     <option value="mobile">Mobile Recharge</option>
                     <option value="electricity">Electricity</option>
                     <option value="water">Water</option>
                 </select>
-                <input type="text" id="bill-account" placeholder="Mobile Number or Account ID">
-                <input type="number" id="bill-amount" placeholder="Amount (₹)">
+                <input type="text" id="bill-account" placeholder="Mobile Number or ID">
+                <input type="number" id="bill-amount" placeholder="Amount">
                 <button onclick="payBill()">Pay Now</button>
-                <p id="bbps-result" class="result-text"></p>
+                <div id="bbps-result" class="result"></div>
             </div>
 
             <!-- 2. Service Requests -->
-            <div id="service-section" class="card">
-                <h3>Service Requests</h3>
+            <div class="card">
+                <h3>📝 Service Requests</h3>
                 <select id="request-type">
-                    <option value="Chequebook">Request New Chequebook</option>
-                    <option value="AddressUpdate">Update Mailing Address</option>
-                    <option value="AccountUpgrade">Request Account Upgrade</option>
+                    <option value="Chequebook">New Chequebook</option>
+                    <option value="AddressUpdate">Update Address</option>
                 </select>
                 <input type="text" id="request-details" placeholder="Additional details...">
                 <button onclick="submitRequest()">Submit Request</button>
-                <p id="service-result" class="result-text"></p>
+                <div id="service-result" class="result"></div>
             </div>
 
             <!-- 3. Investments & Trading -->
-            <div id="invest-section" class="card">
-                <h3>Live Stock Portfolio Tracker</h3>
-                <input type="text" id="stock-symbol" placeholder="Stock Symbol (e.g., AAPL, TSLA)" value="AAPL">
+            <div class="card">
+                <h3>📈 Live Stock Tracker</h3>
+                <input type="text" id="stock-symbol" placeholder="Symbol (e.g., AAPL)" value="AAPL">
                 <button onclick="checkStock()">Get Live Quote</button>
-                <div id="stock-result" class="result-text"></div>
+                <div id="stock-result" class="result"></div>
             </div>
 
             <!-- 4. Grievance Tracker -->
-            <div id="grievance-section" class="card">
-                <h3>Dispute Tracker</h3>
+            <div class="card">
+                <h3>🛡️ Dispute Tracker</h3>
                 <select id="issue-type">
                     <option value="Unexpected Charge">Unexpected Charge</option>
                     <option value="Failed Transaction">Failed Transaction</option>
                     <option value="Unauthorized Account Conversion">Unauthorized Account Conversion</option>
                     <option value="Non-maintenance Charges">Non-maintenance Charges</option>
                 </select>
-                <input type="text" id="issue-desc" placeholder="Briefly describe the issue...">
+                <input type="text" id="issue-desc" placeholder="Describe the issue...">
                 <button onclick="fileGrievance()">File Dispute</button>
-                <ul id="ticket-list" class="ticket-list"></ul>
+                <ul id="ticket-list"></ul>
             </div>
-
+            
         </div>
     </div>
 
-    <!-- Frontend Logic -->
+    <!-- Frontend API Logic -->
     <script>
-        // 1. Bill Payments Logic
+        // 1. BBPS Bills
         async function payBill() {
-            const type = document.getElementById('bill-type').value;
-            const account = document.getElementById('bill-account').value;
-            const amount = document.getElementById('bill-amount').value;
             const resultBox = document.getElementById('bbps-result');
-
-            if (!account || !amount) {
-                resultBox.innerText = "Please fill in all details.";
-                resultBox.style.color = "red";
-                return;
-            }
-
             resultBox.innerText = "Processing payment...";
-            resultBox.style.color = "black";
-
+            resultBox.className = 'result';
             try {
                 const res = await fetch('/api/bbps', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type, accountNumber: account, amount })
+                    body: JSON.stringify({ 
+                        type: document.getElementById('bill-type').value, 
+                        accountNumber: document.getElementById('bill-account').value, 
+                        amount: document.getElementById('bill-amount').value 
+                    })
                 });
                 const data = await res.json();
                 resultBox.innerText = data.message;
-                resultBox.style.color = "#059669";
-            } catch (error) {
-                resultBox.innerText = "Failed to connect to server.";
-                resultBox.style.color = "red";
+            } catch (e) {
+                resultBox.innerText = "Failed to connect to /api/bbps";
+                resultBox.className = 'result error';
             }
         }
 
-        // 2. Service Request Logic
+        // 2. Service Requests
         async function submitRequest() {
-            const type = document.getElementById('request-type').value;
-            const details = document.getElementById('request-details').value;
             const resultBox = document.getElementById('service-result');
-
-            resultBox.innerText = "Submitting request...";
-            resultBox.style.color = "black";
-
+            resultBox.innerText = "Submitting...";
+            resultBox.className = 'result';
             try {
                 const res = await fetch('/api/service_request', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ requestType: type, details })
+                    body: JSON.stringify({ 
+                        requestType: document.getElementById('request-type').value, 
+                        details: document.getElementById('request-details').value 
+                    })
                 });
                 const data = await res.json();
-                resultBox.innerText = `Success: Ref ${data.referenceId} (${data.status})`;
-                resultBox.style.color = "#059669";
-            } catch (error) {
-                resultBox.innerText = "Failed to submit request.";
-                resultBox.style.color = "red";
+                resultBox.innerText = `Ref: ${data.referenceId} (${data.status})`;
+            } catch (e) {
+                resultBox.innerText = "Failed to submit to /api/service_request";
+                resultBox.className = 'result error';
             }
         }
 
-        // 3. Investments Logic
+        // 3. Investments
         async function checkStock() {
-            const symbol = document.getElementById('stock-symbol').value.toUpperCase();
             const resultBox = document.getElementById('stock-result');
-            
-            if (!symbol) return;
-            
-            resultBox.innerText = "Loading live market data...";
-            resultBox.style.color = "black";
-            
+            resultBox.innerText = "Loading data...";
+            resultBox.className = 'result';
             try {
+                const symbol = document.getElementById('stock-symbol').value.toUpperCase();
                 const res = await fetch(`/api/invest?symbol=${symbol}`);
                 const data = await res.json();
-                
                 if (data.success) {
-                    resultBox.innerHTML = `
-                        <br><strong>Symbol:</strong> ${data.symbol}
-                        <br><strong>Current Price:</strong> $${data.currentPrice}
-                        <br><strong>Today's High/Low:</strong> $${data.high} / $${data.low}
-                    `;
-                    resultBox.style.color = "#333";
+                    resultBox.innerHTML = `Price: $${data.currentPrice} <br> High/Low: $${data.high} / $${data.low}`;
                 } else {
-                    resultBox.innerText = "Error fetching data. Check symbol or API key.";
-                    resultBox.style.color = "red";
+                    resultBox.innerText = "Error fetching data.";
+                    resultBox.className = 'result error';
                 }
-            } catch (error) {
-                resultBox.innerText = "Failed to connect to API.";
-                resultBox.style.color = "red";
+            } catch (e) {
+                resultBox.innerText = "API connection failed. Ensure /api/invest is running.";
+                resultBox.className = 'result error';
             }
         }
 
-        // 4. Grievance Tracker Logic
+        // 4. Grievance Tracker
         async function fileGrievance() {
-            const issueType = document.getElementById('issue-type').value;
-            const description = document.getElementById('issue-desc').value;
-
-            if (!description) {
-                alert("Please provide a description of the issue.");
-                return;
-            }
-
             try {
                 await fetch('/api/grievance', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ issueType, description })
+                    body: JSON.stringify({ 
+                        issueType: document.getElementById('issue-type').value, 
+                        description: document.getElementById('issue-desc').value 
+                    })
                 });
-                
-                document.getElementById('issue-desc').value = ""; // Clear input
-                loadTickets(); // Refresh the list
-            } catch (error) {
+                document.getElementById('issue-desc').value = "";
+                loadTickets();
+            } catch (e) {
                 alert("Error filing dispute.");
             }
         }
@@ -299,22 +247,17 @@
             try {
                 const res = await fetch('/api/grievance');
                 const data = await res.json();
-                
-                let html = "";
-                if (data.tickets.length === 0) {
-                    html = "<li>No active disputes.</li>";
-                } else {
-                    data.tickets.forEach(tkt => {
-                        html += `<li><strong>${tkt.id}</strong>: ${tkt.issueType} <br><span style="color:#d97706; font-size: 0.8rem;">Status: ${tkt.status}</span></li>`;
-                    });
-                }
+                let html = data.tickets.length ? "" : "<li>No active disputes.</li>";
+                data.tickets.forEach(tkt => {
+                    html += `<li><strong>${tkt.id}</strong>: ${tkt.issueType} <br><span style="color:#fbbf24;">${tkt.status}</span></li>`;
+                });
                 document.getElementById('ticket-list').innerHTML = html;
-            } catch (error) {
-                document.getElementById('ticket-list').innerHTML = "<li>Error loading tickets.</li>";
+            } catch (e) {
+                document.getElementById('ticket-list').innerHTML = "<li class='error'>Waiting for /api/grievance connection...</li>";
             }
         }
 
-        // Load active tickets when the page opens
+        // Initialize on load
         window.onload = loadTickets;
     </script>
 </body>
