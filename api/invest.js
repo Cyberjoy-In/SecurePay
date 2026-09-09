@@ -1,5 +1,4 @@
-// Note: Get your free API key at finnhub.io
-const FINNHUB_API_KEY = "YOUR_FINNHUB_API_KEY_HERE"; 
+const { getRequiredEnv } = require('./_config');
 
 module.exports = async (req, res) => {
     if (req.method === 'GET') {
@@ -7,7 +6,8 @@ module.exports = async (req, res) => {
         
         try {
             // Fetch live quote from Finnhub
-            const response = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
+            const apiKey = getRequiredEnv('FINNHUB_API_KEY');
+            const response = await fetch(`https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(symbol)}&token=${encodeURIComponent(apiKey)}`);
             const data = await response.json();
             
             // Format the portfolio data

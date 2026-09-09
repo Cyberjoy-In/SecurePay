@@ -1,56 +1,64 @@
-const { Pool } = require('pg');
-const { getRequiredEnv } = require('./_config');
-const pool = new Pool({ connectionString: getRequiredEnv('POSTGRES_URL') });
+const { getClient, getDatabase } = require('./_db');
+const { createId } = require('./_ids');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { sender_email, receiver_account_number, amount } = req.body;
   const transferAmount = parseFloat(amount);
-  const client = await pool.connect();
+  if (!Number.isFinite(transferAmount) || transferAmount <= 0) return res.status(400).json({ success: false, error: 'Invalid transfer amount.' });
+  const client = await getClient();
+  const session = client.startSession();
 
   try {
-    await client.query('BEGIN');
+    let transaction;
+    await session.withTransaction(async () => {
+      const db = client.db(process.env.MONGODB_DB_NAME || 'securepay');
+      const senderUser = await db.collection('users').findOne({ email: sender_email }, { session });
+      const sender = senderUser && await db.collection('accounts').findOne({ user_id: senderUser._id }, { session });
+      if (!sender) throw new Error('Sender account not found.');
 
-    const senderRes = await client.query(`SELECT a.account_id, a.balance FROM accounts a JOIN users u ON a.user_id = u.user_id WHERE u.email = $1`, [sender_email]);
-    const sender = senderRes.rows[0];
-    if (!sender) throw new Error("Sender account not found.");
-    if (parseFloat(sender.balance) < transferAmount) throw new Error("Insufficient account balance.");
+      const receiver = await db.collection('accounts').findOne({ account_number: receiver_account_number }, { session });
+      if (!receiver) throw new Error('Receiver account not registered.');
+      if (sender._id === receiver._id) throw new Error('Sender and receiver accounts must be different.');
 
-    const receiverRes = await client.query(`SELECT account_id FROM accounts WHERE account_number = $1`, [receiver_account_number]);
-    const receiver = receiverRes.rows[0];
-    if (!receiver) throw new Error("Receiver account not registered.");
-
-    // Check if these two users have EVER completed a successful transaction before to establish automatic trust
-    const trustCheck = await client.query(`
-      SELECT 1 FROM transactions 
-      WHERE ((sender_account_id = $1 AND receiver_account_id = $2) OR (sender_account_id = $2 AND receiver_account_id = $1)) 
-      AND status = 'COMPLETED' LIMIT 1
-    `, [sender.account_id, receiver.account_id]);
-    
-    const isTrusted = trustCheck.rows.length > 0;
-    const txnStatus = isTrusted ? 'PENDING_TRUSTED' : 'PENDING';
-
-    await client.query(`UPDATE accounts SET balance = balance - $1 WHERE account_id = $2`, [transferAmount, sender.account_id]);
-    await client.query(`UPDATE accounts SET balance = balance + $1 WHERE account_id = $2`, [transferAmount, receiver.account_id]);
-
-    const txnRes = await client.query(`
-      INSERT INTO transactions (sender_account_id, receiver_account_id, amount, status)
-      VALUES ($1, $2, $3, $4) RETURNING transaction_id
-    `, [sender.account_id, receiver.account_id, transferAmount, txnStatus]);
-
-    await client.query('COMMIT');
+      const trustCheck = await db.collection('transactions').findOne({
+        $or: [
+          { sender_account_id: sender._id, receiver_account_id: receiver._id },
+          { sender_account_id: receiver._id, receiver_account_id: sender._id }
+        ],
+        status: 'COMPLETED'
+      }, { session });
+      const isTrusted = Boolean(trustCheck);
+      const debit = await db.collection('accounts').updateOne(
+        { _id: sender._id, balance: { $gte: transferAmount } },
+        { $inc: { balance: -transferAmount } },
+        { session }
+      );
+      if (debit.modifiedCount !== 1) throw new Error('Insufficient account balance.');
+      await db.collection('accounts').updateOne({ _id: receiver._id }, { $inc: { balance: transferAmount } }, { session });
+      transaction = {
+        _id: createId('TXN'),
+        sender_account_id: sender._id,
+        receiver_account_id: receiver._id,
+        amount: transferAmount,
+        status: isTrusted ? 'PENDING_TRUSTED' : 'PENDING',
+        created_at: new Date(),
+        new_balance: Number(sender.balance) - transferAmount
+      };
+      await db.collection('transactions').insertOne(transaction, { session });
+      transaction.is_trusted = isTrusted;
+    });
     
     return res.status(200).json({ 
       success: true, 
-      transaction_id: txnRes.rows[0].transaction_id, 
-      new_balance: parseFloat(sender.balance) - transferAmount,
-      is_trusted: isTrusted 
+      transaction_id: transaction._id,
+      new_balance: transaction.new_balance,
+      is_trusted: transaction.is_trusted
     });
   } catch (error) {
-    await client.query('ROLLBACK');
     return res.status(400).json({ success: false, error: error.message });
   } finally {
-    client.release();
+    await session.endSession();
   }
 };

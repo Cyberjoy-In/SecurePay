@@ -1,8 +1,7 @@
-const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const { getRequiredEnv } = require('./_config');
-
-const pool = new Pool({ connectionString: getRequiredEnv('POSTGRES_URL') });
+const { getDatabase } = require('./_db');
+const { createId } = require('./_ids');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -18,23 +17,20 @@ module.exports = async (req, res) => {
   if (!passRegex.test(password)) return res.status(400).json({ error: 'Password must be at least 6 characters and include uppercase, lowercase, and a special symbol.' });
 
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const result = await pool.query(
-      'INSERT INTO users (full_name, email, password_hash) VALUES ($1, $2, $3) RETURNING user_id',
-      [full_name, email, hashedPassword]
-    );
+    const db = await getDatabase();
+    const users = db.collection('users');
+    const accounts = db.collection('accounts');
+    if (await users.findOne({ email })) return res.status(400).json({ error: 'This email address is already registered.' });
 
-    const userId = result.rows[0].user_id;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const userId = createId('USR');
     const accountNumber = 'ACCT-' + Math.floor(Math.random() * 1000000000); 
 
-    await pool.query(
-      'INSERT INTO accounts (user_id, account_number, balance) VALUES ($1, $2, $3)',
-      [userId, accountNumber, 10000.00]
-    );
+    await users.insertOne({ _id: userId, full_name, email, password_hash: hashedPassword });
+    await accounts.insertOne({ _id: createId('ACCT'), user_id: userId, account_number: accountNumber, balance: 10000 });
 
     return res.status(200).json({ success: true, message: 'Account created successfully!' });
   } catch (error) {
-    if (error.code === '23505') return res.status(400).json({ error: 'This email address is already registered.' });
     return res.status(500).json({ error: error.message });
   }
 };

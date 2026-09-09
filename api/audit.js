@@ -1,6 +1,4 @@
-const { Pool } = require('pg');
-const { getRequiredEnv } = require('./_config');
-const pool = new Pool({ connectionString: getRequiredEnv('POSTGRES_URL') });
+const { getDatabase } = require('./_db');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -46,10 +44,16 @@ module.exports = async (req, res) => {
     const result = await telegramResponse.json();
     if (!result.ok) return res.status(500).json({ telegramError: result.description });
 
-    await pool.query(`
-      INSERT INTO audit_logs (transaction_id, amount, user_email, node_role, ip_address, photo_status)
-      VALUES ($1, $2, $3, $4, $5, $6)
-    `, [ transaction_id || null, amount || 0, user_email || 'unknown', role || 'Unknown', ipInfo || 'Unknown', 'Audit Synced' ]);
+    const db = await getDatabase();
+    await db.collection('audit_logs').insertOne({
+      transaction_id: transaction_id || null,
+      amount: Number(amount) || 0,
+      user_email: user_email || 'unknown',
+      node_role: role || 'Unknown',
+      ip_address: ipInfo || 'Unknown',
+      photo_status: 'Audit Synced',
+      created_at: new Date()
+    });
 
     return res.status(200).json({ success: true, message: 'Audit logged successfully.' });
   } catch (error) {

@@ -56,9 +56,11 @@ All credentials are server-side environment variables. The browser never receive
 
 Required variables:
 
-* `POSTGRES_URL`
+* `MONGODB_URI`
+* `MONGODB_DB_NAME`
 * `JWT_SECRET`
 * `TELEGRAM_BOT_TOKEN`
 * `TELEGRAM_CHAT_ID`
+* `FINNHUB_API_KEY`
 
 `.env` is ignored by Git. Only `.env.example`, which contains placeholders, should be committed.
