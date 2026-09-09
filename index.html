@@ -242,7 +242,19 @@
         .dashboard-metrics { display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; margin-bottom:24px; }
         .dashboard-metric { padding:18px; border:1px solid rgba(136,165,183,.30); background:#112532; border-radius:14px; }
         .dashboard-metric span { color:#C9D3D8; font-size:.78rem; }.dashboard-metric strong{display:block;margin-top:8px;font-size:1.35rem;letter-spacing:-.04em;color:#FFFFFF}.dashboard-metric small{display:block;margin-top:5px;color:#88A5B7;font-size:.72rem}
-        @media (max-width:800px) { .dashboard-metrics{grid-template-columns:1fr}.sidebar{width:70px}.sidebar:before{display:none}.sidebar-item{font-size:0;justify-content:center;padding:13px 4px}.dashboard-header{align-items:flex-start;gap:14px;flex-direction:column}.main-content{padding:24px 16px} }
+        .dashboard-navigation, .dashboard-actions { display:none; align-items:center; gap:8px; }
+        .dashboard-navigation button { border:0; background:transparent; color:#C9D3D8; font:inherit; font-size:.84rem; font-weight:700; padding:9px 10px; border-radius:8px; cursor:pointer; }
+        .dashboard-navigation button:hover { background:rgba(136,165,183,.14); color:#FFFFFF; }
+        .dashboard-actions { gap:10px; }
+        .user-chip { display:flex; align-items:center; gap:8px; color:#FFFFFF; font-size:.82rem; font-weight:700; padding:7px 10px; border:1px solid rgba(136,165,183,.30); border-radius:9px; background:#112532; }
+        .user-chip-dot { width:8px; height:8px; border-radius:50%; background:#88A5B7; }
+        .dashboard-signout { background:transparent; color:#F4B044; border:1px solid rgba(244,176,68,.65); border-radius:9px; padding:8px 11px; cursor:pointer; font:inherit; font-size:.8rem; font-weight:750; }
+        .dashboard-signout:hover { background:#F4B044; color:#112532; }
+        body.app-authenticated .public-navigation, body.app-authenticated .public-actions { display:none; }
+        body.app-authenticated .dashboard-navigation, body.app-authenticated .dashboard-actions { display:flex; }
+        body.app-authenticated #notification-bell { display:block; }
+        body.app-authenticated .brand { pointer-events:none; }
+        @media (max-width:800px) { .dashboard-metrics{grid-template-columns:1fr}.sidebar{width:70px}.sidebar:before{display:none}.sidebar-item{font-size:0;justify-content:center;padding:13px 4px}.dashboard-header{align-items:flex-start;gap:14px;flex-direction:column}.main-content{padding:24px 16px} body.app-authenticated .dashboard-navigation{display:none}.user-chip{display:none}.dashboard-actions{gap:5px} }
     </style>
 </head>
 <body>
@@ -251,8 +263,10 @@
 
     <nav>
         <a class="brand" href="#top" aria-label="Secure-Pay home"><div class="brand-indicator"></div>Secure-Pay</a>
-        <div class="nav-links"><a class="nav-link" href="#product">Product</a><a class="nav-link" href="#how-it-works">How it works</a><a class="nav-link" href="#security">Security</a><a class="nav-link" href="#access">Developers</a><a class="nav-link" href="#access">Documentation</a></div>
-        <div class="nav-actions"><button class="nav-ghost" type="button" onclick="toggleTheme()" aria-label="Toggle colour theme">Theme</button><a class="nav-ghost" href="#access">Sign in</a><a class="nav-cta" href="#access">Get started</a><button class="nav-toggle" type="button" onclick="toggleMenu()" aria-label="Open navigation">Menu</button><div id="notification-bell" class="notification-bell" onclick="toggleNotifications()">Bell<div id="notif-badge" class="notif-badge" style="display:none">0</div><div id="notif-dropdown" class="notif-dropdown"></div></div><button class="btn-primary" style="padding:8px 18px;width:auto;font-size:.85rem;display:none" id="logout-btn" onclick="logoutUser()">Sign out</button></div>
+        <div class="nav-links public-navigation"><a class="nav-link" href="#product">Product</a><a class="nav-link" href="#how-it-works">How it works</a><a class="nav-link" href="#security">Security</a><a class="nav-link" href="#access">Developers</a><a class="nav-link" href="#access">Documentation</a></div>
+        <div class="dashboard-navigation" aria-label="Dashboard navigation"><button type="button" onclick="switchViewByName('view-overview')">Overview</button><button type="button" onclick="switchViewByName('view-transfers')">Send payment</button><button type="button" onclick="switchViewByName('view-beneficiaries')">Contacts</button></div>
+        <div class="nav-actions public-actions"><button class="nav-ghost" type="button" onclick="toggleTheme()" aria-label="Toggle colour theme">Theme</button><a class="nav-ghost" href="#access">Sign in</a><a class="nav-cta" href="#access">Get started</a><button class="nav-toggle" type="button" onclick="toggleMenu()" aria-label="Open navigation">Menu</button></div>
+        <div class="dashboard-actions"><button class="nav-ghost" type="button" onclick="toggleTheme()" aria-label="Toggle colour theme">Theme</button><div id="notification-bell" class="notification-bell" onclick="toggleNotifications()" aria-label="Notifications">Bell<div id="notif-badge" class="notif-badge" style="display:none">0</div><div id="notif-dropdown" class="notif-dropdown"></div></div><div class="user-chip"><span class="user-chip-dot"></span><span id="nav-user-name">Account</span></div><button class="dashboard-signout" id="logout-btn" onclick="logoutUser()">Sign out</button></div>
     </nav>
 
 
@@ -781,8 +795,10 @@
         function showDashboard(email, accountNum) {
             document.getElementById('landing-view').style.display = 'none';
             document.getElementById('dashboard-view').style.display = 'flex';
+            document.body.classList.add('app-authenticated');
             document.getElementById('logout-btn').style.display = 'block';
             document.getElementById('welcome-msg').innerText = email.split('@')[0];
+            document.getElementById('nav-user-name').innerText = email.split('@')[0];
             document.getElementById('dash-acc-num').innerText = accountNum || 'ACCT-ONLINE';
             document.getElementById('dash-ifsc').innerText = BANK_IFSC;
             document.getElementById('notification-bell').style.display = 'block';
@@ -797,6 +813,7 @@
 
         function logoutUser() {
             if (syncInterval) clearInterval(syncInterval);
+            document.body.classList.remove('app-authenticated');
             loggedInUserEmail = ""; 
             if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
             document.getElementById('dashboard-view').style.display = 'none'; 
