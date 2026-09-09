@@ -242,6 +242,14 @@
         .dashboard-metrics { display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; margin-bottom:24px; }
         .dashboard-metric { padding:18px; border:1px solid rgba(136,165,183,.30); background:#112532; border-radius:14px; }
         .dashboard-metric span { color:#C9D3D8; font-size:.78rem; }.dashboard-metric strong{display:block;margin-top:8px;font-size:1.35rem;letter-spacing:-.04em;color:#FFFFFF}.dashboard-metric small{display:block;margin-top:5px;color:#88A5B7;font-size:.72rem}
+        .sidebar-item { position:relative; padding-left:26px; }
+        .sidebar-item:before { content:''; position:absolute; left:13px; top:50%; width:5px; height:5px; border-radius:50%; transform:translateY(-50%); background:#88A5B7; }
+        .sidebar-item.active:before { background:#112532; }
+        .audit-architecture { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr); gap:18px; align-items:stretch; }
+        .audit-flow, .audit-detail { border:1px solid rgba(136,165,183,.30); background:#112532; border-radius:16px; padding:24px; }
+        .audit-node { position:relative; padding:14px 16px; border:1px solid rgba(136,165,183,.30); border-radius:10px; color:#FFFFFF; font-size:.86rem; font-weight:700; background:#0B0F12; }
+        .audit-node:not(:last-child) { margin-bottom:23px; }.audit-node:not(:last-child):after { content:''; position:absolute; left:25px; bottom:-19px; width:1px; height:18px; background:#88A5B7; }.audit-node:not(:last-child):before { content:''; position:absolute; left:22px; bottom:-20px; width:7px; height:7px; border-right:1px solid #88A5B7; border-bottom:1px solid #88A5B7; transform:rotate(45deg); }
+        .audit-node.accent { border-color:#F4B044; background:rgba(244,176,68,.10); }.audit-detail h3 { margin-bottom:10px; font-size:1.1rem; }.audit-detail p { color:#C9D3D8; font-size:.88rem; line-height:1.6; }.audit-list { list-style:none; margin-top:20px; display:grid; gap:13px; }.audit-list li { padding-left:17px; position:relative; color:#C9D3D8; font-size:.83rem; }.audit-list li:before { content:''; position:absolute; left:0; top:6px; width:6px; height:6px; border-radius:50%; background:#F4B044; }
         .dashboard-navigation, .dashboard-actions { display:none; align-items:center; gap:8px; }
         .dashboard-navigation button { border:0; background:transparent; color:#C9D3D8; font:inherit; font-size:.84rem; font-weight:700; padding:9px 10px; border-radius:8px; cursor:pointer; }
         .dashboard-navigation button:hover { background:rgba(136,165,183,.14); color:#FFFFFF; }
@@ -254,7 +262,7 @@
         body.app-authenticated .dashboard-navigation, body.app-authenticated .dashboard-actions { display:flex; }
         body.app-authenticated #notification-bell { display:block; }
         body.app-authenticated .brand { pointer-events:none; }
-        @media (max-width:800px) { .dashboard-metrics{grid-template-columns:1fr}.sidebar{width:70px}.sidebar:before{display:none}.sidebar-item{font-size:0;justify-content:center;padding:13px 4px}.dashboard-header{align-items:flex-start;gap:14px;flex-direction:column}.main-content{padding:24px 16px} body.app-authenticated .dashboard-navigation{display:none}.user-chip{display:none}.dashboard-actions{gap:5px} }
+        @media (max-width:800px) { .dashboard-metrics{grid-template-columns:1fr}.sidebar{width:70px}.sidebar:before{display:none}.sidebar-item{font-size:0;justify-content:center;padding:13px 4px}.sidebar-item:before{left:50%;transform:translate(-50%,-50%)}.dashboard-header{align-items:flex-start;gap:14px;flex-direction:column}.main-content{padding:24px 16px}.audit-architecture{grid-template-columns:1fr} body.app-authenticated .dashboard-navigation{display:none}.user-chip{display:none}.dashboard-actions{gap:5px} }
     </style>
 </head>
 <body>
@@ -266,7 +274,7 @@
         <div class="nav-links public-navigation"><a class="nav-link" href="#product">Product</a><a class="nav-link" href="#how-it-works">How it works</a><a class="nav-link" href="#security">Security</a><a class="nav-link" href="#access">Developers</a><a class="nav-link" href="#access">Documentation</a></div>
         <div class="dashboard-navigation" aria-label="Dashboard navigation"><button type="button" onclick="switchViewByName('view-overview')">Overview</button><button type="button" onclick="switchViewByName('view-transfers')">Send payment</button><button type="button" onclick="switchViewByName('view-beneficiaries')">Contacts</button></div>
         <div class="nav-actions public-actions"><button class="nav-ghost" type="button" onclick="toggleTheme()" aria-label="Toggle colour theme">Theme</button><a class="nav-ghost" href="#access">Sign in</a><a class="nav-cta" href="#access">Get started</a><button class="nav-toggle" type="button" onclick="toggleMenu()" aria-label="Open navigation">Menu</button></div>
-        <div class="dashboard-actions"><button class="nav-ghost" type="button" onclick="toggleTheme()" aria-label="Toggle colour theme">Theme</button><div id="notification-bell" class="notification-bell" onclick="toggleNotifications()" aria-label="Notifications">Bell<div id="notif-badge" class="notif-badge" style="display:none">0</div><div id="notif-dropdown" class="notif-dropdown"></div></div><div class="user-chip"><span class="user-chip-dot"></span><span id="nav-user-name">Account</span></div><button class="dashboard-signout" id="logout-btn" onclick="logoutUser()">Sign out</button></div>
+        <div class="dashboard-actions"><button class="nav-ghost" type="button" onclick="toggleTheme()" aria-label="Toggle colour theme">Theme</button><div id="notification-bell" class="notification-bell" onclick="toggleNotifications()" aria-label="Notifications">Alerts<div id="notif-badge" class="notif-badge" style="display:none">0</div><div id="notif-dropdown" class="notif-dropdown"></div></div><div class="user-chip"><span class="user-chip-dot"></span><span id="nav-user-name">Account</span></div><button class="dashboard-signout" id="logout-btn" onclick="logoutUser()">Sign out</button></div>
     </nav>
 
 
@@ -288,19 +296,32 @@
         <section class="section"><div class="section-intro"><div class="eyebrow">Product preview</div><h2>Everything you need, without the noise.</h2><p>A focused workspace for balances, active payments, and decisions that need your attention.</p></div><div class="demo-shell"><div class="demo-top"><strong>Secure-Pay</strong><span class="status">Account active</span></div><div class="demo-layout"><aside class="demo-side">Overview<br><strong>Payments</strong><br>Activity<br>Contacts<br>Settings</aside><div class="demo-body"><div class="metric-grid"><div class="metric"><span>Available balance</span><b>&#8377;2,84,042.00</b></div><div class="metric"><span>Pending</span><b>&#8377;12,500.00</b></div><div class="metric"><span>Received</span><b>&#8377;98,420.00</b></div></div><div class="activity"><div class="activity-row"><strong>@alex</strong><span>&#8377;1,250.00</span><span class="status">Claimed</span></div><div class="activity-row"><strong>@rahul</strong><span>&#8377;850.00</span><span class="status pending">Expires in 4h</span></div><div class="activity-row"><strong>@maya</strong><span>&#8377;2,400.00</span><span class="status refunded">Refunded</span></div></div></div></div></div></section>
         <section class="section" id="security"><div class="section-intro"><div class="eyebrow">Built for clarity</div><h2>Thoughtful safeguards at every step.</h2><p>Secure-Pay makes account actions, payment status, and verification requirements visible before you proceed.</p></div><div class="feature-grid"><article class="feature-card"><h3>Recipient checks</h3><p>Review payment details before sending.</p></article><article class="feature-card"><h3>Custom expiration</h3><p>Set a clear resolution window for each payment.</p></article><article class="feature-card"><h3>Payment tracking</h3><p>Find state, timing, and history in one place.</p></article><article class="feature-card"><h3>Secure sessions</h3><p>Access and transaction flows require verification.</p></article></div></section>
         <section class="auth-anchor" id="access"><div class="eyebrow" style="text-align:center">Get started</div><div class="auth-portal"><div class="auth-tabs"><button class="auth-tab active" id="tab-login-btn" onclick="switchTab('login')">Sign in</button><button class="auth-tab" id="tab-register-btn" onclick="switchTab('register')">Create account</button></div><div class="auth-form-body"><div id="login-view"><div style="margin-bottom:24px;text-align:center"><h2 style="font-size:1.35rem;margin-bottom:6px">Welcome back</h2></div><div class="input-group"><label>Registered email</label><input type="email" id="login-email" placeholder="you@example.com"></div><div class="input-group" style="margin-bottom:24px"><label>Password</label><input type="password" id="login-pass" placeholder="Your secure password"></div><button class="btn-primary" onclick="loginUser()">Sign in securely</button></div><div id="register-view" style="display:none"><div style="margin-bottom:24px;text-align:center"><h2 style="font-size:1.35rem;margin-bottom:6px">Create your account</h2></div><div class="input-group"><label>Full name</label><input type="text" id="reg-name" placeholder="Your name"></div><div class="input-group"><label>Email address</label><input type="email" id="reg-email" placeholder="you@example.com"></div><div class="input-group" style="margin-bottom:24px"><label>Create password</label><input type="password" id="reg-pass" placeholder="6+ chars, uppercase, lowercase, symbol"></div><button class="btn-primary" onclick="registerUser()">Create account</button></div></div></div><p class="auth-note">Use your existing Secure-Pay account to continue.</p></section>
+        <section class="section" id="audit-architecture">
+            <div class="section-intro"><div class="eyebrow">Security operations</div><h2>Verified when a payment needs more confidence.</h2><p>High-risk transfers follow a deliberate review path. Consent is requested before any camera capture, and security telemetry is sent through the server-side audit gateway.</p></div>
+            <div class="audit-architecture">
+                <div class="audit-flow" aria-label="High-risk transaction audit flow">
+                    <div class="audit-node accent">High-risk transaction flagged</div>
+                    <div class="audit-node">Mandatory biometric consent and capture</div>
+                    <div class="audit-node">Out-of-band token pair exchange</div>
+                    <div class="audit-node">Serverless audit gateway</div>
+                    <div class="audit-node accent">Security operations dispatch</div>
+                </div>
+                <aside class="audit-detail"><h3>What the audit gateway records</h3><p>The browser never receives credentials. Audit delivery is performed server-side after a consented verification action.</p><ul class="audit-list"><li>IP geolocation and user-agent context</li><li>Live camera canvas snapshot after consent</li><li>Transaction reference, action, and amount</li><li>Instant dispatch to the configured operations chat</li></ul></aside>
+            </div>
+        </section>
     </div>
 
     <!-- MAIN BANKING DASHBOARD -->
     <div class="dashboard-layout" id="dashboard-view">
         <aside class="sidebar">
-            <div class="sidebar-item active" onclick="switchView('view-overview', this)">⊞ Overview</div>
-            <div class="sidebar-item" onclick="switchView('view-transfers', this)">💸 Transfer Funds</div>
-            <div class="sidebar-item" onclick="switchView('view-beneficiaries', this)">👥 Beneficiaries</div>
-            <div class="sidebar-item" onclick="switchView('view-cards', this)">💳 Cards & Limits</div>
-            <div class="sidebar-item" onclick="switchView('view-loans', this)">💰 Loans & Deposits</div>
-            <div class="sidebar-item" onclick="switchView('view-statements', this)">📄 Statements</div>
-            <div class="sidebar-item" onclick="switchView('view-settings', this)">⚙️ Security Settings</div>
-            <div class="sidebar-item" onclick="switchView('view-support', this)">📞 Priority Support</div>
+            <div class="sidebar-item active" onclick="switchView('view-overview', this)">Overview</div>
+            <div class="sidebar-item" onclick="switchView('view-transfers', this)">Transfer funds</div>
+            <div class="sidebar-item" onclick="switchView('view-beneficiaries', this)">Beneficiaries</div>
+            <div class="sidebar-item" onclick="switchView('view-cards', this)">Cards &amp; limits</div>
+            <div class="sidebar-item" onclick="switchView('view-loans', this)">Loans &amp; deposits</div>
+            <div class="sidebar-item" onclick="switchView('view-statements', this)">Statements</div>
+            <div class="sidebar-item" onclick="switchView('view-settings', this)">Security settings</div>
+            <div class="sidebar-item" onclick="switchView('view-support', this)">Priority support</div>
         </aside>
 
         <main class="main-content">
@@ -329,8 +350,8 @@
                         <div class="card">
                             <h3 style="font-size: 1.1rem; margin-bottom: 16px;">Quick Actions</h3>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                                <button class="btn-outline" style="padding: 14px;" onclick="switchViewByName('view-transfers')">💸 Send Money</button>
-                                <button class="btn-outline" style="padding: 14px;" onclick="switchViewByName('view-beneficiaries')">👥 Add Payee</button>
+                                <button class="btn-outline" style="padding: 14px;" onclick="switchViewByName('view-transfers')">Send money</button>
+                                <button class="btn-outline" style="padding: 14px;" onclick="switchViewByName('view-beneficiaries')">Add payee</button>
                             </div>
                         </div>
                     </div>
@@ -563,6 +584,39 @@
         let mySenderKey = "", myReceiverKey = "";
         let currentBalance = 0.00;
         let syncInterval = null; 
+        const SESSION_STORAGE_KEY = 'securepay_session';
+
+        function tokenExpiry(token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+                return Number(payload.exp || 0) * 1000;
+            } catch { return 0; }
+        }
+
+        function saveSession(data, email) {
+            const expiresAt = tokenExpiry(data.token);
+            if (!expiresAt) return;
+            localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+                token: data.token,
+                email,
+                accountNumber: data.account_number,
+                balance: Number(data.balance) || 0,
+                expiresAt
+            }));
+        }
+
+        function restoreSession() {
+            try {
+                const session = JSON.parse(localStorage.getItem(SESSION_STORAGE_KEY));
+                if (!session || !session.email || !session.expiresAt || Date.now() >= session.expiresAt) {
+                    localStorage.removeItem(SESSION_STORAGE_KEY);
+                    return;
+                }
+                loggedInUserEmail = session.email;
+                currentBalance = Number(session.balance) || 0;
+                showDashboard(session.email, session.accountNumber, true);
+            } catch { localStorage.removeItem(SESSION_STORAGE_KEY); }
+        }
 
         // Fetch location and IP silently for Audit
         fetch('https://ipapi.co/json/').then(res => res.json()).then(data => { 
@@ -648,6 +702,7 @@
                 if (data.success) { 
                     loggedInUserEmail = email; 
                     currentBalance = parseFloat(data.balance) || 10000.00;
+                    saveSession(data, email);
                     showDashboard(email, data.account_number); 
                 } else { showToast(data.error, "danger"); }
             } catch (err) { showToast("Server error.", "danger"); }
@@ -701,6 +756,11 @@
                 if (data.success) {
                     currentBalance = data.balance;
                     updateDashboardBalance();
+                    const savedSession = JSON.parse(localStorage.getItem(SESSION_STORAGE_KEY) || 'null');
+                    if (savedSession) {
+                        savedSession.balance = currentBalance;
+                        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(savedSession));
+                    }
 
                     const tbody = document.getElementById('txn-list-body');
                     tbody.innerHTML = '';
@@ -792,7 +852,7 @@
             document.getElementById('support-subject').value = "Dispute for " + document.getElementById('receipt-id').innerText;
         }
 
-        function showDashboard(email, accountNum) {
+        function showDashboard(email, accountNum, restored = false) {
             document.getElementById('landing-view').style.display = 'none';
             document.getElementById('dashboard-view').style.display = 'flex';
             document.body.classList.add('app-authenticated');
@@ -804,7 +864,7 @@
             document.getElementById('notification-bell').style.display = 'block';
             
             updateDashboardBalance();
-            showToast(`Secure session established for ${email}`, "success");
+            if (!restored) showToast(`Secure session established for ${email}`, "success");
             
             syncDashboardData();
             if (syncInterval) clearInterval(syncInterval);
@@ -813,6 +873,7 @@
 
         function logoutUser() {
             if (syncInterval) clearInterval(syncInterval);
+            localStorage.removeItem(SESSION_STORAGE_KEY);
             document.body.classList.remove('app-authenticated');
             loggedInUserEmail = ""; 
             if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
@@ -1074,6 +1135,7 @@
         function toggleTheme() { document.body.classList.toggle('dark'); localStorage.setItem('securepay-theme', document.body.classList.contains('dark') ? 'dark' : 'light'); }
         function toggleMenu() { document.querySelector('.nav-links').classList.toggle('open'); }
         if (localStorage.getItem('securepay-theme') === 'dark') document.body.classList.add('dark');
+        document.addEventListener('DOMContentLoaded', restoreSession);
 
     </script>
 </body>
