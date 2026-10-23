@@ -759,6 +759,67 @@
         .portfolio-divider { border: 0; border-top: 1px solid var(--border-color); margin: 24px 0; }
         .portfolio-panel + .card { display: none; }
         @media (max-width: 700px) { .portfolio-grid, .portfolio-actions { grid-template-columns: 1fr; } }
+        /* Cross-browser responsive hardening */
+        html, body { width: 100%; min-width: 0; }
+        body { overflow-x: hidden; }
+        nav { width: 100%; min-width: 0; }
+        .dashboard-layout, .main-content, .page-view, .card, .bento-grid, .portfolio-panel { min-width: 0; }
+        .main-content { overflow-x: hidden; }
+        img, video, canvas, svg { max-width: 100%; }
+        button, input, select, textarea { max-width: 100%; }
+        @media (max-width: 800px) {
+            nav { padding: 10px 14px; gap: 8px; }
+            nav .brand { min-width: 0; }
+            nav .brand > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            body.app-authenticated nav { min-height: 58px; }
+            body.app-authenticated .dashboard-actions { min-width: 0; margin-left: auto; gap: 5px; }
+            body.app-authenticated .dashboard-actions .user-chip { display: none !important; }
+            body.app-authenticated .dashboard-actions .dashboard-signout { padding: 7px 9px; font-size: .72rem; }
+            body.app-authenticated .notification-bell { max-width: 42px; overflow: hidden; white-space: nowrap; font-size: 0; }
+            body.app-authenticated .notification-bell::before { font-size: .68rem; flex: 0 0 17px; }
+            .dashboard-layout { height: auto; min-height: calc(100dvh - 58px); align-items: stretch; }
+            .sidebar { flex: 0 0 68px; width: 68px; min-height: calc(100dvh - 58px); padding: 16px 7px; }
+            .sidebar-item { width: 54px; min-height: 46px; padding: 11px 4px !important; justify-content: center; gap: 0; }
+            .sidebar-item > span:not(.sidebar-icon) { display: none; }
+            .sidebar-icon { width: 24px; height: 24px; flex-basis: 24px; }
+            .main-content { flex: 1 1 auto; width: calc(100% - 68px); padding: 22px 12px; }
+            .dashboard-header { width: 100%; margin-bottom: 20px; }
+            .dashboard-header h2 { font-size: 1.35rem; overflow-wrap: anywhere; }
+            .dashboard-metrics, .bento-grid, .portfolio-grid { grid-template-columns: 1fr !important; gap: 14px; }
+            .card, .app-container { padding: 20px 16px; border-radius: 16px; }
+            .account-card .acc-balance { font-size: clamp(1.65rem, 8vw, 2.2rem); }
+            .acc-details-grid { grid-template-columns: 1fr; gap: 10px; }
+            .data-table { display: block; width: 100%; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+            .data-table th, .data-table td { padding: 12px 10px; }
+            .data-table th:first-child, .data-table td:first-child { padding-left: 0; }
+            .portfolio-item { align-items: flex-start; flex-wrap: wrap; }
+            .portfolio-item > :last-child { margin-left: auto; }
+            .portfolio-actions { grid-template-columns: 1fr; }
+            .portfolio-actions .btn-primary { grid-column: auto; }
+            .payment-methods-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .sandbox-overlay { padding: 12px; align-items: flex-start; }
+            .sandbox-overlay .app-container { width: 100%; max-height: calc(100dvh - 24px); overflow-y: auto; margin: auto 0; }
+            .toast-container { top: 10px; right: 10px; left: 10px; }
+            .toast { width: 100%; min-width: 0; max-width: none; }
+        }
+        @media (max-width: 420px) {
+            nav .brand-indicator { width: 26px; height: 26px; flex: 0 0 26px; }
+            nav .brand { font-size: .88rem; }
+            body.app-authenticated .dashboard-signout { font-size: 0; width: 34px; height: 34px; padding: 0; }
+            body.app-authenticated .dashboard-signout::before { content: '↪'; font-size: 1rem; }
+            .main-content { padding: 18px 10px; }
+            .auth-form-body { padding: 22px 16px; }
+            .payment-methods-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .method-tile { padding: 12px 6px; }
+            .method-tile .method-desc { font-size: .64rem; }
+            .receipt-detail { gap: 10px; align-items: flex-start; }
+            .receipt-detail strong { text-align: right; overflow-wrap: anywhere; }
+        }
+        @supports not (height: 100dvh) {
+            .dashboard-layout { min-height: calc(100vh - 58px); }
+            .sidebar { min-height: calc(100vh - 58px); }
+            .sandbox-overlay .app-container { max-height: calc(100vh - 24px); }
+        }
     </style>
 </head>
 <body>
