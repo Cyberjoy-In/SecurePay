@@ -150,4 +150,6 @@ Production deployments should configure all required environment variables throu
 
 `MONGODB_URI` - `MONGODB_DB_NAME` - `JWT_SECRET` - `TELEGRAM_BOT_TOKEN` - `TELEGRAM_CHAT_ID` - `FINNHUB_API_KEY`
 
+For a local MongoDB installation, use `MONGODB_URI=mongodb://127.0.0.1:27017`. For MongoDB Atlas, confirm the database user password, grant the user access to the `securepay` database, and add the current IP address to Atlas Network Access. If the password contains characters such as `@`, `:`, `/`, or `#`, URL-encode them in the connection string.
+
 If a Telegram credential or other secret is exposed in a repository, deployment log, screenshot, or chat, revoke it immediately and replace it across every affected environment.

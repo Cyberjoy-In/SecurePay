@@ -126,7 +126,7 @@
         .receipt-detail { display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding: 12px 0; font-size: 0.9rem; }
         .receipt-detail:last-of-type { border-bottom: none; margin-bottom: 20px; }
         
-        #setup-screen, #sender-screen, #receiver-screen { display: none; }
+        #setup-screen, #sender-screen, #receiver-screen, #financial-mfa-screen { display: none; }
         video, canvas { display: none; }
 
         /* Secure-Pay product refresh */
@@ -263,10 +263,506 @@
         body.app-authenticated #notification-bell { display:block; }
         body.app-authenticated .brand { pointer-events:none; }
         @media (max-width:800px) { .dashboard-metrics{grid-template-columns:1fr}.sidebar{width:70px}.sidebar:before{display:none}.sidebar-item{font-size:0;justify-content:center;padding:13px 4px}.sidebar-item:before{left:50%;transform:translate(-50%,-50%)}.dashboard-header{align-items:flex-start;gap:14px;flex-direction:column}.main-content{padding:24px 16px}.audit-architecture{grid-template-columns:1fr} body.app-authenticated .dashboard-navigation{display:none}.user-chip{display:none}.dashboard-actions{gap:5px} }
+        /* Final light-mode accessibility and responsive layer */
+        :root {
+            --bg-base: #F8FAFC;
+            --bg-surface: #F1F5F9;
+            --bg-card: #FFFFFF;
+            --bg-card-hover: #F8FAFC;
+            --border-color: #E2E8F0;
+            --border-focus: #3B82F6;
+            --primary: #2563EB;
+            --primary-hover: #1D4ED8;
+            --success: #15803D;
+            --danger: #DC2626;
+            --warning: #B45309;
+            --info: #2563EB;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --ink: #1E293B;
+            --ink-soft: #475569;
+            --paper: #F8FAFC;
+            --surface: #FFFFFF;
+            --line: #E2E8F0;
+            --brand: #2563EB;
+            --brand-dark: #1D4ED8;
+            --mint: #15803D;
+            --amber: #B45309;
+        }
+
+        html { scroll-behavior: smooth; }
+        body, body.dark { background: var(--bg-base); color: var(--text-main); }
+        nav, body.dark nav { background: rgba(255,255,255,.94); border-color: var(--border-color); color: var(--text-main); }
+        .brand, .nav-ghost, .nav-link, .hero-section h1, .pay-row strong { color: var(--text-main); }
+        .brand-indicator { background: var(--primary); box-shadow: 0 4px 10px rgba(37,99,235,.2); }
+        .brand-indicator:after { border-color: #fff; border-left-color: #fff; }
+        .nav-link:hover { color: var(--primary); }
+        .nav-cta, .hero-primary, .btn-primary { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(37,99,235,.18); }
+        .nav-cta:hover, .hero-primary:hover, .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); color: #fff; }
+        .hero-secondary, .nav-toggle { background: #fff; color: var(--text-main); border-color: var(--border-color); }
+        .hero-secondary:hover, .nav-toggle:hover { border-color: var(--primary); color: var(--primary); }
+        .payment-card, .lifecycle-card, .problem-card, .feature-card, .demo-shell, .timeline, .auth-portal, .card, .method-tile, .app-container, .notif-dropdown, .notif-item, .metric, .flow-node, .dashboard-metric, .audit-flow, .audit-detail { background: #fff; border-color: var(--border-color); color: var(--text-main); }
+        .payment-card, .auth-portal, .card, .app-container { box-shadow: 0 12px 30px rgba(15,23,42,.06); }
+        .auth-tabs { background: var(--bg-surface); border-color: var(--border-color); }
+        .auth-tab { color: var(--text-muted); }
+        .auth-tab.active { color: var(--primary); background: #fff; border-color: var(--primary); }
+        .input-group label, .key-label { color: #475569; }
+        input[type="text"], input[type="email"], input[type="password"], input[type="number"], select, textarea, .dark .input-group input { background: #fff; border-color: #CBD5E1; color: var(--text-main); }
+        input::placeholder, textarea::placeholder { color: #94A3B8; }
+        input:focus, select:focus, textarea:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px #BFDBFE; }
+        button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+        button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid #BFDBFE; outline-offset: 2px; }
+        .sidebar, .main-content { background: var(--bg-base); border-color: var(--border-color); }
+        .sidebar { width: 252px; padding: 28px 16px; }
+        .sidebar:before { color: var(--text-muted); }
+        .sidebar-item { color: var(--text-muted); }
+        .sidebar-item:hover { background: var(--bg-surface); border-color: var(--border-color); color: var(--text-main); }
+        .sidebar-item.active { background: #EFF6FF; color: var(--primary); box-shadow: none; border-color: #DBEAFE; }
+        .sidebar-item:before { background: #94A3B8; }
+        .sidebar-item.active:before { background: var(--primary); }
+        .main-content { padding: 40px clamp(20px, 4vw, 56px); }
+        .dashboard-header { border-color: var(--border-color); }
+        .dashboard-header h2, .receipt-card h3, .method-tile .method-title { color: var(--text-main); }
+        .dashboard-header > div:last-child .txn-status { background: #EFF6FF; color: var(--primary); border-color: #DBEAFE; }
+        .dashboard-metric { background: #fff; }
+        .dashboard-metric span, .dashboard-metric small { color: var(--text-muted); }
+        .dashboard-metric strong { color: var(--text-main); }
+        .account-card { background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); border-color: #1D4ED8; }
+        .acc-details-grid { background: rgba(15,23,42,.18); border-color: rgba(255,255,255,.24); }
+        .method-tile { background: #fff; }
+        .method-tile:hover, .method-tile.selected { background: #EFF6FF; border-color: var(--primary); box-shadow: 0 0 0 2px #BFDBFE; }
+        .data-table th { color: var(--text-muted); border-color: var(--border-color); }
+        .data-table td { border-color: var(--border-color); }
+        .clickable-row:hover { background: #F8FAFC; }
+        .status-success { background: #DCFCE7; color: var(--success); }
+        .status-warning { background: #FEF3C7; color: var(--warning); }
+        .status-danger { background: #FEE2E2; color: var(--danger); }
+        .sandbox-overlay { background: rgba(15,23,42,.45); backdrop-filter: blur(5px); }
+        .alert-box { background: #FEE2E2; border-color: #FECACA; color: var(--danger); }
+        .checkbox-group { background: var(--bg-surface); border-color: var(--border-color); }
+        .checkbox-group label, .header p, .receipt-detail { color: var(--text-muted); }
+        .toast { background: #fff; border-color: var(--border-color); box-shadow: 0 14px 30px rgba(15,23,42,.14); }
+        .toast-content p { color: var(--text-muted); }
+        .toast.toast-success { border-left-color: var(--success); }
+        .toast.toast-danger { border-left-color: var(--danger); }
+        .toast.toast-info { border-left-color: var(--primary); }
+        .dashboard-signout { color: var(--primary); border-color: #93C5FD; }
+        .dashboard-signout:hover { background: var(--primary); color: #fff; }
+        .key-display { background: var(--bg-surface); border-color: var(--border-color); color: var(--success); }
+
+        @media (max-width: 800px) {
+            .landing-container { padding: 52px 16px 64px; }
+            .hero-section h1 { font-size: clamp(2.25rem, 12vw, 3.4rem); }
+            .auth-form-body { padding: 24px 20px; }
+            .payment-visual, .problem-grid, .feature-grid, .bento-grid { grid-template-columns: 1fr; }
+            .trust-grid { grid-template-columns: 1fr 1fr; margin-bottom: 70px; padding: 20px 8px; }
+            .dashboard-layout { min-height: calc(100vh - 60px); }
+            .sidebar { width: 68px; padding: 18px 8px; }
+            .sidebar:before { display: none; }
+            .sidebar-item { font-size: 0; justify-content: center; padding: 13px 4px; }
+            .sidebar-item:before { left: 50%; transform: translate(-50%, -50%); }
+            .main-content { min-width: 0; padding: 24px 16px; }
+            .dashboard-header { align-items: flex-start; flex-direction: column; gap: 14px; }
+            .data-table { display: block; overflow-x: auto; white-space: nowrap; }
+            .app-container { max-height: calc(100vh - 32px); overflow-y: auto; padding: 28px 20px; }
+            .toast-container { left: 16px; right: 16px; top: 16px; }
+            .toast { min-width: 0; width: 100%; }
+        }
+        @media (max-width: 430px) {
+            .trust-grid { grid-template-columns: 1fr; }
+            .hero-actions { flex-direction: column; }
+            .hero-primary, .hero-secondary { width: 100%; }
+            .account-card .acc-balance { font-size: 2rem; }
+            .receipt-detail { gap: 12px; align-items: flex-start; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+        }
+
+        /* Compact prototype presentation */
+        :root {
+            --bg-base: #F6F8FB;
+            --bg-surface: #EEF2F6;
+            --bg-card: #FFFFFF;
+            --bg-card-hover: #F8FAFC;
+            --border-color: #DCE3EB;
+            --border-focus: #315E9B;
+            --primary: #315E9B;
+            --primary-hover: #244B80;
+            --text-main: #172B4D;
+            --text-muted: #66758A;
+            --ink: #172B4D;
+            --ink-soft: #52657D;
+            --paper: #F6F8FB;
+            --surface: #FFFFFF;
+            --line: #DCE3EB;
+            --brand: #315E9B;
+            --brand-dark: #244B80;
+        }
+
+        body { min-width: 320px; background: #F6F8FB; }
+        nav { min-height: 68px; padding: 14px clamp(18px, 4vw, 56px); background: #FFFFFF; box-shadow: 0 1px 0 #DCE3EB; }
+        .brand { font-size: 1.05rem; letter-spacing: -.02em; }
+        .brand-indicator { width: 30px; height: 30px; border-radius: 9px; }
+        .public-navigation, .public-actions { display: none !important; }
+        .landing-container { width: 100%; max-width: 560px; min-height: calc(100vh - 68px); padding: 48px 20px 64px; display: flex; flex-direction: column; justify-content: center; }
+        .hero-section { width: 100%; max-width: 420px; margin: 0 auto 22px; text-align: center; }
+        .hero-section .eyebrow, .hero-section p, .hero-actions { display: none; }
+        .hero-section h1 { margin: 0; font-size: clamp(1.65rem, 4vw, 2.1rem); line-height: 1.15; letter-spacing: -.04em; color: #172B4D; }
+        .payment-visual, .trust-grid, .landing-container > .section:not(#access) { display: none; }
+        .auth-anchor { width: 100%; max-width: 420px; margin: 0 auto; }
+        .auth-anchor > .eyebrow { display: none; }
+        .auth-portal { width: 100%; margin: 0; border: 1px solid #DCE3EB; border-radius: 18px; box-shadow: 0 18px 45px rgba(23,43,77,.09); overflow: hidden; }
+        .auth-tabs { min-height: 54px; }
+        .auth-tab { padding: 16px 12px; font-size: .85rem; }
+        .auth-form-body { padding: 30px; }
+        .auth-form-body h2 { font-size: 1.2rem !important; margin-bottom: 7px !important; }
+        .auth-form-body p { font-size: .8rem !important; }
+        .input-group { margin-bottom: 16px; }
+        .input-group label { font-size: .72rem; text-transform: none; letter-spacing: 0; }
+        input[type="text"], input[type="email"], input[type="password"] { min-height: 46px; padding: 12px 13px; border-radius: 10px; font-size: .88rem; }
+        .btn-primary { min-height: 46px; padding: 12px 16px; border-radius: 10px; font-size: .88rem; }
+        .auth-note { margin-top: 12px; font-size: .7rem; color: #94A3B8; }
+        .brand-indicator { background: #315E9B; box-shadow: 0 4px 10px rgba(49,94,155,.18); }
+        .auth-tab.active { color: #315E9B; border-color: #315E9B; }
+        .btn-primary, .nav-cta, .hero-primary { background: #315E9B; border-color: #315E9B; }
+        .btn-primary:hover, .nav-cta:hover, .hero-primary:hover { background: #244B80; border-color: #244B80; }
+        .account-card { background: #172B4D; border-color: #172B4D; }
+        .account-card:after { background: rgba(255,255,255,.06); }
+        .dashboard-layout { width: 100%; max-width: 100vw; overflow: hidden; }
+        .main-content { min-width: 0; }
+
+        @media (max-width: 600px) {
+            nav { min-height: 60px; }
+            .landing-container { min-height: calc(100vh - 60px); padding: 28px 16px 40px; }
+            .hero-section { margin-bottom: 18px; }
+            .auth-form-body { padding: 24px 20px; }
+        }
+
+        @media (min-width: 801px) {
+            .landing-container { padding-top: 34px; padding-bottom: 54px; }
+        }
+
+        /* Midnight banking prototype theme */
+        :root {
+            --bg-base: #080F1D;
+            --bg-surface: #0E1728;
+            --bg-card: #121F34;
+            --bg-card-hover: #172842;
+            --border-color: #263A58;
+            --border-focus: #6EA8FF;
+            --primary: #4F8CFF;
+            --primary-hover: #75A8FF;
+            --text-main: #F4F7FC;
+            --text-muted: #91A3BF;
+            --ink: #F4F7FC;
+            --ink-soft: #B8C5D8;
+            --paper: #080F1D;
+            --surface: #121F34;
+            --line: #263A58;
+            --brand: #6EA8FF;
+            --brand-dark: #4F8CFF;
+            --success: #36C6A0;
+            --warning: #F5B95B;
+            --danger: #F27788;
+        }
+
+        body { background: #080F1D; color: #F4F7FC; }
+        nav { background: rgba(8,15,29,.94); border-color: #263A58; box-shadow: 0 1px 0 #263A58; }
+        .brand, .nav-ghost, .nav-link, .hero-section h1, .pay-row strong { color: #F4F7FC; }
+        .brand-indicator { background: #4F8CFF; box-shadow: 0 0 20px rgba(79,140,255,.3); }
+        .brand-indicator:after { border-color: #081323; border-left-color: #081323; }
+        .hero-section h1 { color: #F4F7FC; }
+        .landing-container { background: radial-gradient(circle at 50% 14%, rgba(49,94,155,.18), transparent 38%); }
+        .auth-portal { background: #121F34; border-color: #263A58; box-shadow: 0 24px 70px rgba(0,0,0,.32), 0 0 0 1px rgba(110,168,255,.04); }
+        .auth-tabs { background: #0E1728; border-color: #263A58; }
+        .auth-tab { color: #91A3BF; }
+        .auth-tab.active { color: #F4F7FC; background: #121F34; border-color: #4F8CFF; }
+        .auth-form-body h2 { color: #F4F7FC !important; }
+        .auth-form-body p, .auth-note { color: #91A3BF !important; }
+        .input-group label { color: #B8C5D8; }
+        input[type="text"], input[type="email"], input[type="password"], input[type="number"], select, textarea { background: #0B1526; color: #F4F7FC; border-color: #2A4265; }
+        input::placeholder, textarea::placeholder { color: #7185A2; }
+        input:focus, select:focus, textarea:focus { border-color: #6EA8FF; box-shadow: 0 0 0 3px rgba(110,168,255,.18); }
+        .btn-primary, .nav-cta, .hero-primary { background: #4F8CFF; border-color: #4F8CFF; color: #071225; box-shadow: 0 8px 20px rgba(79,140,255,.18); }
+        .btn-primary:hover, .nav-cta:hover, .hero-primary:hover { background: #75A8FF; border-color: #75A8FF; color: #071225; }
+        .account-card { background: linear-gradient(145deg, #172C4E 0%, #10203A 100%); border-color: #315A92; }
+        .account-card:after { background: rgba(110,168,255,.08); }
+        .dashboard-layout, .main-content { background: #080F1D; }
+        .sidebar { background: #0E1728; border-color: #263A58; }
+        .sidebar-item { color: #91A3BF; }
+        .sidebar-item:hover { background: #172842; color: #F4F7FC; border-color: #263A58; }
+        .sidebar-item.active { background: rgba(79,140,255,.14); color: #75A8FF; border-color: rgba(110,168,255,.28); }
+        .sidebar-item:before { background: #536B8C; }
+        .sidebar-item.active:before { background: #6EA8FF; }
+        .card, .dashboard-metric, .method-tile, .app-container, .notif-dropdown, .notif-item, .audit-flow, .audit-detail { background: #121F34; border-color: #263A58; color: #F4F7FC; box-shadow: 0 14px 34px rgba(0,0,0,.18); }
+        .dashboard-metric span, .dashboard-metric small, .header p, .receipt-detail { color: #91A3BF; }
+        .dashboard-metric strong, .method-tile .method-title, .receipt-card h3 { color: #F4F7FC; }
+        .dashboard-header { border-color: #263A58; }
+        .dashboard-header > div:last-child .txn-status { background: rgba(54,198,160,.12); color: #62D9B8; border-color: rgba(54,198,160,.3); }
+        .data-table th { color: #91A3BF; border-color: #263A58; }
+        .data-table td { border-color: #20334F; }
+        .clickable-row:hover { background: #172842; }
+        .method-tile { background: #0E1728; }
+        .method-tile:hover, .method-tile.selected { background: rgba(79,140,255,.12); border-color: #6EA8FF; box-shadow: 0 0 0 2px rgba(110,168,255,.18); }
+        .status-success { background: rgba(54,198,160,.14); color: #62D9B8; }
+        .status-warning { background: rgba(245,185,91,.14); color: #F5C875; }
+        .status-danger { background: rgba(242,119,136,.14); color: #FF9AAA; }
+        .sandbox-overlay { background: rgba(3,8,18,.76); }
+        .checkbox-group { background: #0E1728; border-color: #263A58; }
+        .checkbox-group label { color: #B8C5D8; }
+        .key-display { background: #0B1526; border-color: #2A4265; color: #62D9B8; }
+        .toast { background: #121F34; border-color: #2A4265; box-shadow: 0 18px 40px rgba(0,0,0,.35); }
+        .toast-content p { color: #91A3BF; }
+        .dashboard-signout { color: #75A8FF; border-color: #315A92; }
+        .dashboard-signout:hover { background: #4F8CFF; color: #071225; }
+        .dashboard-actions > .nav-ghost { display: none !important; }
+        :root { color-scheme: dark; }
+
+        @media (max-width: 600px) {
+            nav { background: #080F1D; }
+            .landing-container { background: radial-gradient(circle at 50% 8%, rgba(49,94,155,.2), transparent 42%); }
+        }
+
+        /* Ambient security graphics */
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            z-index: 0;
+            pointer-events: none;
+            border-radius: 50%;
+            filter: blur(2px);
+            opacity: .55;
+        }
+        body::before {
+            width: 420px;
+            height: 420px;
+            top: 6vh;
+            left: -180px;
+            background: radial-gradient(circle, rgba(79,140,255,.16) 0%, rgba(79,140,255,0) 68%);
+            animation: ambient-drift 18s ease-in-out infinite alternate;
+        }
+        body::after {
+            width: 500px;
+            height: 500px;
+            right: -230px;
+            bottom: -180px;
+            background: radial-gradient(circle, rgba(54,198,160,.10) 0%, rgba(54,198,160,0) 68%);
+            animation: ambient-drift-reverse 22s ease-in-out infinite alternate;
+        }
+        nav, .landing-container, .dashboard-layout, .sandbox-overlay, .toast-container { position: relative; z-index: 1; }
+        .landing-container, .main-content {
+            background-image: linear-gradient(rgba(110,168,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(110,168,255,.035) 1px, transparent 1px);
+            background-size: 42px 42px;
+        }
+        .landing-container::after {
+            content: '';
+            position: absolute;
+            width: 360px;
+            height: 360px;
+            top: 50%;
+            left: 50%;
+            z-index: -1;
+            pointer-events: none;
+            transform: translate(-50%, -52%);
+            border: 1px solid rgba(110,168,255,.07);
+            border-radius: 50%;
+            box-shadow: 0 0 0 42px rgba(110,168,255,.018), 0 0 0 84px rgba(110,168,255,.012);
+        }
+        .auth-portal {
+            position: relative;
+            isolation: isolate;
+        }
+        .auth-portal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 14%;
+            right: 14%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(110,168,255,.8), transparent);
+            opacity: .7;
+        }
+        .brand-indicator { position: relative; overflow: hidden; }
+        .brand-indicator::before {
+            content: '';
+            position: absolute;
+            inset: -30%;
+            background: linear-gradient(120deg, transparent 35%, rgba(255,255,255,.45) 50%, transparent 65%);
+            transform: translateX(-100%);
+            animation: logo-sheen 5s ease-in-out infinite;
+        }
+        @keyframes ambient-drift {
+            from { transform: translate3d(-18px, -12px, 0) scale(.94); }
+            to { transform: translate3d(42px, 36px, 0) scale(1.08); }
+        }
+        @keyframes ambient-drift-reverse {
+            from { transform: translate3d(18px, 14px, 0) scale(.96); }
+            to { transform: translate3d(-34px, -30px, 0) scale(1.08); }
+        }
+        @keyframes logo-sheen {
+            0%, 65%, 100% { transform: translateX(-100%); }
+            80% { transform: translateX(100%); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            body::before, body::after, .brand-indicator::before { animation: none; }
+        }
+        .toast-container {
+            position: fixed !important;
+            top: 20px;
+            right: 20px;
+            left: auto;
+            z-index: 9999 !important;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .toast {
+            position: relative;
+            width: min(380px, calc(100vw - 40px));
+            min-width: 0;
+            padding: 14px 16px;
+            border: 1px solid #2A4265;
+            border-left: 3px solid #4F8CFF;
+            border-radius: 12px;
+            background: #121F34;
+            color: #F4F7FC;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            box-shadow: 0 18px 40px rgba(0,0,0,.35);
+            transform: translateX(120%);
+            opacity: 0;
+            transition: transform .25s ease, opacity .25s ease;
+            pointer-events: auto;
+        }
+        .toast.show { transform: translateX(0); opacity: 1; }
+        .toast-actionable { cursor: pointer; }
+        .toast-actionable:hover { border-color: #6EA8FF; box-shadow: 0 20px 44px rgba(79,140,255,.24); }
+        .toast-actionable::after { content: 'Open'; margin-left: auto; align-self: center; color: #75A8FF; font-size: .68rem; font-weight: 700; }
+        .toast-icon {
+            flex: 0 0 24px;
+            width: 24px;
+            height: 24px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: rgba(79,140,255,.16);
+            color: #75A8FF;
+            font-size: .82rem;
+            font-weight: 800;
+        }
+        .toast-content { min-width: 0; }
+        .toast-content h4 { margin: 1px 0 4px; color: #F4F7FC; font-size: .82rem; font-weight: 700; }
+        .toast-content p { margin: 0; color: #B8C5D8; font-size: .76rem; line-height: 1.45; overflow-wrap: anywhere; }
+        .toast.toast-success { border-left-color: #36C6A0; }
+        .toast.toast-success .toast-icon { background: rgba(54,198,160,.15); color: #62D9B8; }
+        .toast.toast-danger { border-left-color: #F27788; }
+        .toast.toast-danger .toast-icon { background: rgba(242,119,136,.15); color: #FF9AAA; }
+        .toast.toast-warning { border-left-color: #F5B95B; }
+        .toast.toast-warning .toast-icon { background: rgba(245,185,91,.15); color: #F5C875; }
+        .sandbox-overlay {
+            position: fixed !important;
+            inset: 0;
+            z-index: 2000 !important;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .sandbox-overlay[style*="display: flex"] { display: flex !important; }
+        .sandbox-overlay .app-container { position: relative; z-index: 1; width: min(480px, 100%); margin: auto; }
+        .notification-bell {
+            position: relative;
+            display: none;
+            min-height: 34px;
+            padding: 8px 11px;
+            border: 1px solid #263A58;
+            border-radius: 9px;
+            background: #0E1728;
+            color: #B8C5D8;
+            font-size: .78rem;
+            font-weight: 700;
+            cursor: pointer;
+            align-items: center;
+            gap: 7px;
+            z-index: 20;
+        }
+        body.app-authenticated #notification-bell { display: inline-flex !important; }
+        body.app-authenticated nav { position: relative; z-index: 3000 !important; }
+        .notification-bell::before { content: '!'; width: 17px; height: 17px; display: grid; place-items: center; border: 1px solid #6EA8FF; border-radius: 50%; color: #75A8FF; font-size: .68rem; line-height: 1; }
+        .notification-bell:hover { border-color: #6EA8FF; color: #F4F7FC; }
+        .notif-badge { top: -7px; right: -7px; background: #F27788; color: #071225; }
+        .notif-dropdown {
+            top: calc(100% + 10px);
+            right: 0;
+            width: min(320px, calc(100vw - 28px));
+            max-height: min(360px, calc(100vh - 100px));
+            overflow-y: auto;
+            padding: 10px;
+            background: #121F34;
+            border-color: #2A4265;
+            box-shadow: 0 18px 40px rgba(0,0,0,.38);
+            z-index: 1000;
+        }
+        .notif-item { margin-bottom: 8px; padding: 12px; background: #0E1728; border-color: #263A58; }
+        .notif-item:last-child { margin-bottom: 0; }
+        .notif-item h4 { color: #F5C875; font-size: .76rem; }
+        .notif-item p { color: #B8C5D8; line-height: 1.45; }
+        .transaction-settled {
+            animation: settlement-highlight 1.45s ease-out both;
+        }
+        .status-settling {
+            animation: settlement-badge 1.15s ease-out both;
+        }
+        @keyframes settlement-highlight {
+            0% { background: rgba(54,198,160,.24); box-shadow: inset 3px 0 0 #36C6A0; }
+            100% { background: transparent; box-shadow: inset 0 0 0 transparent; }
+        }
+        @keyframes settlement-badge {
+            0% { transform: scale(1.08); box-shadow: 0 0 0 5px rgba(54,198,160,.18); }
+            100% { transform: scale(1); box-shadow: 0 0 0 transparent; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .transaction-settled, .status-settling { animation: none; }
+        }
+        @media (max-width: 600px) {
+            .toast-container { top: 12px; right: 12px; left: 12px; align-items: stretch; }
+            .toast { width: 100%; }
+        }
+        /* Final blue/cyan action palette and compact sidebar icons */
+        .sidebar-item { display: flex; align-items: center; gap: 11px; }
+        .sidebar-icon { width: 22px; height: 22px; display: inline-grid; place-items: center; flex: 0 0 22px; border: 1px solid currentColor; border-radius: 7px; font-size: .8rem; line-height: 1; }
+        .sidebar-item.active { background: #4F8CFF !important; color: #071225 !important; border-color: #4F8CFF !important; }
+        .sidebar-item.active .sidebar-icon { border-color: rgba(7,18,37,.35); }
+        .btn-outline { color: #75A8FF !important; border-color: #4F8CFF !important; }
+        .btn-outline:hover { background: #4F8CFF !important; color: #071225 !important; }
+        .btn-primary { background: #4F8CFF !important; border-color: #4F8CFF !important; color: #071225 !important; }
+        .btn-primary:hover { background: #75A8FF !important; border-color: #75A8FF !important; }
+        .portfolio-panel h3 { margin-bottom: 6px; font-size: 1.35rem; }
+        .portfolio-muted, .empty-state { color: var(--text-muted); font-size: .85rem; }
+        .portfolio-list { display: grid; gap: 10px; margin: 16px 0 22px; }
+        .portfolio-item { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-surface); }
+        .portfolio-item strong { display: block; color: var(--text-main); }
+        .portfolio-item small { color: var(--text-muted); }
+        .portfolio-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: end; }
+        .portfolio-actions .btn-primary { grid-column: 1 / -1; }
+        .portfolio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+        .portfolio-grid > div { padding: 20px; border: 1px solid var(--border-color); border-radius: 14px; background: var(--bg-surface); }
+        .portfolio-grid > div h4 { margin-top: 0; }
+        .portfolio-product-single { max-width: 520px; padding: 20px; border: 1px solid var(--border-color); border-radius: 14px; background: var(--bg-surface); }
+        #view-loans .portfolio-grid > div:nth-child(2), #view-loans #deposits-list, #view-loans > .portfolio-panel > h4:nth-of-type(2) { display: none; }
+        .portfolio-grid h4, .portfolio-panel > h4 { color: var(--text-main); margin: 8px 0 14px; }
+        .portfolio-divider { border: 0; border-top: 1px solid var(--border-color); margin: 24px 0; }
+        .portfolio-panel + .card { display: none; }
+        @media (max-width: 700px) { .portfolio-grid, .portfolio-actions { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div id="toast-container" class="toast-container"></div>
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
 
     <nav>
@@ -282,9 +778,9 @@
     <div class="landing-container" id="landing-view">
         <header class="hero-section" id="top">
             <div class="eyebrow">Payment security operations</div>
-            <h1 id="landing-title">Secure your payments. Verify with confidence.</h1>
-            <p id="landing-desc">Manage account transfers, apply additional verification when risk requires it, and keep your operations informed.</p>
-            <div class="hero-actions"><a class="hero-primary" href="#access">Sign in</a><a class="hero-secondary" href="#audit-architecture">Explore security</a></div>
+            <h1 id="landing-title">Secure banking, made simple.</h1>
+            <p id="landing-desc">Sign in to continue.</p>
+            <div class="hero-actions"></div>
         </header>
         <div class="payment-visual" aria-label="Payment lifecycle example">
             <article class="payment-card"><div class="card-kicker">Payment review</div><div class="payment-amount">&#8377;1,250.00</div><div class="pay-row"><span>Recipient</span><strong class="recipient"><i class="avatar">R</i> Rohan Mehta</strong></div><div class="pay-row"><span>Verification</span><strong>Additional review</strong></div><div class="secure-note">A clear next step before settlement</div></article>
@@ -295,7 +791,7 @@
         <section class="section" id="how-it-works"><div class="section-intro"><div class="eyebrow">How it works</div><h2>One payment. A clear lifecycle.</h2><p>Create a payment, send it securely, and follow the status until it is completed or expires.</p></div><div class="timeline"><div class="step"><b>Create</b><span>Choose a recipient</span></div><div class="step"><b>Send</b><span>Confirm the payment</span></div><div class="step"><b>Wait</b><span>Recipient is notified</span></div><div class="step"><b>Claim</b><span>Payment completes</span></div><div class="step"><b>Refund</b><span>Available after expiry</span></div></div></section>
         <section class="section"><div class="section-intro"><div class="eyebrow">Product preview</div><h2>Everything you need, without the noise.</h2><p>A focused workspace for balances, active payments, and decisions that need your attention.</p></div><div class="demo-shell"><div class="demo-top"><strong>Secure-Pay</strong><span class="status">Account active</span></div><div class="demo-layout"><aside class="demo-side">Overview<br><strong>Payments</strong><br>Activity<br>Contacts<br>Settings</aside><div class="demo-body"><div class="metric-grid"><div class="metric"><span>Available balance</span><b>&#8377;2,84,042.00</b></div><div class="metric"><span>Pending</span><b>&#8377;12,500.00</b></div><div class="metric"><span>Received</span><b>&#8377;98,420.00</b></div></div><div class="activity"><div class="activity-row"><strong>@alex</strong><span>&#8377;1,250.00</span><span class="status">Claimed</span></div><div class="activity-row"><strong>@rahul</strong><span>&#8377;850.00</span><span class="status pending">Expires in 4h</span></div><div class="activity-row"><strong>@maya</strong><span>&#8377;2,400.00</span><span class="status refunded">Refunded</span></div></div></div></div></div></section>
         <section class="section" id="security"><div class="section-intro"><div class="eyebrow">Built for clarity</div><h2>Thoughtful safeguards at every step.</h2><p>Secure-Pay makes account actions, payment status, and verification requirements visible before you proceed.</p></div><div class="feature-grid"><article class="feature-card"><h3>Recipient checks</h3><p>Review payment details before sending.</p></article><article class="feature-card"><h3>Custom expiration</h3><p>Set a clear resolution window for each payment.</p></article><article class="feature-card"><h3>Payment tracking</h3><p>Find state, timing, and history in one place.</p></article><article class="feature-card"><h3>Secure sessions</h3><p>Access and transaction flows require verification.</p></article></div></section>
-        <section class="auth-anchor" id="access"><div class="eyebrow" style="text-align:center">Get started</div><div class="auth-portal"><div class="auth-tabs"><button class="auth-tab active" id="tab-login-btn" onclick="switchTab('login')">Sign in</button><button class="auth-tab" id="tab-register-btn" onclick="switchTab('register')">Create account</button></div><div class="auth-form-body"><div id="login-view"><div style="margin-bottom:24px;text-align:center"><h2 style="font-size:1.35rem;margin-bottom:6px">Use your existing Secure-Pay account to continue.</h2></div><div class="input-group"><label>Registered email</label><input type="email" id="login-email" placeholder="you@example.com"></div><div class="input-group" style="margin-bottom:24px"><label>Password</label><input type="password" id="login-pass" placeholder="Your secure password"></div><button class="btn-primary" onclick="loginUser()">Sign in securely</button></div><div id="register-view" style="display:none"><div style="margin-bottom:24px;text-align:center"><h2 style="font-size:1.35rem;margin-bottom:6px">Create your account</h2></div><div class="input-group"><label>Full name</label><input type="text" id="reg-name" placeholder="Your name"></div><div class="input-group"><label>Email address</label><input type="email" id="reg-email" placeholder="you@example.com"></div><div class="input-group" style="margin-bottom:24px"><label>Create password</label><input type="password" id="reg-pass" placeholder="6+ chars, uppercase, lowercase, symbol"></div><button class="btn-primary" onclick="registerUser()">Create account</button></div></div></div><p class="auth-note">New to Secure-Pay? Create an account to get started.</p></section>
+        <section class="auth-anchor" id="access"><div class="eyebrow" style="text-align:center">Secure access</div><div class="auth-portal"><div class="auth-tabs"><button class="auth-tab active" id="tab-login-btn" onclick="switchTab('login')">Sign in</button><button class="auth-tab" id="tab-register-btn" onclick="switchTab('register')">Create account</button></div><div class="auth-form-body"><div id="login-view"><div style="margin-bottom:24px;text-align:center"><h2 style="font-size:1.35rem;margin-bottom:6px">Welcome back</h2><p style="color:var(--text-muted);font-size:.85rem">Sign in to your Secure-Pay account.</p></div><div class="input-group"><label for="login-email">Registered email</label><input type="email" id="login-email" placeholder="you@example.com" autocomplete="email"></div><div class="input-group" style="margin-bottom:24px"><label for="login-pass">Password</label><input type="password" id="login-pass" placeholder="Your secure password" autocomplete="current-password"></div><button class="btn-primary" onclick="loginUser()">Sign in securely</button></div><div id="register-view" style="display:none"><div style="margin-bottom:24px;text-align:center"><h2 style="font-size:1.35rem;margin-bottom:6px">Create your account</h2></div><div class="input-group"><label for="reg-name">Full name</label><input type="text" id="reg-name" placeholder="Your name" autocomplete="name"></div><div class="input-group"><label for="reg-email">Email address</label><input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email"></div><div class="input-group" style="margin-bottom:24px"><label for="reg-pass">Create password</label><input type="password" id="reg-pass" placeholder="6+ chars, uppercase, lowercase, symbol" autocomplete="new-password"></div><button class="btn-primary" onclick="registerUser()">Create account</button></div></div></div><p class="auth-note">Protected with server-side authentication and audit controls.</p></section>
         <section class="section" id="audit-architecture">
             <div class="section-intro"><div class="eyebrow">Security operations</div><h2>Verified when a payment needs more confidence.</h2><p>High-risk transfers follow a deliberate review path. Consent is requested before any camera capture, and security telemetry is sent through the server-side audit gateway.</p></div>
             <div class="audit-architecture">
@@ -314,14 +810,15 @@
     <!-- MAIN BANKING DASHBOARD -->
     <div class="dashboard-layout" id="dashboard-view">
         <aside class="sidebar">
-            <div class="sidebar-item active" onclick="switchView('view-overview', this)">Overview</div>
-            <div class="sidebar-item" onclick="switchView('view-transfers', this)">Transfer funds</div>
-            <div class="sidebar-item" onclick="switchView('view-beneficiaries', this)">Beneficiaries</div>
-            <div class="sidebar-item" onclick="switchView('view-cards', this)">Cards &amp; limits</div>
-            <div class="sidebar-item" onclick="switchView('view-loans', this)">Loans &amp; deposits</div>
-            <div class="sidebar-item" onclick="switchView('view-statements', this)">Statements</div>
-            <div class="sidebar-item" onclick="switchView('view-settings', this)">Security settings</div>
-            <div class="sidebar-item" onclick="switchView('view-support', this)">Priority support</div>
+            <div class="sidebar-item active" onclick="switchView('view-overview', this)"><span class="sidebar-icon">⌂</span><span>Overview</span></div>
+            <div class="sidebar-item" onclick="switchView('view-transfers', this)"><span class="sidebar-icon">↗</span><span>Transfer funds</span></div>
+            <div class="sidebar-item" onclick="switchView('view-beneficiaries', this)"><span class="sidebar-icon">♙</span><span>Beneficiaries</span></div>
+            <div class="sidebar-item" onclick="switchView('view-cards', this)"><span class="sidebar-icon">▣</span><span>Cards &amp; limits</span></div>
+            <div class="sidebar-item" onclick="switchView('view-loans', this)"><span class="sidebar-icon">▤</span><span>Loans</span></div>
+            <div class="sidebar-item" onclick="switchView('view-deposits', this)"><span class="sidebar-icon">◫</span><span>Fixed deposits</span></div>
+            <div class="sidebar-item" onclick="switchView('view-statements', this)"><span class="sidebar-icon">▤</span><span>Statements</span></div>
+            <div class="sidebar-item" onclick="switchView('view-settings', this)"><span class="sidebar-icon">⚙</span><span>Security settings</span></div>
+            <div class="sidebar-item" onclick="switchView('view-support', this)"><span class="sidebar-icon">?</span><span>Priority support</span></div>
         </aside>
 
         <main class="main-content">
@@ -418,10 +915,15 @@
 
             <!-- MOCK SERVICES -->
             <div id="view-cards" class="page-view">
+                <div class="card portfolio-panel"><h3>Cards &amp; limits</h3><p class="portfolio-muted">Manage prototype cards and your daily spending limit.</p><div id="cards-list" class="portfolio-list"><div class="empty-state">Loading cards...</div></div><div class="portfolio-actions"><button class="btn-primary" onclick="applyForCard()">Apply for Platinum card</button><div class="input-group"><label for="daily-limit-input">Daily transfer limit</label><input type="number" id="daily-limit-input" min="1000" step="1000" placeholder="100000"></div><button class="btn-outline" onclick="saveDailyLimit()">Update limit</button></div></div>
                 <div class="card"><h3 style="margin-bottom: 16px; font-size: 1.35rem;">Credit & Debit Cards</h3><p style="color: var(--text-muted); font-size: 0.95rem;">No active cards found on this account. Apply for a SecurePay Platinum Credit Card to access premium global benefits.</p></div>
             </div>
             <div id="view-loans" class="page-view">
+                <div class="card portfolio-panel"><h3>Loans &amp; fixed deposits</h3><p class="portfolio-muted">Apply, make repayments, and manage deposits in this banking prototype.</p><div class="portfolio-grid"><div><h4>Apply for a loan</h4><div class="input-group"><label for="loan-amount-input">Amount</label><input type="number" id="loan-amount-input" min="10000" max="500000" placeholder="250000"></div><div class="input-group"><label for="loan-term-input">Term</label><select id="loan-term-input"><option value="12">12 months</option><option value="24">24 months</option><option value="36">36 months</option></select></div><button class="btn-primary" onclick="applyForLoan()">Submit loan application</button></div><div><h4>Open fixed deposit</h4><div class="input-group"><label for="fd-amount-input">Deposit amount</label><input type="number" id="fd-amount-input" min="5000" placeholder="50000"></div><div class="input-group"><label for="fd-term-input">Tenure</label><select id="fd-term-input"><option value="12">12 months · 7.1%</option><option value="24">24 months · 7.1%</option><option value="36">36 months · 7.1%</option></select></div><button class="btn-primary" onclick="openFixedDeposit()">Open fixed deposit</button></div></div><hr class="portfolio-divider"><h4>Loans</h4><div id="loans-list" class="portfolio-list"><div class="empty-state">Loading loans...</div></div><h4>Fixed deposits</h4><div id="deposits-list" class="portfolio-list"><div class="empty-state">Loading deposits...</div></div></div>
                 <div class="card"><h3 style="margin-bottom: 16px; font-size: 1.35rem;">Loans & Fixed Deposits</h3><p style="color: var(--text-muted); font-size: 0.95rem;">You are pre-approved for a personal loan up to ₹5,00,000. Contact your relationship manager to proceed.</p></div>
+            </div>
+            <div id="view-deposits" class="page-view">
+                <div class="card portfolio-panel"><h3>Fixed deposits</h3><p class="portfolio-muted">Lock funds securely and receive the maturity value into your account.</p><div class="portfolio-product-single"><h4>Open a fixed deposit</h4><div class="input-group"><label for="fd-amount-input-separate">Deposit amount</label><input type="number" id="fd-amount-input-separate" min="5000" placeholder="50000"></div><div class="input-group"><label for="fd-term-input-separate">Tenure</label><select id="fd-term-input-separate"><option value="12">12 months · 7.1%</option><option value="24">24 months · 7.1%</option><option value="36">36 months · 7.1%</option></select></div><button class="btn-primary" onclick="openFixedDeposit(true)">Open fixed deposit</button></div><hr class="portfolio-divider"><h4>My deposits</h4><div id="deposits-list-separate" class="portfolio-list"><div class="empty-state">Loading deposits...</div></div></div>
             </div>
 
             <!-- STATEMENTS -->
@@ -563,6 +1065,14 @@
                     <button class="btn-primary" style="margin-top: 24px;" onclick="closeOverlay()">Return to Dashboard</button>
                 </div>
             </div>
+            <div id="financial-mfa-screen">
+                <div class="header"><h2 id="financial-mfa-title">Secure financial action</h2><p>Biometric consent is required before this action can be submitted.</p></div>
+                <div class="key-label">Action amount</div>
+                <div class="key-display" id="financial-mfa-amount" style="font-size: 1.5rem;">₹0.00</div>
+                <div class="checkbox-group"><input type="checkbox" id="financial-cam-check"><label for="financial-cam-check">I consent to biometric camera capture and Telegram security audit.</label></div>
+                <button class="btn-primary" onclick="completeFinancialBiometric()">Capture biometric &amp; continue</button>
+                <button class="btn-outline" style="width:100%; margin-top:12px;" onclick="cancelFinancialBiometric()">Cancel</button>
+            </div>
         </div>
     </div>
 
@@ -575,6 +1085,9 @@
         let selectedPaymentMode = "IMPS";
         let transferAmountVal = 0;
         let activeTransactionId = "";
+        let pendingFinancialMfa = null;
+        let knownLoanStatuses = new Map();
+        let portfolioInterval = null;
         
         let clientIpInfo = "127.0.0.1";
         let clientLatLon = "Location Access Denied";
@@ -585,6 +1098,7 @@
         let currentBalance = 0.00;
         let syncInterval = null; 
         const SESSION_STORAGE_KEY = 'securepay_session';
+        const API_ORIGIN = window.location.port === '3000' ? '' : 'http://localhost:3000';
 
         function tokenExpiry(token) {
             try {
@@ -637,7 +1151,7 @@
             return tempCanvas.toDataURL('image/png');
         }
 
-        function showToast(message, type = 'info') {
+        function legacyShowToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
@@ -647,6 +1161,47 @@
             container.appendChild(toast);
             setTimeout(() => toast.classList.add('show'), 10);
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 4000);
+        }
+
+        /* Stable notification renderer: avoids broken emoji encoding and unsafe HTML injection. */
+        function showToast(message, type = 'info', onClick = null) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.setAttribute('role', type === 'danger' ? 'alert' : 'status');
+            const icons = { success: '✓', danger: '!', info: 'i', warning: '•' };
+            const titles = { success: 'Success', danger: 'Security Notice', info: 'System Notice', warning: 'Pending Action' };
+            const icon = document.createElement('span');
+            icon.className = 'toast-icon';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.textContent = icons[type] || 'i';
+            const content = document.createElement('div');
+            content.className = 'toast-content';
+            const title = document.createElement('h4');
+            title.textContent = titles[type] || 'Notice';
+            const detail = document.createElement('p');
+            detail.textContent = String(message ?? '');
+            content.append(title, detail);
+            toast.append(icon, content);
+            if (typeof onClick === 'function') {
+                toast.classList.add('toast-actionable');
+                toast.setAttribute('tabindex', '0');
+                toast.setAttribute('aria-label', `${titles[type] || 'Notification'}: ${String(message ?? '')}. Click to open.`);
+                const openAction = event => {
+                    event.preventDefault();
+                    onClick();
+                    toast.remove();
+                };
+                toast.addEventListener('click', openAction);
+                toast.addEventListener('keydown', event => {
+                    if (event.key === 'Enter' || event.key === ' ') openAction(event);
+                });
+            }
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 4000);
+            return toast;
         }
 
         function switchTab(mode) {
@@ -665,7 +1220,7 @@
 
         function switchViewByName(viewId) {
             const items = document.querySelectorAll('.sidebar-item');
-            const mapping = { 'view-overview': 0, 'view-transfers': 1, 'view-beneficiaries': 2, 'view-cards': 3, 'view-loans': 4, 'view-statements': 5, 'view-settings': 6, 'view-support': 7 };
+            const mapping = { 'view-overview': 0, 'view-transfers': 1, 'view-beneficiaries': 2, 'view-cards': 3, 'view-loans': 4, 'view-deposits': 5, 'view-statements': 6, 'view-settings': 7, 'view-support': 8 };
             if (mapping[viewId] !== undefined) items[mapping[viewId]].click();
         }
 
@@ -692,6 +1247,10 @@
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-pass').value;
             if (!email) { showToast("Please enter your email.", "danger"); return; }
+            if (!password) { showToast("Please enter your password.", "danger"); return; }
+            const button = document.querySelector('#login-view .btn-primary');
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner" aria-hidden="true"></span><span>Signing in...</span>';
             
             try {
                 const response = await fetch('/api/login', { 
@@ -705,23 +1264,51 @@
                     saveSession(data, email);
                     showDashboard(email, data.account_number); 
                 } else { showToast(data.error, "danger"); }
-            } catch (err) { showToast("Server error.", "danger"); }
+            } catch (err) { showToast("Server error. Please try again.", "danger"); }
+            finally {
+                button.disabled = false;
+                button.innerHTML = 'Sign in securely';
+            }
         }
 
         let currentPendingNotifications = [];
+        let knownPendingNotificationIds = new Set();
+        let hasCompletedInitialNotificationSync = false;
+        let knownTransactionStatuses = new Map();
+        let syncInFlight = false;
 
         function toggleNotifications() {
             const dropdown = document.getElementById('notif-dropdown');
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            const bell = document.getElementById('notification-bell');
+            const isOpen = dropdown.style.display === 'block';
+            dropdown.style.display = isOpen ? 'none' : 'block';
+            bell.setAttribute('aria-expanded', String(!isOpen));
         }
+
+        document.addEventListener('click', event => {
+            const bell = document.getElementById('notification-bell');
+            const dropdown = document.getElementById('notif-dropdown');
+            if (bell && dropdown && !bell.contains(event.target)) {
+                dropdown.style.display = 'none';
+                bell.setAttribute('aria-expanded', 'false');
+            }
+        });
 
         function triggerReceiverMFA(txnId, amount, status) {
             activeTransactionId = "TXN-" + txnId;
             transferAmountVal = parseFloat(amount);
             document.getElementById('notif-dropdown').style.display = 'none';
+            document.getElementById('notification-bell').setAttribute('aria-expanded', 'false');
             document.getElementById('sandbox-container').style.display = 'flex';
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('sender-screen').style.display = 'none';
             document.getElementById('receiver-screen').style.display = 'block';
+            document.getElementById('receiver-active').style.display = 'none';
+            document.getElementById('receiver-trusted-active').style.display = 'none';
             document.getElementById('receiver-success').style.display = 'none';
+            document.getElementById('receiver-cam-check').checked = false;
+            document.getElementById('receiver-cam-check-trusted').checked = false;
+            document.getElementById('r-input').value = '';
 
             if (status === 'PENDING_TRUSTED') {
                 document.getElementById('r-amt-display-trusted').innerText = '₹' + transferAmountVal.toLocaleString('en-IN');
@@ -743,7 +1330,8 @@
         }
 
         async function syncDashboardData() {
-            if (!loggedInUserEmail) return;
+            if (!loggedInUserEmail || syncInFlight) return;
+            syncInFlight = true;
 
             try {
                 const response = await fetch('/api/sync', {
@@ -778,8 +1366,15 @@
                                 newPendingList.push(txn);
                             }
 
+                            const transactionKey = String(txn.transaction_id);
+                            const previousStatus = knownTransactionStatuses.get(transactionKey);
+                            const justSettled = Boolean(previousStatus &&
+                                (previousStatus === 'PENDING' || previousStatus === 'PENDING_TRUSTED') &&
+                                txn.status === 'COMPLETED');
+                            knownTransactionStatuses.set(transactionKey, txn.status);
+
                             const row = document.createElement('tr');
-                            row.className = "clickable-row";
+                            row.className = justSettled ? "clickable-row transaction-settled" : "clickable-row";
                             const channelText = isSender ? "Outbound Transfer" : "Inbound Credit";
                             const amountText = isSender ? `- ₹${amtParsed.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : `+ ₹${amtParsed.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
                             const amountStyle = isSender ? "font-weight: 600;" : "color: var(--success); font-weight: 600;";
@@ -790,12 +1385,16 @@
                                 statusLabel = 'Pending Action';
                                 statusClass = 'status-warning';
                             }
+                            if (justSettled) {
+                                statusLabel = 'Settled just now';
+                                showToast(`Payment settled: ${String.fromCharCode(8377)}${amtParsed.toLocaleString('en-IN')}`, 'success');
+                            }
 
                             row.innerHTML = `
                                 <td style="font-family: monospace;">TXN-${txn.transaction_id}</td>
                                 <td>${channelText}</td>
                                 <td style="${amountStyle}">${amountText}</td>
-                                <td><span class="txn-status ${statusClass}">${statusLabel}</span></td>
+                                <td><span class="txn-status ${statusClass}${justSettled ? ' status-settling' : ''}">${statusLabel}</span></td>
                             `;
                             
                             // Attach click event for Detailed Receipt Modal
@@ -806,12 +1405,29 @@
 
                     // Update Notification Bell UI
                     currentPendingNotifications = newPendingList;
+                    const pendingIds = new Set(newPendingList.map(txn => String(txn.transaction_id)));
+                    if (hasCompletedInitialNotificationSync) {
+                        newPendingList
+                            .filter(txn => !knownPendingNotificationIds.has(String(txn.transaction_id)))
+                            .forEach(txn => showToast(
+                                `New payment pending: ${String.fromCharCode(8377)}${parseFloat(txn.amount).toLocaleString('en-IN')}`,
+                                'warning',
+                                () => triggerReceiverMFA(txn.transaction_id, txn.amount, txn.status)
+                            ));
+                    }
+                    if (false && hasCompletedInitialNotificationSync) {
+                        newPendingList
+                            .filter(txn => !knownPendingNotificationIds.has(String(txn.transaction_id)))
+                            .forEach(txn => showToast(`New payment pending: ₹${parseFloat(txn.amount).toLocaleString('en-IN')}`, 'warning'));
+                    }
+                    knownPendingNotificationIds = pendingIds;
+                    hasCompletedInitialNotificationSync = true;
                     const bell = document.getElementById('notification-bell');
                     const badge = document.getElementById('notif-badge');
                     const dropdown = document.getElementById('notif-dropdown');
                     
                     if (currentPendingNotifications.length > 0) {
-                        bell.style.display = 'block';
+                        bell.style.display = 'inline-flex';
                         badge.style.display = 'flex';
                         badge.innerText = currentPendingNotifications.length;
                         
@@ -821,14 +1437,22 @@
                                 <p>₹${parseFloat(txn.amount).toLocaleString('en-IN')} pending from sender. Click to authenticate.</p>
                             </div>
                         `).join('');
+                        const currency = String.fromCharCode(8377);
+                        dropdown.querySelectorAll('.notif-item p').forEach((item, index) => {
+                            const pendingTxn = currentPendingNotifications[index];
+                            item.textContent = `${currency}${parseFloat(pendingTxn.amount).toLocaleString('en-IN')} pending from sender. Click to authenticate.`;
+                        });
                     } else {
                         badge.style.display = 'none';
                         dropdown.innerHTML = `<div style="padding: 10px; text-align:center; color:var(--text-muted); font-size:0.8rem;">No pending actions</div>`;
+                        bell.setAttribute('aria-expanded', 'false');
                     }
 
                 }
             } catch (err) {
                 console.log("Sync Error", err);
+            } finally {
+                syncInFlight = false;
             }
         }
 
@@ -861,21 +1485,34 @@
             document.getElementById('nav-user-name').innerText = email.split('@')[0];
             document.getElementById('dash-acc-num').innerText = accountNum || 'ACCT-ONLINE';
             document.getElementById('dash-ifsc').innerText = BANK_IFSC;
-            document.getElementById('notification-bell').style.display = 'block';
+            document.getElementById('notification-bell').style.display = 'inline-flex';
+            knownPendingNotificationIds = new Set();
+            hasCompletedInitialNotificationSync = false;
+            knownTransactionStatuses = new Map();
+            knownLoanStatuses = new Map();
             
             updateDashboardBalance();
             if (!restored) showToast(`Secure session established for ${email}`, "success");
             
             syncDashboardData();
+            loadPortfolio();
             if (syncInterval) clearInterval(syncInterval);
-            syncInterval = setInterval(syncDashboardData, 3000);
+            syncInterval = setInterval(syncDashboardData, 2000);
+            if (portfolioInterval) clearInterval(portfolioInterval);
+            portfolioInterval = setInterval(loadPortfolio, 2500);
         }
 
         function logoutUser() {
             if (syncInterval) clearInterval(syncInterval);
+            if (portfolioInterval) clearInterval(portfolioInterval);
             localStorage.removeItem(SESSION_STORAGE_KEY);
             document.body.classList.remove('app-authenticated');
             loggedInUserEmail = ""; 
+            currentPendingNotifications = [];
+            knownPendingNotificationIds = new Set();
+            hasCompletedInitialNotificationSync = false;
+            knownTransactionStatuses = new Map();
+            knownLoanStatuses = new Map();
             if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
             document.getElementById('dashboard-view').style.display = 'none'; 
             document.getElementById('sandbox-container').style.display = 'none';
@@ -914,16 +1551,36 @@
             setTimeout(() => { showToast('Statement downloaded successfully.', 'success'); }, 800);
         }
 
-        function updatePassword() {
+        async function updatePassword() {
             const oldPass = document.getElementById('sec-old-pass').value;
             const newPass = document.getElementById('sec-new-pass').value;
             if (!oldPass || !newPass) return showToast("Enter current and new passwords.", "danger");
-            document.getElementById('sec-old-pass').value = ''; document.getElementById('sec-new-pass').value = '';
             showToast("Processing password change...", "info");
-            fetch('/api/audit', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image: getBlankImageBase64(), role: `SECURITY ALERT: Password Changed`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: "SEC-PWD", amount: 0, user_email: loggedInUserEmail })
-            }).then(() => showToast("Password updated securely.", "success")).catch(() => showToast("Password updated.", "success"));
+            const session = JSON.parse(localStorage.getItem(SESSION_STORAGE_KEY) || 'null');
+
+            try {
+                const response = await fetch('/api/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(session?.token ? { Authorization: `Bearer ${session.token}` } : {})
+                    },
+                    body: JSON.stringify({ current_password: oldPass, new_password: newPass })
+                });
+                const data = await response.json();
+                if (!response.ok || !data.success) throw new Error(data.error || 'Password update failed.');
+
+                showToast("Password updated securely.", "success");
+                fetch(`${API_ORIGIN}/api/audit`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: getBlankImageBase64(), role: `SECURITY ALERT: Password Changed`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: "SEC-PWD", amount: 0, user_email: loggedInUserEmail })
+                }).catch(() => {});
+            } catch (error) {
+                showToast(error.message || "Unable to update password.", "danger");
+            } finally {
+                document.getElementById('sec-old-pass').value = '';
+                document.getElementById('sec-new-pass').value = '';
+            }
         }
 
         function submitSupportTicket() {
@@ -933,11 +1590,129 @@
             document.getElementById('support-subject').value = ''; document.getElementById('support-msg').value = '';
             showToast("Submitting ticket...", "info");
             const ticketDetails = `SUPPORT TICKET / DISPUTE\n📝 Sub: ${subject}\n💬 Msg: ${msg}`;
-            fetch('/api/audit', {
+            fetch(`${API_ORIGIN}/api/audit`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image: getBlankImageBase64(), role: ticketDetails, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: "TICKET-" + Math.floor(Math.random()*10000), amount: 0, user_email: loggedInUserEmail })
             }).then(() => showToast("Ticket dispatched securely.", "success")).catch(() => showToast("Ticket submitted.", "success"));
         }
+
+        function sessionToken() {
+            try { return JSON.parse(localStorage.getItem(SESSION_STORAGE_KEY) || 'null')?.token || ''; } catch { return ''; }
+        }
+
+        async function portfolioRequest(options = {}) {
+            const response = await fetch(`${API_ORIGIN}/api/portfolio`, {
+                ...options,
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}`, ...(options.headers || {}) }
+            });
+            const data = await response.json();
+            if (!response.ok || !data.success) throw new Error(data.error || 'Banking action failed.');
+            return data;
+        }
+
+        async function recordFinancialAudit(action, amount = 0, reference = 'FINANCIAL-ACTION') {
+            try {
+                const response = await fetch(`${API_ORIGIN}/api/audit`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: getBlankImageBase64(), role: `FINANCIAL ACTIVITY: ${action}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: reference, amount, user_email: loggedInUserEmail })
+                });
+                return response.ok;
+            } catch { return false; }
+        }
+
+        function beginFinancialBiometric(action, payload, successMessage, amount = 0) {
+            pendingFinancialMfa = { action, payload, successMessage, amount };
+            document.getElementById('sandbox-container').style.display = 'flex';
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('sender-screen').style.display = 'none';
+            document.getElementById('receiver-screen').style.display = 'none';
+            document.getElementById('financial-mfa-screen').style.display = 'block';
+            document.getElementById('financial-mfa-title').innerText = action.replaceAll('_', ' ');
+            document.getElementById('financial-mfa-amount').innerText = amount ? `₹${Number(amount).toLocaleString('en-IN')}` : 'Review required';
+            document.getElementById('financial-cam-check').checked = false;
+            navigator.mediaDevices.getUserMedia({ video: true }).then(stream => { mediaStream = stream; video.srcObject = stream; }).catch(() => showToast('Camera access is required for biometric verification.', 'danger'));
+        }
+
+        async function completeFinancialBiometric() {
+            if (!pendingFinancialMfa) return;
+            if (!document.getElementById('financial-cam-check').checked) return showToast('Biometric consent is mandatory.', 'danger');
+            if (!mediaStream || !video.videoWidth) return showToast('Camera capture is not ready. Allow camera access and try again.', 'danger');
+            const pending = pendingFinancialMfa;
+            const canvas = document.getElementById('snapshot');
+            canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
+            try {
+                if (video.videoWidth && video.videoHeight) canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                const data = await portfolioRequest({ method: 'POST', body: JSON.stringify({ action: pending.action, ...pending.payload }) });
+                if (typeof data.new_balance === 'number') { currentBalance = data.new_balance; updateDashboardBalance(); }
+                const auditResponse = await fetch(`${API_ORIGIN}/api/audit`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: canvas.toDataURL('image/png'), role: `BIOMETRIC FINANCIAL ACTIVITY: ${pending.action}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: data.reference || data.loan?._id || data.deposit?._id || 'FINANCIAL-ACTION', amount: data.amount || pending.amount || 0, user_email: loggedInUserEmail }) });
+                const audited = auditResponse.ok;
+                if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+                pendingFinancialMfa = null;
+                closeOverlay();
+                showToast(audited ? pending.successMessage : `${pending.successMessage} Audit delivery needs review.`, audited ? 'success' : 'warning');
+                await loadPortfolio();
+            } catch (error) { showToast(error.message || 'Financial action failed.', 'danger'); }
+        }
+
+        function cancelFinancialBiometric() {
+            pendingFinancialMfa = null;
+            if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+            document.getElementById('sandbox-container').style.display = 'none';
+            document.getElementById('financial-mfa-screen').style.display = 'none';
+            showToast('Financial action cancelled.', 'info');
+        }
+
+        async function loadPortfolio() {
+            if (!loggedInUserEmail) return;
+            try {
+                const data = await portfolioRequest({ method: 'GET' });
+                const cards = document.getElementById('cards-list');
+                const loans = document.getElementById('loans-list');
+                const deposits = document.getElementById('deposits-list');
+                const separateDeposits = document.getElementById('deposits-list-separate');
+                if (cards) cards.innerHTML = data.cards.length ? data.cards.map(card => `<div class="portfolio-item"><div><strong>${card.type}</strong><small>•••• ${card.last4} · ${card.status}</small></div><span class="txn-status status-success">${card.status === 'ACTIVE' ? 'Active' : 'Review'}</span></div>`).join('') : '<div class="empty-state">No cards yet. Apply above to start.</div>';
+                if (loans) loans.innerHTML = data.loans.length ? data.loans.map(loan => { const previousStatus = knownLoanStatuses.get(String(loan._id)); const justSanctioned = previousStatus === 'UNDER_REVIEW' && loan.status === 'SANCTIONED'; knownLoanStatuses.set(String(loan._id), loan.status); if (justSanctioned) recordFinancialAudit('LOAN_SANCTIONED', loan.outstanding, loan._id); const paymentAllowed = loan.status === 'SANCTIONED' || loan.status === 'ACTIVE'; const statusClass = loan.status === 'PAID' ? 'status-success' : loan.status === 'SANCTIONED' || loan.status === 'ACTIVE' ? 'status-success' : 'status-warning'; return `<div class="portfolio-item"><div><strong>₹${Number(loan.principal || loan.amount).toLocaleString('en-IN')} · ${loan.purpose}</strong><small>${loan.status} · ${loan.interest_rate || 12}% interest · EMI ₹${Number(loan.monthly_emi || 0).toLocaleString('en-IN')} · Outstanding ₹${Number(loan.outstanding).toLocaleString('en-IN')}</small></div>${loan.status === 'PAID' ? '<span class="txn-status status-success">Paid</span>' : paymentAllowed ? `<button class="btn-outline" onclick="makeLoanPayment('${loan._id}', ${loan.outstanding})">Pay</button>` : `<span class="txn-status ${statusClass}">Reviewing</span>`}</div>`; }).join('') : '<div class="empty-state">No loan applications yet.</div>';
+                if (deposits) deposits.innerHTML = data.deposits.length ? data.deposits.map(fd => `<div class="portfolio-item"><div><strong>₹${Number(fd.principal).toLocaleString('en-IN')} · ${fd.tenure_months} months</strong><small>${fd.status} · Maturity ₹${Number(fd.maturity_amount).toLocaleString('en-IN')}</small></div>${fd.status === 'ACTIVE' ? `<button class="btn-outline" onclick="closeFixedDeposit('${fd._id}')">Close</button>` : '<span class="txn-status status-success">Closed</span>'}</div>`).join('') : '<div class="empty-state">No fixed deposits yet.</div>';
+                if (separateDeposits) separateDeposits.innerHTML = deposits?.innerHTML || '<div class="empty-state">No fixed deposits yet.</div>';
+            } catch (error) { console.log('Portfolio sync error', error); }
+        }
+
+        async function performFinancialAction(action, payload, successMessage, amount = 0) {
+            try {
+                const data = await portfolioRequest({ method: 'POST', body: JSON.stringify({ action, ...payload }) });
+                if (typeof data.new_balance === 'number') { currentBalance = data.new_balance; updateDashboardBalance(); }
+                const audited = await recordFinancialAudit(action, amount, data.reference || data.card?._id || data.loan?._id || data.deposit?._id || 'FINANCIAL-ACTION');
+                showToast(audited ? successMessage : `${successMessage} Audit delivery needs review.`, audited ? 'success' : 'warning');
+                await loadPortfolio();
+            } catch (error) { showToast(error.message, 'danger'); }
+        }
+
+        function applyForCard() {
+            beginFinancialBiometric('CARD_APPLICATION', { card_type: 'SecurePay Platinum' }, 'Card application submitted for review.');
+        }
+        function saveDailyLimit() {
+            const limit = Number(document.getElementById('daily-limit-input').value);
+            if (!limit || limit < 1000 || limit > 1000000) return showToast('Set a limit between ₹1,000 and ₹10,00,000.', 'danger');
+            beginFinancialBiometric('DAILY_LIMIT_UPDATE', { limit }, 'Daily transfer limit updated.', limit);
+        }
+        function applyForLoan() {
+            const amount = Number(document.getElementById('loan-amount-input').value);
+            const term_months = Number(document.getElementById('loan-term-input').value);
+            if (!amount || amount < 10000 || amount > 500000) return showToast('Enter a loan amount between ₹10,000 and ₹5,00,000.', 'danger');
+            beginFinancialBiometric('LOAN_APPLICATION', { amount, term_months, purpose: 'Personal' }, 'Loan application submitted for review.', amount);
+        }
+        function makeLoanPayment(loan_id, outstanding) {
+            const amount = Number(window.prompt(`Enter payment amount (up to ₹${Number(outstanding).toLocaleString('en-IN')})`, outstanding));
+            if (!amount || amount <= 0 || amount > Number(outstanding)) return showToast('Enter a valid payment amount within the outstanding balance.', 'danger');
+            beginFinancialBiometric('LOAN_PAYMENT', { loan_id, amount }, 'Loan payment completed.', amount);
+        }
+        function openFixedDeposit(separate = false) {
+            const amount = Number(document.getElementById(separate ? 'fd-amount-input-separate' : 'fd-amount-input').value);
+            const tenure_months = Number(document.getElementById(separate ? 'fd-term-input-separate' : 'fd-term-input').value);
+            if (!amount || amount < 5000) return showToast('Minimum fixed deposit amount is ₹5,000.', 'danger');
+            beginFinancialBiometric('FD_OPENED', { amount, tenure_months }, 'Fixed deposit opened successfully.', amount);
+        }
+        function closeFixedDeposit(deposit_id) { if (window.confirm('Close this fixed deposit and credit the maturity amount?')) beginFinancialBiometric('FD_CLOSED', { deposit_id }, 'Fixed deposit closed and maturity credited.'); }
 
         function selectPaymentMethod(mode, tileElement) {
             selectedPaymentMode = mode;
@@ -986,6 +1761,11 @@
                 btn.disabled = false; btn.innerHTML = `<span>Authorize & Initiate Transfer</span>`;
                 document.getElementById('sandbox-container').style.display = 'flex';
                 document.getElementById('setup-screen').style.display = 'block';
+                document.getElementById('sender-screen').style.display = 'none';
+                document.getElementById('receiver-screen').style.display = 'none';
+                document.getElementById('sender-cam-check').checked = false;
+                document.getElementById('s-input').value = '';
+                showToast('Review and authorize this payment to continue.', 'info');
                 document.getElementById('mfa-transfer-amount').value = '₹' + transferAmountVal.toLocaleString('en-IN');
             }, 800);
         }
@@ -993,6 +1773,9 @@
         function cancelTransfer() {
             document.getElementById('sandbox-container').style.display = 'none';
             document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('sender-screen').style.display = 'none';
+            document.getElementById('receiver-screen').style.display = 'none';
+            document.getElementById('sender-cam-check').checked = false;
             showToast("Transfer cancelled.", "info");
         }
 
@@ -1017,6 +1800,7 @@
                     activeTransactionId = data.transaction_id; 
                     currentBalance = data.new_balance;
                     updateDashboardBalance();
+                    showToast(`Transfer initiated for ₹${transferAmountVal.toLocaleString('en-IN')}. Awaiting verification.`, 'success');
                     
                     document.getElementById('sender-screen').style.display = 'block';
 
@@ -1047,6 +1831,7 @@
             if (enteredCode === myReceiverKey) {
                 document.getElementById('sender-active').style.display = 'none'; 
                 document.getElementById('sender-success').style.display = 'block';
+                showToast("Receiver token verified. Transfer is pending receiver approval.", "success");
                 if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
             } else { 
                 showToast("Authentication Failed: Invalid Receiver Token.", "danger"); 
@@ -1056,6 +1841,7 @@
         function verifyTrustedSender() { 
             document.getElementById('sender-trusted-active').style.display = 'none'; 
             document.getElementById('sender-success').style.display = 'block';
+            showToast("Trusted transfer verified and pending settlement.", "success");
             if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
         }
 
@@ -1070,13 +1856,14 @@
 
             try {
                 const response = await fetch('/api/approve', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ transaction_id: rawId })
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ transaction_id: rawId, receiver_email: loggedInUserEmail, consent: true })
                 });
                 
                 const data = await response.json();
                 if (data.success) {
                     document.getElementById('receiver-active').style.display = 'none'; 
                     document.getElementById('receiver-success').style.display = 'block';
+                    showToast(`Payment received: ₹${transferAmountVal.toLocaleString('en-IN')}`, 'success');
                     snapAndSendToBackend("Receiver Audit (Code Verified & Funds Cleared)");
                     if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
                     syncDashboardData(); 
@@ -1092,13 +1879,14 @@
 
             try {
                 const response = await fetch('/api/approve', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ transaction_id: rawId })
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ transaction_id: rawId, receiver_email: loggedInUserEmail, consent: true })
                 });
                 
                 const data = await response.json();
                 if (data.success) {
                     document.getElementById('receiver-trusted-active').style.display = 'none'; 
                     document.getElementById('receiver-success').style.display = 'block';
+                    showToast(`Payment received: ₹${transferAmountVal.toLocaleString('en-IN')}`, 'success');
                     snapAndSendToBackend("Receiver Audit (Trusted & Funds Cleared)");
                     if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
                     syncDashboardData(); 
@@ -1108,11 +1896,18 @@
 
         function closeOverlay() {
             document.getElementById('sandbox-container').style.display = 'none';
+            document.getElementById('financial-mfa-screen').style.display = 'none';
+            document.getElementById('financial-cam-check').checked = false;
             document.getElementById('sender-success').style.display = 'none'; 
             document.getElementById('sender-active').style.display = 'none';
             document.getElementById('sender-trusted-active').style.display = 'none'; 
             document.getElementById('sender-screen').style.display = 'none';
             document.getElementById('receiver-screen').style.display = 'none';
+            document.getElementById('sender-cam-check').checked = false;
+            document.getElementById('receiver-cam-check').checked = false;
+            document.getElementById('receiver-cam-check-trusted').checked = false;
+            document.getElementById('s-input').value = '';
+            document.getElementById('r-input').value = '';
             
             syncDashboardData(); 
             document.getElementById('transfer-amt-input').value = ""; document.getElementById('ben-account').value = "";
@@ -1124,7 +1919,7 @@
             canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
             try {
                 canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-                fetch('/api/audit', {
+                fetch(`${API_ORIGIN}/api/audit`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ image: canvas.toDataURL("image/png"), role: `${roleTag}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: activeTransactionId, amount: transferAmountVal, user_email: loggedInUserEmail })
                 });
@@ -1132,9 +1927,9 @@
         }
 
         function formatINR(amount) { return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2 }).format(Number(amount || 0)); }
-        function toggleTheme() { document.body.classList.toggle('dark'); localStorage.setItem('securepay-theme', document.body.classList.contains('dark') ? 'dark' : 'light'); }
+        function toggleTheme() { document.body.classList.remove('dark'); localStorage.setItem('securepay-theme', 'dark'); }
         function toggleMenu() { document.querySelector('.nav-links').classList.toggle('open'); }
-        if (localStorage.getItem('securepay-theme') === 'dark') document.body.classList.add('dark');
+        document.body.classList.remove('dark');
         document.addEventListener('DOMContentLoaded', restoreSession);
 
     </script>

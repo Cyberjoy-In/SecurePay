@@ -30,13 +30,7 @@ module.exports = async (req, res) => {
         status: 'COMPLETED'
       }, { session });
       const isTrusted = Boolean(trustCheck);
-      const debit = await db.collection('accounts').updateOne(
-        { _id: sender._id, balance: { $gte: transferAmount } },
-        { $inc: { balance: -transferAmount } },
-        { session }
-      );
-      if (debit.modifiedCount !== 1) throw new Error('Insufficient account balance.');
-      await db.collection('accounts').updateOne({ _id: receiver._id }, { $inc: { balance: transferAmount } }, { session });
+      if (Number(sender.balance) < transferAmount) throw new Error('Insufficient account balance.');
       transaction = {
         _id: createId('TXN'),
         sender_account_id: sender._id,
@@ -44,7 +38,9 @@ module.exports = async (req, res) => {
         amount: transferAmount,
         status: isTrusted ? 'PENDING_TRUSTED' : 'PENDING',
         created_at: new Date(),
-        new_balance: Number(sender.balance) - transferAmount
+        // Funds remain in both accounts until the receiver completes consent and approval.
+        funds_reserved: false,
+        new_balance: Number(sender.balance)
       };
       await db.collection('transactions').insertOne(transaction, { session });
       transaction.is_trusted = isTrusted;

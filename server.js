@@ -6,6 +6,8 @@ const apiHandlers = new Map([
   ['approve', require('./api/approve')],
   ['audit', require('./api/audit')],
   ['bbps', require('./api/bbps')],
+  ['change-password', require('./api/change-password')],
+  ['portfolio', require('./api/portfolio')],
   ['grievance', require('./api/grievance')],
   ['invest', require('./api/invest')],
   ['login', require('./api/login')],
@@ -16,7 +18,12 @@ const apiHandlers = new Map([
 ]);
 
 function sendJson(res, statusCode, payload) {
-  res.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.writeHead(statusCode, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+  });
   res.end(JSON.stringify(payload));
 }
 
@@ -35,8 +42,18 @@ function readBody(req) {
 const server = http.createServer(async (req, res) => {
   const requestUrl = new URL(req.url, `http://${req.headers.host}`);
 
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+    });
+    return res.end();
+  }
+
   if (requestUrl.pathname.startsWith('/api/')) {
-    const handler = apiHandlers.get(requestUrl.pathname.slice(5));
+    const endpointName = requestUrl.pathname.slice(5).replace(/^\/+|\/+$/g, '');
+    const handler = apiHandlers.get(endpointName);
     if (!handler) return sendJson(res, 404, { error: 'API endpoint not found' });
 
     try {
