@@ -150,6 +150,26 @@ Production deployments should configure all required environment variables throu
 
 `MONGODB_URI` - `MONGODB_DB_NAME` - `JWT_SECRET` - `TELEGRAM_BOT_TOKEN` - `TELEGRAM_CHAT_ID` - `FINNHUB_API_KEY`
 
+## Loan workflow prototype
+
+Customer loan applications are stored with the lifecycle `UNDER_REVIEW` → `APPROVED` → `DISBURSED` → `ACTIVE` → `CLOSED`; `REJECTED` is also supported. Approval, rejection, and disbursement are protected backend actions and require a JWT whose database user has `role: reviewer` or `role: admin`. Customers cannot approve or disburse their own applications.
+
+The authenticated loan API is exposed through `POST /api/portfolio` with actions `APPLY_LOAN`, `LOAN_PAYMENT`, `APPROVE_LOAN`, `REJECT_LOAN`, and `DISBURSE_LOAN`. Loan applications and repayments require an `idempotency_key`. The server calculates illustrative 12% annual EMI terms, validates ownership and state transitions, and records repayment principal and interest separately.
+
+Loan audit events are created in the MongoDB `audit_events` outbox in the same transaction as the loan operation. The existing `/api/audit` endpoint attaches a consented photo and attempts Telegram delivery; failed deliveries remain `PENDING` and are retried during authenticated portfolio requests. This is a demonstration workflow, not a regulated lending implementation.
+
+## Fixed deposit workflow prototype
+
+FD operations use the authenticated `/api/fds` endpoint. `GET /api/fds` lists only the signed-in customer's deposits. `POST /api/fds` accepts `OPEN`, `CLOSE`, and the protected `PROCESS_MATURITY` action. Opening supports 12, 24, or 36 months at an illustrative 7.1% simple annual rate with a ₹5,000 minimum. The server calculates calendar-month maturity dates and stores all amounts in paise-style integer cents.
+
+Opening and premature closure use idempotency keys and MongoDB transactions for the account balance, FD record, financial ledger and audit outbox. Early closure is full closure only and uses an illustrative 5.1% annual rate for elapsed whole months plus a 10% penalty on calculated interest. Maturity processing is restricted to reviewer/admin identities or a separately configured `FD_MATURITY_WORKER_TOKEN`, credits proceeds once, and records the `ACTIVE → MATURED → CLOSED` history. Telegram delivery uses the shared audit outbox; delivery failure leaves the committed financial event pending for retry.
+
+## Cards and daily limits prototype
+
+Card operations use the authenticated `/api/cards` endpoint. `GET /api/cards` lists only the signed-in customer's masked cards. `POST /api/cards` supports `APPLY`, protected reviewer/admin `APPROVE` and `ACTIVATE`, customer-owned `BLOCK` and `UNBLOCK`, `SET_LIMIT`, and `SIMULATE_PAYMENT`. Card applications remain pending until an authorized reviewer approves and activates them.
+
+Simulated card payments never expose or create full card numbers, CVVs, or real card credentials. Active cards accumulate server-side daily spending in MongoDB; blocked cards and concurrent requests over the configured limit are rejected atomically. Card actions use idempotency keys, MongoDB transactions, and the shared Telegram audit outbox. The UI labels these as simulated transactions and does not imply that a real card has been issued.
+
 For a local MongoDB installation, use `MONGODB_URI=mongodb://127.0.0.1:27017`. For MongoDB Atlas, confirm the database user password, grant the user access to the `securepay` database, and add the current IP address to Atlas Network Access. If the password contains characters such as `@`, `:`, `/`, or `#`, URL-encode them in the connection string.
 
 If a Telegram credential or other secret is exposed in a repository, deployment log, screenshot, or chat, revoke it immediately and replace it across every affected environment.

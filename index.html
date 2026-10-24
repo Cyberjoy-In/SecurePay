@@ -748,16 +748,27 @@
         .portfolio-item { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-surface); }
         .portfolio-item strong { display: block; color: var(--text-main); }
         .portfolio-item small { color: var(--text-muted); }
+        .portfolio-item-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
         .portfolio-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: end; }
         .portfolio-actions .btn-primary { grid-column: 1 / -1; }
         .portfolio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
         .portfolio-grid > div { padding: 20px; border: 1px solid var(--border-color); border-radius: 14px; background: var(--bg-surface); }
         .portfolio-grid > div h4 { margin-top: 0; }
         .portfolio-product-single { max-width: 520px; padding: 20px; border: 1px solid var(--border-color); border-radius: 14px; background: var(--bg-surface); }
+        #view-loans > .portfolio-panel, #view-loans > .portfolio-panel + .card { display: none; }
+        .loan-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .loan-workflow-panel .loan-confirm { margin-top: 18px; }
+        .loan-history { margin-top: 8px; color: var(--text-muted); font-size: .72rem; }
+        .loan-history summary { cursor: pointer; color: #75A8FF; margin-bottom: 5px; }
+        @media (max-width: 700px) { .loan-form-grid { grid-template-columns: 1fr; gap: 0; } }
         #view-loans .portfolio-grid > div:nth-child(2), #view-loans #deposits-list, #view-loans > .portfolio-panel > h4:nth-of-type(2) { display: none; }
         .portfolio-grid h4, .portfolio-panel > h4 { color: var(--text-main); margin: 8px 0 14px; }
         .portfolio-divider { border: 0; border-top: 1px solid var(--border-color); margin: 24px 0; }
         .portfolio-panel + .card { display: none; }
+        #view-deposits > .portfolio-panel { display: none; }
+        #view-cards > .portfolio-panel { display: none; }
+        #view-cards > .card:not(.cards-workflow-panel) { display: none; }
+        .fd-workflow-panel { max-width: 760px; }
         @media (max-width: 700px) { .portfolio-grid, .portfolio-actions { grid-template-columns: 1fr; } }
         /* Cross-browser responsive hardening */
         html, body { width: 100%; min-width: 0; }
@@ -976,14 +987,17 @@
 
             <!-- MOCK SERVICES -->
             <div id="view-cards" class="page-view">
+                <div class="card cards-workflow-panel"><h3>Cards &amp; daily limits</h3><p class="portfolio-muted">Applications and payments are simulated for this prototype. No real card credentials are issued.</p><div class="portfolio-actions"><button class="btn-primary" onclick="applyForCard()">Apply for card</button><div class="input-group"><label for="daily-limit-input-new">Daily simulated spending limit (INR)</label><input type="number" id="daily-limit-input-new" min="1000" max="1000000" step="1000" placeholder="100000"></div><button class="btn-outline" onclick="saveDailyLimit(true)">Request limit change</button></div><hr class="portfolio-divider"><h4>My cards</h4><div id="cards-list-new" class="portfolio-list"><div class="empty-state">Loading cards...</div></div></div>
                 <div class="card portfolio-panel"><h3>Cards &amp; limits</h3><p class="portfolio-muted">Manage prototype cards and your daily spending limit.</p><div id="cards-list" class="portfolio-list"><div class="empty-state">Loading cards...</div></div><div class="portfolio-actions"><button class="btn-primary" onclick="applyForCard()">Apply for Platinum card</button><div class="input-group"><label for="daily-limit-input">Daily transfer limit</label><input type="number" id="daily-limit-input" min="1000" step="1000" placeholder="100000"></div><button class="btn-outline" onclick="saveDailyLimit()">Update limit</button></div></div>
                 <div class="card"><h3 style="margin-bottom: 16px; font-size: 1.35rem;">Credit & Debit Cards</h3><p style="color: var(--text-muted); font-size: 0.95rem;">No active cards found on this account. Apply for a SecurePay Platinum Credit Card to access premium global benefits.</p></div>
             </div>
             <div id="view-loans" class="page-view">
+                <div class="card loan-workflow-panel"><h3>Loans</h3><p class="portfolio-muted">Illustrative prototype terms. Applications remain under review until an authorized reviewer decides.</p><div class="loan-form-grid"><div><div class="input-group"><label for="loan-amount-input-new">Loan amount (₹)</label><input type="number" id="loan-amount-input-new" min="10000" max="500000" placeholder="250000"></div><div class="input-group"><label for="loan-purpose-input">Purpose</label><input type="text" id="loan-purpose-input" maxlength="100" placeholder="Home improvement"></div><div class="input-group"><label for="loan-employment-input">Employment</label><input type="text" id="loan-employment-input" maxlength="80" placeholder="Salaried / self-employed"></div></div><div><div class="input-group"><label for="loan-income-input">Monthly income (₹)</label><input type="number" id="loan-income-input" min="1" placeholder="75000"></div><div class="input-group"><label for="loan-term-input-new">Repayment tenure</label><select id="loan-term-input-new"><option value="12">12 months</option><option value="24">24 months</option><option value="36">36 months</option></select></div><div id="loan-estimate" class="portfolio-muted">Enter amount and tenure to preview EMI.</div></div></div><div class="checkbox-group loan-confirm"><input type="checkbox" id="loan-confirm-check"><label for="loan-confirm-check">I reviewed the illustrative amount, EMI, interest and repayment schedule.</label></div><button class="btn-primary" onclick="applyForLoan()">Submit loan application</button><hr class="portfolio-divider"><h4>My loan applications</h4><div id="loans-list-new" class="portfolio-list"><div class="empty-state">Loading loans...</div></div></div>
                 <div class="card portfolio-panel"><h3>Loans &amp; fixed deposits</h3><p class="portfolio-muted">Apply, make repayments, and manage deposits in this banking prototype.</p><div class="portfolio-grid"><div><h4>Apply for a loan</h4><div class="input-group"><label for="loan-amount-input">Amount</label><input type="number" id="loan-amount-input" min="10000" max="500000" placeholder="250000"></div><div class="input-group"><label for="loan-term-input">Term</label><select id="loan-term-input"><option value="12">12 months</option><option value="24">24 months</option><option value="36">36 months</option></select></div><button class="btn-primary" onclick="applyForLoan()">Submit loan application</button></div><div><h4>Open fixed deposit</h4><div class="input-group"><label for="fd-amount-input">Deposit amount</label><input type="number" id="fd-amount-input" min="5000" placeholder="50000"></div><div class="input-group"><label for="fd-term-input">Tenure</label><select id="fd-term-input"><option value="12">12 months · 7.1%</option><option value="24">24 months · 7.1%</option><option value="36">36 months · 7.1%</option></select></div><button class="btn-primary" onclick="openFixedDeposit()">Open fixed deposit</button></div></div><hr class="portfolio-divider"><h4>Loans</h4><div id="loans-list" class="portfolio-list"><div class="empty-state">Loading loans...</div></div><h4>Fixed deposits</h4><div id="deposits-list" class="portfolio-list"><div class="empty-state">Loading deposits...</div></div></div>
                 <div class="card"><h3 style="margin-bottom: 16px; font-size: 1.35rem;">Loans & Fixed Deposits</h3><p style="color: var(--text-muted); font-size: 0.95rem;">You are pre-approved for a personal loan up to ₹5,00,000. Contact your relationship manager to proceed.</p></div>
             </div>
             <div id="view-deposits" class="page-view">
+                <div class="card fd-workflow-panel"><h3>Fixed deposits</h3><p class="portfolio-muted">Illustrative prototype terms: 7.1% simple interest. Not an actual bank deposit or insurance product.</p><div class="portfolio-product-single"><h4>Open a fixed deposit</h4><div class="portfolio-muted" id="fd-balance-display">Available account balance: Loading...</div><div class="input-group"><label for="fd-amount-input-new">Deposit amount (INR)</label><input type="number" id="fd-amount-input-new" min="5000" step="100" placeholder="50000" oninput="updateFixedDepositEstimate()"></div><div class="input-group"><label for="fd-term-input-new">Tenure</label><select id="fd-term-input-new" onchange="updateFixedDepositEstimate()"><option value="12">12 months · 7.1%</option><option value="24">24 months · 7.1%</option><option value="36">36 months · 7.1%</option></select></div><div class="portfolio-muted">Simple interest · maturity proceeds credited to linked account</div><div id="fd-estimate" class="portfolio-muted" style="margin-top:10px;">Enter an amount to preview interest and maturity.</div><div class="checkbox-group loan-confirm"><input type="checkbox" id="fd-confirm-check"><label for="fd-confirm-check">I understand these are illustrative prototype terms.</label></div><button class="btn-primary" onclick="openFixedDeposit(true)">Open fixed deposit</button></div><hr class="portfolio-divider"><h4>My deposits</h4><div id="deposits-list-new" class="portfolio-list"><div class="empty-state">Loading deposits...</div></div></div>
                 <div class="card portfolio-panel"><h3>Fixed deposits</h3><p class="portfolio-muted">Lock funds securely and receive the maturity value into your account.</p><div class="portfolio-product-single"><h4>Open a fixed deposit</h4><div class="input-group"><label for="fd-amount-input-separate">Deposit amount</label><input type="number" id="fd-amount-input-separate" min="5000" placeholder="50000"></div><div class="input-group"><label for="fd-term-input-separate">Tenure</label><select id="fd-term-input-separate"><option value="12">12 months · 7.1%</option><option value="24">24 months · 7.1%</option><option value="36">36 months · 7.1%</option></select></div><button class="btn-primary" onclick="openFixedDeposit(true)">Open fixed deposit</button></div><hr class="portfolio-divider"><h4>My deposits</h4><div id="deposits-list-separate" class="portfolio-list"><div class="empty-state">Loading deposits...</div></div></div>
             </div>
 
@@ -1671,18 +1685,39 @@
             return data;
         }
 
+        async function fdRequest(options = {}) {
+            const response = await fetch(`${API_ORIGIN}/api/fds`, {
+                ...options,
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}`, ...(options.headers || {}) }
+            });
+            const data = await response.json();
+            if (!response.ok || !data.success) throw new Error(data.error || 'Fixed deposit action failed.');
+            return data;
+        }
+
+        async function cardsRequest(options = {}) {
+            const response = await fetch(`${API_ORIGIN}/api/cards`, {
+                ...options,
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}`, ...(options.headers || {}) }
+            });
+            const data = await response.json();
+            if (!response.ok || !data.success) throw new Error(data.error || 'Card action failed.');
+            return data;
+        }
+
         async function recordFinancialAudit(action, amount = 0, reference = 'FINANCIAL-ACTION') {
             try {
                 const response = await fetch(`${API_ORIGIN}/api/audit`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ image: getBlankImageBase64(), role: `FINANCIAL ACTIVITY: ${action}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: reference, amount, user_email: loggedInUserEmail })
                 });
-                return response.ok;
+                const result = await response.json();
+                return response.ok && result.delivery_status === 'DELIVERED';
             } catch { return false; }
         }
 
-        function beginFinancialBiometric(action, payload, successMessage, amount = 0) {
-            pendingFinancialMfa = { action, payload, successMessage, amount };
+        function beginFinancialBiometric(action, payload, successMessage, amount = 0, endpoint = '/api/portfolio') {
+            pendingFinancialMfa = { action, payload, successMessage, amount, endpoint };
             document.getElementById('sandbox-container').style.display = 'flex';
             document.getElementById('setup-screen').style.display = 'none';
             document.getElementById('sender-screen').style.display = 'none';
@@ -1703,10 +1738,12 @@
             canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
             try {
                 if (video.videoWidth && video.videoHeight) canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-                const data = await portfolioRequest({ method: 'POST', body: JSON.stringify({ action: pending.action, ...pending.payload }) });
+                const request = pending.endpoint === '/api/fds' ? fdRequest : portfolioRequest;
+                const data = await request({ method: 'POST', body: JSON.stringify({ action: pending.action, ...pending.payload }) });
                 if (typeof data.new_balance === 'number') { currentBalance = data.new_balance; updateDashboardBalance(); }
-                const auditResponse = await fetch(`${API_ORIGIN}/api/audit`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: canvas.toDataURL('image/png'), role: `BIOMETRIC FINANCIAL ACTIVITY: ${pending.action}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: data.reference || data.loan?._id || data.deposit?._id || 'FINANCIAL-ACTION', amount: data.amount || pending.amount || 0, user_email: loggedInUserEmail }) });
-                const audited = auditResponse.ok;
+                const auditResponse = await fetch(`${API_ORIGIN}/api/audit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` }, body: JSON.stringify({ image: canvas.toDataURL('image/png'), audit_event_id: data.audit_event_id, event_type: pending.action, role: `BIOMETRIC FINANCIAL ACTIVITY: ${pending.action}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: data.reference || data.loan?._id || data.deposit?._id || 'FINANCIAL-ACTION', amount: data.amount || pending.amount || 0, user_email: loggedInUserEmail }) });
+                const auditResult = await auditResponse.json();
+                const audited = auditResponse.ok && auditResult.delivery_status === 'DELIVERED';
                 if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
                 pendingFinancialMfa = null;
                 closeOverlay();
@@ -1726,15 +1763,25 @@
         async function loadPortfolio() {
             if (!loggedInUserEmail) return;
             try {
-                const data = await portfolioRequest({ method: 'GET' });
+                const [data, fdData, cardsData] = await Promise.all([portfolioRequest({ method: 'GET' }), fdRequest({ method: 'GET' }), cardsRequest({ method: 'GET' })]);
                 const cards = document.getElementById('cards-list');
                 const loans = document.getElementById('loans-list');
+                const newLoans = document.getElementById('loans-list-new');
+                const newCards = document.getElementById('cards-list-new');
                 const deposits = document.getElementById('deposits-list');
                 const separateDeposits = document.getElementById('deposits-list-separate');
+                const newDeposits = document.getElementById('deposits-list-new');
+                const fdBalance = document.getElementById('fd-balance-display');
+                if (fdBalance) fdBalance.textContent = `Available account balance: ₹${Number(fdData.account.balance || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+                if (newCards) newCards.innerHTML = cardsData.cards.length ? cardsData.cards.map(card => { const statusClass = card.status === 'ACTIVE' ? 'status-success' : card.status === 'BLOCKED' ? 'status-danger' : 'status-warning'; const action = card.status === 'ACTIVE' ? `<button class="btn-outline" onclick="changeCardStatus('${card._id}', 'BLOCK')">Block</button><button class="btn-outline" onclick="simulateCardPayment('${card._id}', ${card.available_daily_limit})">Simulate payment</button>` : card.status === 'BLOCKED' ? `<button class="btn-outline" onclick="changeCardStatus('${card._id}', 'UNBLOCK')">Unblock</button>` : ''; return `<div class="portfolio-item"><div><strong>${card.card_type} · ${card.masked_number}</strong><small>${card.status} · Daily limit ₹${Number(card.daily_limit).toLocaleString('en-IN')} · Spent today ₹${Number(card.daily_spent).toLocaleString('en-IN')} · Available ₹${Number(card.available_daily_limit).toLocaleString('en-IN')} · Simulated only</small></div><span class="txn-status ${statusClass}">${card.status}</span><div class="portfolio-item-actions">${action}</div></div>`; }).join('') : '<div class="empty-state">No card applications yet. Apply above to start.</div>';
                 if (cards) cards.innerHTML = data.cards.length ? data.cards.map(card => `<div class="portfolio-item"><div><strong>${card.type}</strong><small>•••• ${card.last4} · ${card.status}</small></div><span class="txn-status status-success">${card.status === 'ACTIVE' ? 'Active' : 'Review'}</span></div>`).join('') : '<div class="empty-state">No cards yet. Apply above to start.</div>';
-                if (loans) loans.innerHTML = data.loans.length ? data.loans.map(loan => { const previousStatus = knownLoanStatuses.get(String(loan._id)); const justSanctioned = previousStatus === 'UNDER_REVIEW' && loan.status === 'SANCTIONED'; knownLoanStatuses.set(String(loan._id), loan.status); if (justSanctioned) recordFinancialAudit('LOAN_SANCTIONED', loan.outstanding, loan._id); const paymentAllowed = loan.status === 'SANCTIONED' || loan.status === 'ACTIVE'; const statusClass = loan.status === 'PAID' ? 'status-success' : loan.status === 'SANCTIONED' || loan.status === 'ACTIVE' ? 'status-success' : 'status-warning'; return `<div class="portfolio-item"><div><strong>₹${Number(loan.principal || loan.amount).toLocaleString('en-IN')} · ${loan.purpose}</strong><small>${loan.status} · ${loan.interest_rate || 12}% interest · EMI ₹${Number(loan.monthly_emi || 0).toLocaleString('en-IN')} · Outstanding ₹${Number(loan.outstanding).toLocaleString('en-IN')}</small></div>${loan.status === 'PAID' ? '<span class="txn-status status-success">Paid</span>' : paymentAllowed ? `<button class="btn-outline" onclick="makeLoanPayment('${loan._id}', ${loan.outstanding})">Pay</button>` : `<span class="txn-status ${statusClass}">Reviewing</span>`}</div>`; }).join('') : '<div class="empty-state">No loan applications yet.</div>';
+                if (loans) loans.innerHTML = data.loans.length ? data.loans.map(loan => { const previousStatus = knownLoanStatuses.get(String(loan._id)); knownLoanStatuses.set(String(loan._id), loan.status); const paymentAllowed = loan.status === 'DISBURSED' || loan.status === 'ACTIVE'; const statusClass = loan.status === 'CLOSED' ? 'status-success' : loan.status === 'DISBURSED' || loan.status === 'ACTIVE' ? 'status-success' : loan.status === 'REJECTED' ? 'status-danger' : 'status-warning'; const decision = loan.rejection_reason ? ` · ${loan.rejection_reason}` : ''; const due = loan.next_due_date ? ` · Next due ${new Date(loan.next_due_date).toLocaleDateString('en-IN')}` : ''; const repayments = (loan.repayments || []).length ? ` · ${loan.repayments.length} payment(s)` : ''; const history = (loan.repayments || []).length ? `<details class="loan-history"><summary>View repayment history</summary>${loan.repayments.map(item => `<div>₹${Number(item.amount_cents / 100).toLocaleString('en-IN')} · Principal ₹${Number(item.principal_cents / 100).toLocaleString('en-IN')} · Interest ₹${Number(item.interest_cents / 100).toLocaleString('en-IN')}</div>`).join('')}</details>` : ''; return `<div class="portfolio-item"><div><strong>${loan._id} · ₹${Number(loan.principal || loan.amount).toLocaleString('en-IN')} · ${loan.purpose}</strong><small>${loan.status}${decision} · ${loan.interest_rate || 12}% illustrative interest · EMI ₹${Number(loan.monthly_emi || 0).toLocaleString('en-IN')} · Outstanding ₹${Number(loan.outstanding).toLocaleString('en-IN')}${due}${repayments}</small>${history}</div>${loan.status === 'CLOSED' ? '<span class="txn-status status-success">Closed</span>' : paymentAllowed ? `<button class="btn-outline" onclick="makeLoanPayment('${loan._id}', ${loan.outstanding})">Pay EMI</button>` : `<span class="txn-status ${statusClass}">${loan.status.replace('_', ' ')}</span>`}</div>`; }).join('') : '<div class="empty-state">No loan applications yet.</div>';
+                if (newLoans) newLoans.innerHTML = loans ? loans.innerHTML : '<div class="empty-state">No loan applications yet.</div>';
                 if (deposits) deposits.innerHTML = data.deposits.length ? data.deposits.map(fd => `<div class="portfolio-item"><div><strong>₹${Number(fd.principal).toLocaleString('en-IN')} · ${fd.tenure_months} months</strong><small>${fd.status} · Maturity ₹${Number(fd.maturity_amount).toLocaleString('en-IN')}</small></div>${fd.status === 'ACTIVE' ? `<button class="btn-outline" onclick="closeFixedDeposit('${fd._id}')">Close</button>` : '<span class="txn-status status-success">Closed</span>'}</div>`).join('') : '<div class="empty-state">No fixed deposits yet.</div>';
-                if (separateDeposits) separateDeposits.innerHTML = deposits?.innerHTML || '<div class="empty-state">No fixed deposits yet.</div>';
+                const depositMarkup = fdData.deposits.length ? fdData.deposits.map(fd => { const action = fd.status === 'ACTIVE' ? `<button class="btn-outline" onclick="closeFixedDeposit('${fd._id}')">Close early</button>` : `<span class="txn-status status-success">${fd.status}</span>`; return `<div class="portfolio-item"><div><strong>${fd._id} · ₹${Number(fd.principal).toLocaleString('en-IN')} · ${fd.tenure_months} months</strong><small>${fd.status} · Opened ${fd.opened_at ? new Date(fd.opened_at).toLocaleDateString('en-IN') : '—'} · Matures ${fd.maturity_date ? new Date(fd.maturity_date).toLocaleDateString('en-IN') : '—'} · ${fd.interest_rate}% simple interest · Projected interest ₹${Number(fd.projected_interest || 0).toLocaleString('en-IN')} · Maturity ₹${Number(fd.projected_maturity || fd.maturity_amount || 0).toLocaleString('en-IN')}</small>${fd.closure_type === 'PREMATURE' ? `<small>Early closure: interest ₹${Number(fd.premature_interest || 0).toLocaleString('en-IN')}, penalty ₹${Number(fd.penalty || 0).toLocaleString('en-IN')}, settled ₹${Number(fd.settlement_amount || 0).toLocaleString('en-IN')}</small>` : ''}</div>${action}</div>`; }).join('') : '<div class="empty-state">No fixed deposits yet.</div>';
+                if (deposits) deposits.innerHTML = depositMarkup;
+                if (separateDeposits) separateDeposits.innerHTML = depositMarkup;
+                if (newDeposits) newDeposits.innerHTML = depositMarkup;
             } catch (error) { console.log('Portfolio sync error', error); }
         }
 
@@ -1749,31 +1796,95 @@
         }
 
         function applyForCard() {
-            beginFinancialBiometric('CARD_APPLICATION', { card_type: 'SecurePay Platinum' }, 'Card application submitted for review.');
+            const idempotency_key = `CARD-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`;
+            beginFinancialBiometric('APPLY', { card_type: 'SecurePay Platinum', idempotency_key }, 'Card application submitted for review.', 0, '/api/cards');
         }
-        function saveDailyLimit() {
+        function legacySaveDailyLimit() {
             const limit = Number(document.getElementById('daily-limit-input').value);
             if (!limit || limit < 1000 || limit > 1000000) return showToast('Set a limit between ₹1,000 and ₹10,00,000.', 'danger');
             beginFinancialBiometric('DAILY_LIMIT_UPDATE', { limit }, 'Daily transfer limit updated.', limit);
         }
-        function applyForLoan() {
-            const amount = Number(document.getElementById('loan-amount-input').value);
-            const term_months = Number(document.getElementById('loan-term-input').value);
-            if (!amount || amount < 10000 || amount > 500000) return showToast('Enter a loan amount between ₹10,000 and ₹5,00,000.', 'danger');
-            beginFinancialBiometric('LOAN_APPLICATION', { amount, term_months, purpose: 'Personal' }, 'Loan application submitted for review.', amount);
+        function saveDailyLimit(newCardView = false) {
+            const limit = Number(document.getElementById(newCardView ? 'daily-limit-input-new' : 'daily-limit-input').value);
+            if (!limit || limit < 1000 || limit > 1000000) return showToast('Set a limit between ₹1,000 and ₹10,00,000.', 'danger');
+            const idempotency_key = `LIMIT-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`;
+            beginFinancialBiometric('SET_LIMIT', { limit, idempotency_key }, 'Daily simulated spending limit updated.', limit, '/api/cards');
         }
+        function changeCardStatus(card_id, action) {
+            if (!window.confirm(action === 'BLOCK' ? 'Block this card? Simulated payments will be rejected.' : 'Unblock this card and allow simulated payments again?')) return;
+            const idempotency_key = `CARD-${action}-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`;
+            beginFinancialBiometric(action, { card_id, idempotency_key }, action === 'BLOCK' ? 'Card blocked successfully.' : 'Card unblocked successfully.', 0, '/api/cards');
+        }
+        function simulateCardPayment(card_id, available) {
+            const amount = Number(window.prompt(`Enter simulated payment amount (up to ₹${Number(available).toLocaleString('en-IN')})`, '1000'));
+            if (!amount || amount <= 0 || amount > Number(available)) return showToast('Enter an amount within the available daily card limit.', 'danger');
+            const idempotency_key = `CARD-PAY-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`;
+            beginFinancialBiometric('SIMULATE_PAYMENT', { card_id, amount, idempotency_key }, 'Simulated card payment recorded.', amount, '/api/cards');
+        }
+        function applyForLoan() {
+            const amount = Number(document.getElementById('loan-amount-input-new').value);
+            const term_months = Number(document.getElementById('loan-term-input-new').value);
+            const purpose = document.getElementById('loan-purpose-input').value.trim();
+            const employment = document.getElementById('loan-employment-input').value.trim();
+            const monthly_income = Number(document.getElementById('loan-income-input').value);
+            const confirmed = document.getElementById('loan-confirm-check').checked;
+            if (!amount || amount < 10000 || amount > 500000) return showToast('Enter a loan amount between ₹10,000 and ₹5,00,000.', 'danger');
+            if (purpose.length < 3) return showToast('Enter the loan purpose.', 'danger');
+            if (employment.length < 2) return showToast('Enter employment information.', 'danger');
+            if (!monthly_income || monthly_income <= 0) return showToast('Enter your monthly income.', 'danger');
+            if (!confirmed) return showToast('Confirm that you reviewed the loan details.', 'danger');
+            const idempotency_key = `LOAN-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`;
+            beginFinancialBiometric('LOAN_APPLICATION', { amount, term_months, purpose, employment, monthly_income, confirmed, idempotency_key }, 'Loan application submitted for review.', amount);
+        }
+        function updateLoanEstimate() {
+            const amount = Number(document.getElementById('loan-amount-input-new')?.value || 0);
+            const term = Number(document.getElementById('loan-term-input-new')?.value || 12);
+            const output = document.getElementById('loan-estimate');
+            if (!output || !amount) return;
+            const rate = 0.12 / 12;
+            const emi = amount * rate * Math.pow(1 + rate, term) / (Math.pow(1 + rate, term) - 1);
+            const total = emi * term;
+            output.textContent = `Illustrative preview: ₹${emi.toLocaleString('en-IN', { maximumFractionDigits: 2 })}/month · Total ₹${total.toLocaleString('en-IN', { maximumFractionDigits: 2 })} at 12% p.a.`;
+        }
+        document.getElementById('loan-amount-input-new')?.addEventListener('input', updateLoanEstimate);
+        document.getElementById('loan-term-input-new')?.addEventListener('change', updateLoanEstimate);
         function makeLoanPayment(loan_id, outstanding) {
             const amount = Number(window.prompt(`Enter payment amount (up to ₹${Number(outstanding).toLocaleString('en-IN')})`, outstanding));
             if (!amount || amount <= 0 || amount > Number(outstanding)) return showToast('Enter a valid payment amount within the outstanding balance.', 'danger');
-            beginFinancialBiometric('LOAN_PAYMENT', { loan_id, amount }, 'Loan payment completed.', amount);
+            const idempotency_key = `REPAY-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`;
+            beginFinancialBiometric('LOAN_PAYMENT', { loan_id, amount, idempotency_key }, 'Loan payment completed.', amount);
         }
-        function openFixedDeposit(separate = false) {
+        function legacyOpenFixedDeposit(separate = false) {
             const amount = Number(document.getElementById(separate ? 'fd-amount-input-separate' : 'fd-amount-input').value);
             const tenure_months = Number(document.getElementById(separate ? 'fd-term-input-separate' : 'fd-term-input').value);
             if (!amount || amount < 5000) return showToast('Minimum fixed deposit amount is ₹5,000.', 'danger');
             beginFinancialBiometric('FD_OPENED', { amount, tenure_months }, 'Fixed deposit opened successfully.', amount);
         }
-        function closeFixedDeposit(deposit_id) { if (window.confirm('Close this fixed deposit and credit the maturity amount?')) beginFinancialBiometric('FD_CLOSED', { deposit_id }, 'Fixed deposit closed and maturity credited.'); }
+        function legacyCloseFixedDeposit(deposit_id) { if (window.confirm('Close this fixed deposit and credit the maturity amount?')) beginFinancialBiometric('FD_CLOSED', { deposit_id }, 'Fixed deposit closed and maturity credited.'); }
+
+        function updateFixedDepositEstimate() {
+            const amount = Number(document.getElementById('fd-amount-input-new')?.value || 0);
+            const tenure = Number(document.getElementById('fd-term-input-new')?.value || 12);
+            const output = document.getElementById('fd-estimate');
+            if (!output) return;
+            if (!amount) { output.textContent = 'Enter an amount to preview interest and maturity.'; return; }
+            const interest = amount * 0.071 * tenure / 12;
+            output.textContent = `Preview only: interest ₹${interest.toLocaleString('en-IN', { maximumFractionDigits: 2 })} · maturity ₹${(amount + interest).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+        }
+        function openFixedDeposit(separate = false) {
+            const amount = Number(document.getElementById(separate ? 'fd-amount-input-new' : 'fd-amount-input').value);
+            const tenure_months = Number(document.getElementById(separate ? 'fd-term-input-new' : 'fd-term-input').value);
+            const confirmed = separate ? document.getElementById('fd-confirm-check')?.checked === true : true;
+            if (!amount || amount < 5000) return showToast('Minimum fixed deposit amount is ₹5,000.', 'danger');
+            if (separate && !confirmed) return showToast('Confirm the illustrative FD terms before continuing.', 'danger');
+            const idempotency_key = `FD-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`;
+            beginFinancialBiometric('OPEN', { amount, tenure_months, confirmed, idempotency_key }, 'Fixed deposit opened successfully.', amount, '/api/fds');
+        }
+        function closeFixedDeposit(fd_id) {
+            if (!window.confirm('Close this FD early? A reduced illustrative rate and 10% interest penalty apply.')) return;
+            const idempotency_key = `FD-CLOSE-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`;
+            beginFinancialBiometric('CLOSE', { fd_id, idempotency_key }, 'Fixed deposit closed and proceeds credited.', 0, '/api/fds');
+        }
 
         function selectPaymentMethod(mode, tileElement) {
             selectedPaymentMode = mode;
