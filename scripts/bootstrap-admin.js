@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { getDatabase } = require('../api/_db');
+const { getDatabase } = require('../lib/api/_db');
 
 function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

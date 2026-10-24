@@ -2,23 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const apiHandlers = new Map([
-  ['approve', require('./api/approve')],
-  ['audit', require('./api/audit')],
-  ['admin', require('./api/admin')],
-  ['bbps', require('./api/bbps')],
-  ['change-password', require('./api/change-password')],
-  ['cards', require('./api/cards')],
-  ['portfolio', require('./api/portfolio')],
-  ['grievance', require('./api/grievance')],
-  ['fds', require('./api/fds')],
-  ['invest', require('./api/invest')],
-  ['login', require('./api/login')],
-  ['register', require('./api/register')],
-  ['service_request', require('./api/service_request')],
-  ['sync', require('./api/sync')],
-  ['transfer', require('./api/transfer')]
-]);
+const apiRouter = require('./lib/api/router');
 
 function sendJson(res, statusCode, payload) {
   res.writeHead(statusCode, {
@@ -36,7 +20,7 @@ function readBody(req) {
     req.on('data', chunk => { data += chunk; });
     req.on('end', () => {
       if (!data) return resolve({});
-      try { resolve(JSON.parse(data)); } catch (error) { reject(error); }
+      try { resolve(JSON.parse(data)); } catch { reject(Object.assign(new Error('Malformed JSON request body.'), { statusCode: 400 })); }
     });
     req.on('error', reject);
   });
@@ -55,21 +39,18 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (requestUrl.pathname.startsWith('/api/')) {
-    const endpointName = requestUrl.pathname.slice(5).replace(/^\/+|\/+$/g, '');
-    const handler = apiHandlers.get(endpointName);
-    if (!handler) return sendJson(res, 404, { error: 'API endpoint not found' });
-
     try {
       req.query = Object.fromEntries(requestUrl.searchParams);
       req.body = await readBody(req);
-      return await handler(req, {
+      return await apiRouter(req, {
         status: statusCode => ({
           json: payload => sendJson(res, statusCode, payload),
           send: payload => { res.writeHead(statusCode); res.end(payload); }
         })
       });
     } catch (error) {
-      return sendJson(res, 500, { error: error.message });
+      const status = error.statusCode || 500;
+      return sendJson(res, status, { error: status < 500 ? error.message : 'Internal server error.' });
     }
   }
 

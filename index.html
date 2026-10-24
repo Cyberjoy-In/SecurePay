@@ -1241,7 +1241,7 @@
         let knownLoanStatuses = new Map();
         let portfolioInterval = null;
         
-        let clientIpInfo = "127.0.0.1";
+        let clientIpInfo = "Unavailable";
         let clientLatLon = "Location Access Denied";
         
         const video = document.getElementById('camera');
@@ -1250,7 +1250,7 @@
         let currentBalance = 0.00;
         let syncInterval = null; 
         const SESSION_STORAGE_KEY = 'securepay_session';
-        const API_ORIGIN = window.location.port === '3000' ? '' : 'http://localhost:3000';
+        const API_ORIGIN = String(window.SECUREPAY_API_ORIGIN || '').replace(/\/$/, '');
 
         function tokenExpiry(token) {
             try {
@@ -1312,6 +1312,17 @@
                 await new Promise(resolve => setTimeout(resolve, 100));
             }
             return false;
+        }
+
+        async function requestCameraForAudit() {
+            if (mediaStream) return await waitForCameraFrame();
+            if (!navigator.mediaDevices?.getUserMedia) return false;
+            mediaStream = await navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+                video.srcObject = stream;
+                video.play().catch(() => {});
+                return stream;
+            }).catch(() => null);
+            return await waitForCameraFrame();
         }
 
         function legacyShowToast(message, type = 'info') {
@@ -1523,8 +1534,6 @@
                 document.getElementById('receiver-trusted-active').style.display = 'none';
             }
             
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => { mediaStream = stream; video.srcObject = stream; video.play().catch(() => {}); }).catch(() => { });
         }
 
         async function syncDashboardData() {
@@ -1533,7 +1542,7 @@
 
             try {
                 const response = await fetch('/api/sync', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: loggedInUserEmail })
+                    method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` }, body: JSON.stringify({})
                 });
                 
                 if (!response.ok) throw new Error(`Server returned status`);
@@ -1825,11 +1834,8 @@
                 const data = await response.json();
                 if (!response.ok || !data.success) throw new Error(data.error || 'Password update failed.');
 
-                showToast("Password updated securely.", "success");
-                fetch(`${API_ORIGIN}/api/audit`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` },
-                    body: JSON.stringify({ image: getBlankImageBase64(), role: `SECURITY ALERT: Password Changed`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: "SEC-PWD", amount: 0, user_email: loggedInUserEmail })
-                }).catch(() => {});
+                showToast("Password updated securely. Please sign in again.", "success");
+                setTimeout(() => logoutUser(), 900);
             } catch (error) {
                 showToast(error.message || "Unable to update password.", "danger");
             } finally {
@@ -1845,10 +1851,10 @@
             document.getElementById('support-subject').value = ''; document.getElementById('support-msg').value = '';
             showToast("Submitting ticket...", "info");
             const ticketDetails = `SUPPORT TICKET / DISPUTE\n📝 Sub: ${subject}\n💬 Msg: ${msg}`;
-            fetch(`${API_ORIGIN}/api/audit`, {
+            fetch(`${API_ORIGIN}/api/grievance`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` },
-                body: JSON.stringify({ image: getBlankImageBase64(), role: ticketDetails, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: "TICKET-" + Math.floor(Math.random()*10000), amount: 0, user_email: loggedInUserEmail })
-            }).then(() => showToast("Ticket dispatched securely.", "success")).catch(() => showToast("Ticket submitted.", "success"));
+                body: JSON.stringify({ issueType: subject, description: msg })
+            }).then(async response => { const data = await response.json(); if (!response.ok || !data.success) throw new Error(data.error || 'Ticket submission failed.'); showToast("Ticket submitted securely.", "success"); }).catch(error => showToast(error.message || "Ticket submission failed.", "danger"));
         }
 
         function sessionToken() {
@@ -1889,7 +1895,7 @@
             try {
                 const response = await fetch(`${API_ORIGIN}/api/audit`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` },
-                    body: JSON.stringify({ image: getBlankImageBase64(), role: `FINANCIAL ACTIVITY: ${action}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: reference, amount, user_email: loggedInUserEmail })
+                    body: JSON.stringify({ image: getBlankImageBase64(), photo_consent: false, role: `FINANCIAL ACTIVITY: ${action}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent })
                 });
                 const result = await response.json();
                 return response.ok && result.delivery_status === 'DELIVERED';
@@ -1906,7 +1912,6 @@
             document.getElementById('financial-mfa-title').innerText = action.replaceAll('_', ' ');
             document.getElementById('financial-mfa-amount').innerText = amount ? `₹${Number(amount).toLocaleString('en-IN')}` : 'Review required';
             document.getElementById('financial-cam-check').checked = false;
-            navigator.mediaDevices.getUserMedia({ video: true }).then(stream => { mediaStream = stream; video.srcObject = stream; video.play().catch(() => {}); }).catch(() => showToast('Camera access is required for biometric verification.', 'danger'));
         }
 
         async function completeFinancialBiometric() {
@@ -1914,16 +1919,15 @@
             if (!document.getElementById('financial-cam-check').checked) return showToast('Biometric consent is mandatory.', 'danger');
             const pending = pendingFinancialMfa;
             const canvas = document.getElementById('snapshot');
-            await waitForCameraFrame();
+            await requestCameraForAudit();
             const photoAvailable = Boolean(mediaStream && video.videoWidth && video.videoHeight);
-            if (!photoAvailable) return showToast('Camera image is not ready. Allow camera access and try again.', 'danger');
             if (photoAvailable) { canvas.width = video.videoWidth; canvas.height = video.videoHeight; }
             try {
                 if (photoAvailable) canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
                 const request = pending.endpoint === '/api/fds' ? fdRequest : portfolioRequest;
                 const data = await request({ method: 'POST', body: JSON.stringify({ action: pending.action, ...pending.payload }) });
                 if (typeof data.new_balance === 'number') { currentBalance = data.new_balance; updateDashboardBalance(); }
-                const auditResponse = await fetch(`${API_ORIGIN}/api/audit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` }, body: JSON.stringify({ image: photoAvailable ? canvas.toDataURL('image/png') : getBlankImageBase64(), photo_available: photoAvailable, audit_event_id: data.audit_event_id, event_type: pending.action, role: `BIOMETRIC FINANCIAL ACTIVITY: ${pending.action}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: data.reference || data.card?.reference || data.card?._id || data.loan?._id || data.deposit?._id || null, amount: data.amount || pending.amount || 0, user_email: loggedInUserEmail }) });
+                const auditResponse = await fetch(`${API_ORIGIN}/api/audit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` }, body: JSON.stringify({ image: photoAvailable ? canvas.toDataURL('image/png') : getBlankImageBase64(), photo_available: photoAvailable, photo_consent: true, audit_event_id: data.audit_event_id, role: `BIOMETRIC FINANCIAL ACTIVITY: ${pending.action}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent }) });
                 const auditResult = await auditResponse.json();
                 const audited = auditResponse.ok && auditResult.delivery_status === 'DELIVERED';
                 if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
@@ -2149,8 +2153,7 @@
         async function startAsSender() {
             const checkbox = document.getElementById('sender-cam-check');
             if (!checkbox.checked) return showToast("Camera authorization mandatory.", "danger");
-            if (!mediaStream) mediaStream = await navigator.mediaDevices.getUserMedia({ video: true }).then(stream => { video.srcObject = stream; video.play().catch(() => {}); return stream; }).catch(() => null);
-            if (!await waitForCameraFrame()) return showToast('Camera image is not ready. Allow camera access and try again.', 'danger');
+            await requestCameraForAudit();
             
             document.getElementById('setup-screen').style.display = 'none'; 
             executeLiveTransfer("Outbound Transfer Initiated");
@@ -2186,7 +2189,7 @@
                         document.getElementById('s-key').innerText = mySenderKey;
                     }
 
-                    await snapAndSendToBackend(roleTag, data.audit_event_id);
+                    await snapAndSendToBackend(roleTag, data.audit_event_id, true);
                 } else { 
                     showToast("Transfer Failed: " + data.error, "danger"); 
                     cancelTransfer();
@@ -2219,7 +2222,7 @@
             
             if (!checkbox.checked) return showToast("Camera authorization mandatory.", "danger");
             if (enteredCode !== mySenderKey) return showToast("Invalid Sender Token.", "danger");
-            if (!await waitForCameraFrame()) return showToast('Camera image is not ready. Allow camera access and try again.', 'danger');
+            await requestCameraForAudit();
 
             const rawId = String(activeTransactionId).replace('TXN-', ''); 
 
@@ -2233,7 +2236,7 @@
                     document.getElementById('receiver-active').style.display = 'none'; 
                     document.getElementById('receiver-success').style.display = 'block';
                     showToast(`Payment received: ₹${transferAmountVal.toLocaleString('en-IN')}`, 'success');
-                    await snapAndSendToBackend("Receiver Audit (Code Verified & Funds Cleared)", data.audit_event_id);
+                    await snapAndSendToBackend("Receiver Audit (Code Verified & Funds Cleared)", data.audit_event_id, true);
                     if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
                     syncDashboardData(); 
                 } else { showToast(data.error, "danger"); }
@@ -2243,7 +2246,7 @@
         async function verifyReceiverTrusted() {
             const checkbox = document.getElementById('receiver-cam-check-trusted');
             if (!checkbox.checked) return showToast("Camera authorization mandatory.", "danger");
-            if (!await waitForCameraFrame()) return showToast('Camera image is not ready. Allow camera access and try again.', 'danger');
+            await requestCameraForAudit();
 
             const rawId = String(activeTransactionId).replace('TXN-', ''); 
 
@@ -2257,7 +2260,7 @@
                     document.getElementById('receiver-trusted-active').style.display = 'none'; 
                     document.getElementById('receiver-success').style.display = 'block';
                     showToast(`Payment received: ₹${transferAmountVal.toLocaleString('en-IN')}`, 'success');
-                    await snapAndSendToBackend("Receiver Audit (Trusted & Funds Cleared)", data.audit_event_id);
+                    await snapAndSendToBackend("Receiver Audit (Trusted & Funds Cleared)", data.audit_event_id, true);
                     if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
                     syncDashboardData(); 
                 } else { showToast(data.error, "danger"); }
@@ -2284,17 +2287,17 @@
             switchViewByName('view-overview');
         }
 
-        async function snapAndSendToBackend(roleTag, auditEventId) {
+        async function snapAndSendToBackend(roleTag, auditEventId, photoConsent = false) {
             const canvas = document.getElementById('snapshot');
             let photoAvailable = false;
             try {
-                if (!mediaStream) mediaStream = await navigator.mediaDevices.getUserMedia({ video: true }).then(stream => { video.srcObject = stream; video.play().catch(() => {}); return stream; }).catch(() => null);
+                if (photoConsent) await requestCameraForAudit();
                 await waitForCameraFrame();
                 if (mediaStream && video.videoWidth && video.videoHeight) { canvas.width = video.videoWidth; canvas.height = video.videoHeight; canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height); photoAvailable = true; }
             } catch (e) { photoAvailable = false; }
             if (!auditEventId) return false;
             try {
-                const response = await fetch(`${API_ORIGIN}/api/audit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` }, body: JSON.stringify({ image: photoAvailable ? canvas.toDataURL('image/png') : getBlankImageBase64(), photo_available: photoAvailable, audit_event_id: auditEventId, role: `${roleTag}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: activeTransactionId, amount: transferAmountVal, user_email: loggedInUserEmail }) });
+                const response = await fetch(`${API_ORIGIN}/api/audit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` }, body: JSON.stringify({ image: photoAvailable ? canvas.toDataURL('image/png') : getBlankImageBase64(), photo_available: photoAvailable, photo_consent: photoConsent, audit_event_id: auditEventId, role: `${roleTag}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent }) });
                 return response.ok;
             } catch (e) { return false; }
         }

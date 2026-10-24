@@ -156,7 +156,7 @@ Customer loan applications are stored with the lifecycle `UNDER_REVIEW` → `APP
 
 The authenticated loan API is exposed through `POST /api/portfolio` with actions `APPLY_LOAN`, `LOAN_PAYMENT`, `APPROVE_LOAN`, `REJECT_LOAN`, and `DISBURSE_LOAN`. Loan applications and repayments require an `idempotency_key`. The server calculates illustrative 12% annual EMI terms, validates ownership and state transitions, and records repayment principal and interest separately.
 
-Loan audit events are created in the MongoDB `audit_events` outbox in the same transaction as the loan operation. The existing `/api/audit` endpoint attaches a consented photo and attempts Telegram delivery; failed deliveries remain `PENDING` and are retried during authenticated portfolio requests. This is a demonstration workflow, not a regulated lending implementation.
+Loan audit events are created in the MongoDB `audit_events` outbox in the same transaction as the loan operation. The existing `/api/audit` endpoint attaches optional, explicitly consented telemetry/photo data and attempts Telegram delivery; failed deliveries remain `PENDING` for bounded, administrator-authorized retry. Routine portfolio reads do not send Telegram messages. This is a demonstration workflow, not a regulated lending implementation.
 
 ## Fixed deposit workflow prototype
 
@@ -174,8 +174,16 @@ Simulated card payments never expose or create full card numbers, CVVs, or real 
 
 Administrators use the protected `/api/admin` route and the separate in-app operations workspace. The dashboard provides database-backed metrics and paginated views for customers, transactions, loans, fixed deposits, cards and audit events. Loan approval/rejection/disbursement and card approval/activation are server-authorized actions with conditional state transitions and audit events; completed ledger records are not editable.
 
-To bootstrap an administrator, create the account through the normal registration flow with its intended password, set `ADMIN_EMAIL` to that registered email in the server environment, and run `npm run bootstrap-admin`. The bootstrap only promotes the existing account and preserves its password hash; it never creates an account or changes the password. Public registration always creates `customer` users. The dashboard refreshes metrics every seven seconds and customer polling continues to reconcile authoritative backend state; this prototype does not add WebSockets or SSE infrastructure.
+To bootstrap an administrator, create the account through the normal registration flow with its intended password, set `ADMIN_EMAIL` to that registered email in the server environment, and run `npm run bootstrap-admin`. The bootstrap only promotes the existing account and preserves its password hash; it never creates an account or changes the password. Public registration always creates `customer` users. The dashboard may refresh metrics periodically, but reads do not create audit events or trigger Telegram delivery; customer polling continues to reconcile authoritative backend state. This prototype does not add WebSockets or SSE infrastructure.
 
 For a local MongoDB installation, use `MONGODB_URI=mongodb://127.0.0.1:27017`. For MongoDB Atlas, confirm the database user password, grant the user access to the `securepay` database, and add the current IP address to Atlas Network Access. If the password contains characters such as `@`, `:`, `/`, or `#`, URL-encode them in the connection string.
+
+## Deployment and API routing
+
+The deployable API surface uses the single Vercel catch-all entry point `api/[...path].js`; shared endpoint implementations live under `lib/api/`. Existing paths such as `/api/login`, `/api/sync`, `/api/portfolio`, and `/api/transfer` are dispatched without changing their contracts. This keeps Vercel API function discovery within the Hobby limit while the local `server.js` uses the same router.
+
+The browser uses same-origin relative API paths by default. For local development through a separate static server, define `window.SECUREPAY_API_ORIGIN` before the application script with an explicitly trusted local API origin. A deployed site should leave it unset; it must never be set to localhost in production.
+
+Set `TRUST_PROXY=true` only when the deployment platform is a trusted proxy and supplies the request forwarding headers. Leave it `false` for direct local development. Configure `JWT_ISSUER` and `JWT_AUDIENCE` consistently if issuer/audience validation is enabled.
 
 If a Telegram credential or other secret is exposed in a repository, deployment log, screenshot, or chat, revoke it immediately and replace it across every affected environment.
