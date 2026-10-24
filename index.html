@@ -749,6 +749,31 @@
         .portfolio-item strong { display: block; color: var(--text-main); }
         .portfolio-item small { color: var(--text-muted); }
         .portfolio-item-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+        #admin-view { display: none; min-height: calc(100vh - 73px); background: var(--bg-base); }
+        .admin-layout { display: flex; min-height: calc(100vh - 73px); }
+        .admin-sidebar { width: 230px; flex: 0 0 230px; padding: 24px 14px; background: var(--bg-surface); border-right: 1px solid var(--border-color); }
+        .admin-sidebar button { width: 100%; text-align: left; margin-bottom: 7px; border: 0; background: transparent; color: var(--text-muted); padding: 12px 14px; border-radius: 10px; cursor: pointer; font-weight: 700; }
+        .admin-sidebar button:hover, .admin-sidebar button.active { background: var(--primary); color: #fff; }
+        .admin-main { flex: 1; min-width: 0; padding: 30px clamp(16px, 4vw, 46px); overflow: auto; }
+        .admin-metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 12px; margin: 22px 0; }
+        .admin-metric { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; }
+        .admin-metric-button { width: 100%; text-align: left; color: inherit; cursor: pointer; font: inherit; }
+        .admin-metric-button:hover { border-color: var(--primary); transform: translateY(-1px); }
+        .admin-metric span { display: block; color: var(--text-muted); font-size: .75rem; }
+        .admin-metric strong { display: block; margin-top: 8px; font-size: 1.35rem; }
+        .admin-table-wrap { overflow-x: auto; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; }
+        .admin-table { width: 100%; min-width: 680px; border-collapse: collapse; }
+        .admin-table th, .admin-table td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: .8rem; }
+        .admin-table th { color: var(--text-muted); text-transform: uppercase; font-size: .68rem; }
+        .admin-toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0; }
+        .admin-toolbar input, .admin-toolbar select { max-width: 220px; padding: 10px; }
+        @media (max-width: 700px) { .admin-layout { display: block; } .admin-sidebar { width: 100%; display: flex; overflow-x: auto; gap: 6px; padding: 10px; } .admin-sidebar button { min-width: max-content; margin: 0; } .admin-main { padding: 20px 12px; } }
+        .in-page-modal { display: none; position: fixed; inset: 0; z-index: 2600; align-items: center; justify-content: center; padding: 18px; background: rgba(7,18,37,.68); }
+        .in-page-modal.open { display: flex; }
+        .in-page-panel { width: min(460px, 100%); background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 22px; box-shadow: 0 24px 70px rgba(0,0,0,.35); }
+        .in-page-panel h3 { margin: 0 0 6px; }
+        .in-page-panel .modal-summary { color: var(--text-muted); font-size: .86rem; line-height: 1.55; margin-bottom: 16px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
         .portfolio-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: end; }
         .portfolio-actions .btn-primary { grid-column: 1 / -1; }
         .portfolio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
@@ -826,6 +851,18 @@
             .receipt-detail { gap: 10px; align-items: flex-start; }
             .receipt-detail strong { text-align: right; overflow-wrap: anywhere; }
         }
+        .admin-login-link { color: var(--brand); border: 1px solid var(--line); background: transparent; border-radius: 9px; padding: 9px 13px; font-weight: 750; font-size: .84rem; cursor: pointer; }
+        .admin-login-link:hover { background: var(--brand); color: #fff; border-color: var(--brand); }
+        .standalone-admin-login { margin-left: auto; margin-right: 8px; }
+        body.app-authenticated .standalone-admin-login { display: none; }
+        .admin-login-modal { display: none; position: fixed; inset: 0; z-index: 2500; background: rgba(15,23,42,.56); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px; }
+        .admin-login-modal.open { display: flex; }
+        .admin-login-panel { width: min(410px, 100%); background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 18px; padding: 28px; box-shadow: 0 24px 70px rgba(16,24,40,.22); }
+        .admin-login-panel h2 { margin-bottom: 7px; font-size: 1.35rem; }
+        .admin-login-panel p { color: var(--ink-soft); font-size: .82rem; margin-bottom: 22px; }
+        .admin-login-actions { display: flex; gap: 10px; margin-top: 6px; }
+        .admin-login-actions button { flex: 1; }
+        @media (max-width: 600px) { .admin-login-link { padding: 8px 9px; font-size: .76rem; } .admin-login-modal { align-items: flex-start; padding: 78px 14px 14px; } }
         @supports not (height: 100dvh) {
             .dashboard-layout { min-height: calc(100vh - 58px); }
             .sidebar { min-height: calc(100vh - 58px); }
@@ -841,7 +878,7 @@
         <a class="brand" href="#top" aria-label="Secure-Pay home"><div class="brand-indicator"></div>Secure-Pay</a>
         <div class="nav-links public-navigation"><a class="nav-link" href="#product">Product</a><a class="nav-link" href="#how-it-works">How it works</a><a class="nav-link" href="#security">Security</a><a class="nav-link" href="#access">Developers</a><a class="nav-link" href="#access">Documentation</a></div>
         <div class="dashboard-navigation" aria-label="Dashboard navigation"><button type="button" onclick="switchViewByName('view-overview')">Overview</button><button type="button" onclick="switchViewByName('view-transfers')">Send payment</button><button type="button" onclick="switchViewByName('view-beneficiaries')">Contacts</button></div>
-        <div class="nav-actions public-actions"><button class="nav-ghost" type="button" onclick="toggleTheme()" aria-label="Toggle colour theme">Theme</button><a class="nav-ghost" href="#access">Sign in</a><a class="nav-cta" href="#access">Get started</a><button class="nav-toggle" type="button" onclick="toggleMenu()" aria-label="Open navigation">Menu</button></div>
+        <button class="admin-login-link standalone-admin-login" type="button" onclick="openAdminLogin()">Admin Login</button><div class="nav-actions public-actions"><button class="nav-ghost" type="button" onclick="toggleTheme()" aria-label="Toggle colour theme">Theme</button><a class="nav-ghost" href="#access">Sign in</a><a class="nav-cta" href="#access">Get started</a><button class="nav-toggle" type="button" onclick="toggleMenu()" aria-label="Open navigation">Menu</button></div>
         <div class="dashboard-actions"><button class="nav-ghost" type="button" onclick="toggleTheme()" aria-label="Toggle colour theme">Theme</button><div id="notification-bell" class="notification-bell" onclick="toggleNotifications()" aria-label="Notifications">Alerts<div id="notif-badge" class="notif-badge" style="display:none">0</div><div id="notif-dropdown" class="notif-dropdown"></div></div><div class="user-chip"><span class="user-chip-dot"></span><span id="nav-user-name">Account</span></div><button class="dashboard-signout" id="logout-btn" onclick="logoutUser()">Sign out</button></div>
     </nav>
 
@@ -1042,6 +1079,46 @@
         </main>
     </div>
 
+    <div class="admin-login-modal" id="admin-login-modal" role="dialog" aria-modal="true" aria-labelledby="admin-login-title" onclick="if(event.target===this) closeAdminLogin()">
+        <form class="admin-login-panel" onsubmit="adminLoginUser(event)">
+            <h2 id="admin-login-title">Admin Login</h2>
+            <p>Use your existing administrator credentials. Access is verified by the server.</p>
+            <div class="input-group"><label for="admin-login-email">Admin email</label><input type="email" id="admin-login-email" autocomplete="username" required></div>
+            <div class="input-group"><label for="admin-login-pass">Password</label><input type="password" id="admin-login-pass" autocomplete="current-password" required></div>
+            <div class="admin-login-actions"><button class="btn-outline" type="button" onclick="closeAdminLogin()">Cancel</button><button class="btn-primary" id="admin-login-submit" type="submit">Sign in</button></div>
+        </form>
+    </div>
+
+    <!-- ADMIN DASHBOARD -->
+    <div id="admin-view">
+        <div class="admin-layout">
+            <aside class="admin-sidebar" aria-label="Administration navigation">
+                <button type="button" data-admin-section="dashboard" class="active" onclick="loadAdminSection('dashboard', this)">Overview</button>
+                <button type="button" data-admin-section="users" onclick="loadAdminSection('users', this)">Users</button>
+                <button type="button" data-admin-section="transactions" onclick="loadAdminSection('transactions', this)">Transactions</button>
+                <button type="button" data-admin-section="loans" onclick="loadAdminSection('loans', this)">Loans</button>
+                <button type="button" data-admin-section="fds" onclick="loadAdminSection('fds', this)">Fixed deposits</button>
+                <button type="button" data-admin-section="cards" onclick="loadAdminSection('cards', this)">Cards</button>
+                <button type="button" data-admin-section="audit" onclick="loadAdminSection('audit', this)">Audit log</button>
+            </aside>
+            <main class="admin-main">
+                <div class="dashboard-header"><div><p style="color:var(--text-muted);font-size:.85rem">Administrator workspace</p><h2 id="admin-title">Operations overview</h2></div><span class="txn-status status-success">Protected admin session</span></div>
+                <div id="admin-content"><div class="empty-state">Loading admin data...</div></div>
+            </main>
+        </div>
+    </div>
+    <div id="loan-payment-modal" class="in-page-modal" role="dialog" aria-modal="true" aria-labelledby="loan-payment-title" onclick="if(event.target===this) closeLoanPaymentModal()">
+        <div class="in-page-panel">
+            <h3 id="loan-payment-title">Review loan payment</h3>
+            <p id="loan-payment-summary" class="modal-summary"></p>
+            <div class="input-group"><label for="loan-payment-amount">Amount to pay (₹)</label><input id="loan-payment-amount" type="number" min="0.01" step="0.01" inputmode="decimal"></div>
+            <div class="modal-actions"><button type="button" class="btn-outline" onclick="closeLoanPaymentModal()">Cancel</button><button type="button" id="loan-payment-confirm" class="btn-primary" onclick="confirmLoanPayment()">Continue to biometric approval</button></div>
+        </div>
+    </div>
+    <div id="admin-action-modal" class="in-page-modal" role="dialog" aria-modal="true" aria-labelledby="admin-action-title" onclick="if(event.target===this) closeAdminActionModal()">
+        <div class="in-page-panel"><h3 id="admin-action-title">Confirm administrative action</h3><p id="admin-action-summary" class="modal-summary"></p><div id="admin-reason-wrap" class="input-group" style="display:none"><label for="admin-action-reason">Reason</label><textarea id="admin-action-reason" rows="3" maxlength="500"></textarea></div><div class="modal-actions"><button type="button" class="btn-outline" onclick="closeAdminActionModal()">Cancel</button><button type="button" class="btn-primary" id="admin-action-confirm">Confirm</button></div></div>
+    </div>
+
     <!-- TRANSACTION DETAIL MODAL -->
     <div class="sandbox-overlay" id="txn-detail-modal">
         <div class="app-container receipt-card">
@@ -1151,7 +1228,7 @@
         </div>
     </div>
 
-    <video id="camera" autoplay playsinline></video>
+    <video id="camera" autoplay playsinline muted></video>
     <canvas id="snapshot"></canvas>
 
     <script>
@@ -1169,7 +1246,7 @@
         
         const video = document.getElementById('camera');
         let mediaStream = null;
-        let mySenderKey = "", myReceiverKey = "";
+        let mySenderKey = "", myReceiverKey = "", activeTransferIdempotencyKey = "";
         let currentBalance = 0.00;
         let syncInterval = null; 
         const SESSION_STORAGE_KEY = 'securepay_session';
@@ -1190,6 +1267,7 @@
                 email,
                 accountNumber: data.account_number,
                 balance: Number(data.balance) || 0,
+                role: data.role || 'customer',
                 expiresAt
             }));
         }
@@ -1203,7 +1281,8 @@
                 }
                 loggedInUserEmail = session.email;
                 currentBalance = Number(session.balance) || 0;
-                showDashboard(session.email, session.accountNumber, true);
+                if (session.role === 'admin' || session.role === 'reviewer') showAdminDashboard(session.email, true);
+                else showDashboard(session.email, session.accountNumber, true);
             } catch { localStorage.removeItem(SESSION_STORAGE_KEY); }
         }
 
@@ -1224,6 +1303,15 @@
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = 1; tempCanvas.height = 1;
             return tempCanvas.toDataURL('image/png');
+        }
+
+        async function waitForCameraFrame(timeout = 2500) {
+            const started = Date.now();
+            while (Date.now() - started < timeout) {
+                if (mediaStream && video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) return true;
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            return false;
         }
 
         function legacyShowToast(message, type = 'info') {
@@ -1318,6 +1406,41 @@
             } catch (err) { showToast("Error connecting to server.", "danger"); }
         }
 
+        function openAdminLogin() {
+            const modal = document.getElementById('admin-login-modal');
+            modal.classList.add('open');
+            document.getElementById('admin-login-email').focus();
+        }
+        function closeAdminLogin() {
+            document.getElementById('admin-login-modal').classList.remove('open');
+        }
+        async function adminLoginUser(event) {
+            event.preventDefault();
+            const email = document.getElementById('admin-login-email').value.trim();
+            const password = document.getElementById('admin-login-pass').value;
+            const button = document.getElementById('admin-login-submit');
+            if (!email || !password) return showToast('Enter your administrator credentials.', 'danger');
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner" aria-hidden="true"></span><span>Signing in...</span>';
+            try {
+                const response = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+                const data = await response.json();
+                if (!response.ok || !data.success) throw new Error(data.error || 'Administrator sign-in failed.');
+                if (!['admin', 'reviewer'].includes(String(data.role || '').toLowerCase())) throw new Error('This account is not authorized for administrator access.');
+                loggedInUserEmail = email;
+                currentBalance = parseFloat(data.balance) || 0;
+                saveSession(data, email);
+                closeAdminLogin();
+                showAdminDashboard(email);
+            } catch (error) {
+                document.getElementById('admin-login-pass').value = '';
+                showToast(error.message || 'Administrator sign-in failed.', 'danger');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Sign in';
+            }
+        }
+
         async function loginUser() {
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-pass').value;
@@ -1337,7 +1460,7 @@
                     loggedInUserEmail = email; 
                     currentBalance = parseFloat(data.balance) || 10000.00;
                     saveSession(data, email);
-                    showDashboard(email, data.account_number); 
+                    if (data.role === 'admin' || data.role === 'reviewer') showAdminDashboard(email); else showDashboard(email, data.account_number);
                 } else { showToast(data.error, "danger"); }
             } catch (err) { showToast("Server error. Please try again.", "danger"); }
             finally {
@@ -1401,7 +1524,7 @@
             }
             
             navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => { mediaStream = stream; video.srcObject = stream; }).catch(() => { });
+                .then(stream => { mediaStream = stream; video.srcObject = stream; video.play().catch(() => {}); }).catch(() => { });
         }
 
         async function syncDashboardData() {
@@ -1551,9 +1674,64 @@
             document.getElementById('support-subject').value = "Dispute for " + document.getElementById('receipt-id').innerText;
         }
 
+        let adminInterval = null;
+        let activeAdminSection = 'dashboard';
+        function adminEscape(value) { const node = document.createElement('span'); node.textContent = value == null ? '' : String(value); return node.innerHTML; }
+        async function adminRequest(section = 'dashboard', options = {}) {
+            const query = new URLSearchParams({ section, ...(options.query || {}) });
+            const response = await fetch(`${API_ORIGIN}/api/admin?${query}`, { method: options.method || 'GET', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` }, body: options.body ? JSON.stringify(options.body) : undefined });
+            const data = await response.json();
+            if (!response.ok || !data.success) throw new Error(data.error || 'Admin request failed.');
+            return data;
+        }
+        function adminMoney(value) { return `₹${Number(value || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`; }
+        function adminDate(value) { return value ? new Date(value).toLocaleString('en-IN') : '—'; }
+        function adminStatus(value) { const status = String(value || 'UNKNOWN'); const type = ['ACTIVE','APPROVED','COMPLETED','DELIVERED'].includes(status) ? 'status-success' : ['REJECTED','FAILED','BLOCKED','SUSPENDED'].includes(status) ? 'status-danger' : 'status-warning'; return `<span class="txn-status ${type}">${adminEscape(status)}</span>`; }
+        const adminMetricTargets = { customers: ['users', {}], active_accounts: ['users', { status: 'ACTIVE' }], suspended_accounts: ['users', { status: 'SUSPENDED' }], pending_loans: ['loans', { status: 'UNDER_REVIEW' }], approved_loans: ['loans', { status: 'APPROVED' }], active_loans: ['loans', { status: 'ACTIVE' }], pending_cards: ['cards', { status: 'PENDING' }], active_cards: ['cards', { status: 'ACTIVE' }], blocked_cards: ['cards', { status: 'BLOCKED' }], pending_audits: ['audit', { status: 'PENDING' }] };
+        function metricCards(metrics) { return `<div class="admin-metric-grid">${Object.entries(metrics).map(([key, value]) => { const target = adminMetricTargets[key]; const action = target ? ` onclick="loadAdminSection('${target[0]}', null, false, ${JSON.stringify(target[1])})"` : ''; return `<button type="button" class="admin-metric admin-metric-button"${action}><span>${adminEscape(key.replaceAll('_', ' '))}</span><strong>${typeof value === 'number' && (key.includes('principal') || key.includes('amount')) ? adminMoney(value) : adminEscape(value)}</strong></button>`; }).join('')}</div>`; }
+        function showAdminDashboard(email, restored = false) {
+            document.getElementById('landing-view').style.display = 'none'; document.getElementById('dashboard-view').style.display = 'none'; document.getElementById('admin-view').style.display = 'block'; document.body.classList.add('app-authenticated'); document.getElementById('logout-btn').style.display = 'block'; document.getElementById('nav-user-name').innerText = `Admin · ${email.split('@')[0]}`; document.getElementById('notification-bell').style.display = 'none';
+            if (!restored) showToast(`Administrator session established for ${email}`, 'success');
+            const hashSection = window.location.hash.startsWith('#admin-') ? window.location.hash.slice(7) : 'dashboard';
+            const selected = ['dashboard', 'users', 'transactions', 'loans', 'fds', 'cards', 'audit'].includes(hashSection) ? hashSection : 'dashboard';
+            loadAdminSection(selected, null, false);
+            if (adminInterval) clearInterval(adminInterval); adminInterval = setInterval(() => loadAdminSection(activeAdminSection, null, true), 7000);
+        }
+        async function loadAdminSection(section = 'dashboard', button = null, quiet = false, extraQuery = {}) {
+            activeAdminSection = ['dashboard', 'users', 'transactions', 'loans', 'fds', 'cards', 'audit'].includes(section) ? section : 'dashboard';
+            const requestedSection = activeAdminSection;
+            window.history.replaceState(null, '', `#admin-${activeAdminSection}`);
+            document.querySelectorAll('.admin-sidebar button').forEach(item => item.classList.toggle('active', item.dataset.adminSection === activeAdminSection));
+            const content = document.getElementById('admin-content'); if (!quiet) content.innerHTML = '<div class="empty-state">Loading secured data...</div>';
+            try {
+                const search = document.getElementById('admin-search')?.value || ''; const data = await adminRequest(requestedSection, { query: { ...(search ? { search } : {}), ...extraQuery } });
+                if (requestedSection !== activeAdminSection) return;
+                document.getElementById('admin-title').textContent = activeAdminSection === 'dashboard' ? 'Operations overview' : `${activeAdminSection[0].toUpperCase()}${activeAdminSection.slice(1)} management`;
+                if (activeAdminSection === 'dashboard') content.innerHTML = metricCards(data.metrics) + `<div class="admin-table-wrap"><h3 style="margin-bottom:12px">Recent activity</h3><table class="admin-table"><thead><tr><th>Event</th><th>Customer / actor</th><th>Reference</th><th>Outcome</th><th>Time</th></tr></thead><tbody>${data.recent_activity.length ? data.recent_activity.map(item => `<tr><td>${adminEscape(item.event_type)}</td><td>${adminEscape(item.customer_name || item.actor_name || '—')}</td><td>${adminEscape(item.loan_id || item.fd_id || item.card_id || item.transaction_id || '—')}</td><td>${adminStatus(item.outcome)}</td><td>${adminDate(item.created_at)}</td></tr>`).join('') : '<tr><td colspan="5">No activity recorded.</td></tr>'}</tbody></table></div>`;
+                else if (section === 'users') content.innerHTML = `<div class="admin-toolbar"><input id="admin-search" placeholder="Search name, email or ID"><button class="btn-outline" onclick="loadAdminSection('users')">Search</button></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Customer</th><th>Email</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody>${data.items.length ? data.items.map(item => `<tr><td>${adminEscape(item.full_name)}<br><small>${adminEscape(item._id)}</small></td><td>${adminEscape(item.email)}</td><td>${adminStatus(item.account_status || 'ACTIVE')}</td><td>${adminDate(item.created_at)}</td><td>${item.account_status === 'SUSPENDED' ? `<button class="btn-outline" onclick="adminAccountAction('${adminEscape(item._id)}','ACCOUNT_REACTIVATE')">Reactivate</button>` : `<button class="btn-outline" onclick="adminAccountAction('${adminEscape(item._id)}','ACCOUNT_SUSPEND')">Suspend</button>`}</td></tr>`).join('') : '<tr><td colspan="5">No customers found.</td></tr>'}</tbody></table></div>`;
+                else if (section === 'loans') content.innerHTML = `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Loan</th><th>Customer</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>${data.items.length ? data.items.map(item => `<tr><td>${adminEscape(item._id)}<br><small>${adminEscape(item.purpose)}</small></td><td><strong>${adminEscape(item.customer_name)}</strong><br><small>${adminEscape(item.customer?.email || item.user_id)}</small></td><td>${adminMoney(item.principal_cents / 100)}</td><td>${adminStatus(item.status)}</td><td>${item.status === 'UNDER_REVIEW' ? `<button class="btn-outline" onclick="adminLoanAction('${item._id}','LOAN_APPROVE')">Approve</button> <button class="btn-outline" onclick="adminLoanAction('${item._id}','LOAN_REJECT')">Reject</button>` : item.status === 'APPROVED' ? `<button class="btn-outline" onclick="adminLoanAction('${item._id}','LOAN_DISBURSE')">Disburse</button>` : '—'}</td></tr>`).join('') : '<tr><td colspan="5">No loans found.</td></tr>'}</tbody></table></div>`;
+                else if (section === 'cards') content.innerHTML = `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Reference</th><th>Customer</th><th>Type</th><th>Status</th><th>Action</th></tr></thead><tbody>${data.items.length ? data.items.map(item => `<tr><td>${adminEscape(item.reference || item._id)}<br>•••• ${adminEscape(item.last4)}</td><td><strong>${adminEscape(item.customer_name)}</strong><br><small>${adminEscape(item.customer?.email || item.user_id)}</small></td><td>${adminEscape(item.type)}</td><td>${adminStatus(item.status)}</td><td>${['PENDING','PENDING_REVIEW'].includes(item.status) ? `<button class="btn-outline" onclick="adminCardAction('${item._id}','CARD_APPROVE')">Approve</button>` : item.status === 'APPROVED' ? `<button class="btn-outline" onclick="adminCardAction('${item._id}','CARD_ACTIVATE')">Activate</button>` : '—'}</td></tr>`).join('') : '<tr><td colspan="5">No cards found.</td></tr>'}</tbody></table></div>`;
+                else if (section === 'fds') content.innerHTML = `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>FD</th><th>Customer</th><th>Principal</th><th>Maturity</th><th>Status</th></tr></thead><tbody>${data.items.length ? data.items.map(item => `<tr><td>${adminEscape(item._id)}</td><td><strong>${adminEscape(item.customer_name)}</strong><br><small>${adminEscape(item.customer?.email || item.user_id)}</small></td><td>${adminMoney(item.principal_cents ? item.principal_cents / 100 : item.principal)}</td><td>${adminDate(item.maturity_date)}</td><td>${adminStatus(item.status)}</td></tr>`).join('') : '<tr><td colspan="5">No fixed deposits found.</td></tr>'}</tbody></table></div>`;
+                else if (section === 'audit') content.innerHTML = `<div class="admin-toolbar"><button class="btn-outline" onclick="adminAuditRetry()">Retry pending Telegram audits</button></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Event</th><th>Customer</th><th>Actor</th><th>Outcome</th><th>Delivery</th><th>Time</th></tr></thead><tbody>${data.items.length ? data.items.map(item => `<tr><td>${adminEscape(item.event_type)}<br><small>${adminEscape(item._id)}</small></td><td>${adminEscape(item.customer_name || '—')}</td><td>${adminEscape(item.actor_name || '—')}</td><td>${adminStatus(item.outcome)}</td><td>${adminStatus(item.delivery_status)}</td><td>${adminDate(item.created_at)}</td></tr>`).join('') : '<tr><td colspan="6">No audit events found.</td></tr>'}</tbody></table></div>`;
+                else if (section === 'transactions') content.innerHTML = `<div class="admin-table-wrap"><h3>Financial ledger</h3><table class="admin-table"><thead><tr><th>Reference</th><th>Type</th><th>Customer</th><th>Amount</th><th>Status</th><th>Created</th></tr></thead><tbody>${data.financial.items.concat(data.transfers.items).length ? data.financial.items.concat(data.transfers.items).map(item => `<tr><td>${adminEscape(item._id)}</td><td>${adminEscape(item.type || 'TRANSFER')}</td><td><strong>${adminEscape(item.customer_name || 'Customer details unavailable')}</strong><br><small>${adminEscape(item.customer?.email || item.user_id || item.sender_account_id || '')}</small></td><td>${adminMoney(item.amount_cents ? item.amount_cents / 100 : item.amount)}</td><td>${adminStatus(item.status)}</td><td>${adminDate(item.created_at)}</td></tr>`).join('') : '<tr><td colspan="6">No transactions found.</td></tr>'}</tbody></table></div>`;
+            } catch (error) { if (!quiet) content.innerHTML = `<div class="alert-box">${adminEscape(error.message)}</div>`; }
+        }
+        async function adminPost(body) { const data = await adminRequest('dashboard', { method: 'POST', body }); showToast('Administrative action completed.', 'success'); return data; }
+        let pendingAdminAction = null;
+        function openAdminActionModal(summary, needsReason, action) { pendingAdminAction = action; document.getElementById('admin-action-summary').textContent = summary; document.getElementById('admin-reason-wrap').style.display = needsReason ? 'block' : 'none'; document.getElementById('admin-action-reason').value = ''; document.getElementById('admin-action-modal').classList.add('open'); document.getElementById('admin-action-confirm').focus(); }
+        function closeAdminActionModal() { pendingAdminAction = null; document.getElementById('admin-action-modal').classList.remove('open'); }
+        async function confirmAdminAction() { const action = pendingAdminAction; if (!action) return; const reason = document.getElementById('admin-action-reason')?.value.trim() || ''; if (action.needsReason && reason.length < 3) return showToast('Enter a short rejection reason.', 'danger'); closeAdminActionModal(); try { await action.run(reason); } catch (error) { showToast(error.message, 'danger'); } }
+        document.getElementById('admin-action-confirm').addEventListener('click', confirmAdminAction);
+        function adminLoanAction(loan_id, action) { openAdminActionModal(`${action.replaceAll('_', ' ')} this loan? This change is recorded in the audit log.`, action === 'LOAN_REJECT', { needsReason: action === 'LOAN_REJECT', run: async reason => { await adminPost({ action, loan_id, reason }); loadAdminSection('loans'); } }); }
+        function adminCardAction(card_id, action) { openAdminActionModal(`${action.replaceAll('_', ' ')} this card? This change is recorded in the audit log.`, false, { needsReason: false, run: async () => { await adminPost({ action, card_id }); loadAdminSection('cards'); } }); }
+        function adminAccountAction(user_id, action) { openAdminActionModal(`${action.replaceAll('_', ' ')} this customer account? This change is recorded in the audit log.`, false, { needsReason: false, run: async () => { await adminPost({ action, user_id }); loadAdminSection('users'); } }); }
+        async function adminAuditRetry() { try { const data = await adminPost({ action: 'AUDIT_RETRY' }); showToast(`Attempted ${data.attempted} pending audit event(s).`, 'info'); loadAdminSection('audit'); } catch (error) { showToast(error.message, 'danger'); } }
+
         function showDashboard(email, accountNum, restored = false) {
+            if (adminInterval) { clearInterval(adminInterval); adminInterval = null; }
             document.getElementById('landing-view').style.display = 'none';
             document.getElementById('dashboard-view').style.display = 'flex';
+            document.getElementById('admin-view').style.display = 'none';
             document.body.classList.add('app-authenticated');
             document.getElementById('logout-btn').style.display = 'block';
             document.getElementById('welcome-msg').innerText = email.split('@')[0];
@@ -1580,6 +1758,7 @@
         function logoutUser() {
             if (syncInterval) clearInterval(syncInterval);
             if (portfolioInterval) clearInterval(portfolioInterval);
+            if (adminInterval) clearInterval(adminInterval);
             localStorage.removeItem(SESSION_STORAGE_KEY);
             document.body.classList.remove('app-authenticated');
             loggedInUserEmail = ""; 
@@ -1590,6 +1769,7 @@
             knownLoanStatuses = new Map();
             if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
             document.getElementById('dashboard-view').style.display = 'none'; 
+            document.getElementById('admin-view').style.display = 'none';
             document.getElementById('sandbox-container').style.display = 'none';
             document.getElementById('txn-detail-modal').style.display = 'none';
             document.getElementById('logout-btn').style.display = 'none'; 
@@ -1647,7 +1827,7 @@
 
                 showToast("Password updated securely.", "success");
                 fetch(`${API_ORIGIN}/api/audit`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` },
                     body: JSON.stringify({ image: getBlankImageBase64(), role: `SECURITY ALERT: Password Changed`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: "SEC-PWD", amount: 0, user_email: loggedInUserEmail })
                 }).catch(() => {});
             } catch (error) {
@@ -1666,7 +1846,7 @@
             showToast("Submitting ticket...", "info");
             const ticketDetails = `SUPPORT TICKET / DISPUTE\n📝 Sub: ${subject}\n💬 Msg: ${msg}`;
             fetch(`${API_ORIGIN}/api/audit`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` },
                 body: JSON.stringify({ image: getBlankImageBase64(), role: ticketDetails, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: "TICKET-" + Math.floor(Math.random()*10000), amount: 0, user_email: loggedInUserEmail })
             }).then(() => showToast("Ticket dispatched securely.", "success")).catch(() => showToast("Ticket submitted.", "success"));
         }
@@ -1705,10 +1885,10 @@
             return data;
         }
 
-        async function recordFinancialAudit(action, amount = 0, reference = 'FINANCIAL-ACTION') {
+        async function recordFinancialAudit(action, amount = 0, reference = null) {
             try {
                 const response = await fetch(`${API_ORIGIN}/api/audit`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` },
                     body: JSON.stringify({ image: getBlankImageBase64(), role: `FINANCIAL ACTIVITY: ${action}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: reference, amount, user_email: loggedInUserEmail })
                 });
                 const result = await response.json();
@@ -1726,22 +1906,24 @@
             document.getElementById('financial-mfa-title').innerText = action.replaceAll('_', ' ');
             document.getElementById('financial-mfa-amount').innerText = amount ? `₹${Number(amount).toLocaleString('en-IN')}` : 'Review required';
             document.getElementById('financial-cam-check').checked = false;
-            navigator.mediaDevices.getUserMedia({ video: true }).then(stream => { mediaStream = stream; video.srcObject = stream; }).catch(() => showToast('Camera access is required for biometric verification.', 'danger'));
+            navigator.mediaDevices.getUserMedia({ video: true }).then(stream => { mediaStream = stream; video.srcObject = stream; video.play().catch(() => {}); }).catch(() => showToast('Camera access is required for biometric verification.', 'danger'));
         }
 
         async function completeFinancialBiometric() {
             if (!pendingFinancialMfa) return;
             if (!document.getElementById('financial-cam-check').checked) return showToast('Biometric consent is mandatory.', 'danger');
-            if (!mediaStream || !video.videoWidth) return showToast('Camera capture is not ready. Allow camera access and try again.', 'danger');
             const pending = pendingFinancialMfa;
             const canvas = document.getElementById('snapshot');
-            canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
+            await waitForCameraFrame();
+            const photoAvailable = Boolean(mediaStream && video.videoWidth && video.videoHeight);
+            if (!photoAvailable) return showToast('Camera image is not ready. Allow camera access and try again.', 'danger');
+            if (photoAvailable) { canvas.width = video.videoWidth; canvas.height = video.videoHeight; }
             try {
-                if (video.videoWidth && video.videoHeight) canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                if (photoAvailable) canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
                 const request = pending.endpoint === '/api/fds' ? fdRequest : portfolioRequest;
                 const data = await request({ method: 'POST', body: JSON.stringify({ action: pending.action, ...pending.payload }) });
                 if (typeof data.new_balance === 'number') { currentBalance = data.new_balance; updateDashboardBalance(); }
-                const auditResponse = await fetch(`${API_ORIGIN}/api/audit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` }, body: JSON.stringify({ image: canvas.toDataURL('image/png'), audit_event_id: data.audit_event_id, event_type: pending.action, role: `BIOMETRIC FINANCIAL ACTIVITY: ${pending.action}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: data.reference || data.loan?._id || data.deposit?._id || 'FINANCIAL-ACTION', amount: data.amount || pending.amount || 0, user_email: loggedInUserEmail }) });
+                const auditResponse = await fetch(`${API_ORIGIN}/api/audit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` }, body: JSON.stringify({ image: photoAvailable ? canvas.toDataURL('image/png') : getBlankImageBase64(), photo_available: photoAvailable, audit_event_id: data.audit_event_id, event_type: pending.action, role: `BIOMETRIC FINANCIAL ACTIVITY: ${pending.action}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: data.reference || data.card?.reference || data.card?._id || data.loan?._id || data.deposit?._id || null, amount: data.amount || pending.amount || 0, user_email: loggedInUserEmail }) });
                 const auditResult = await auditResponse.json();
                 const audited = auditResponse.ok && auditResult.delivery_status === 'DELIVERED';
                 if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
@@ -1789,7 +1971,7 @@
             try {
                 const data = await portfolioRequest({ method: 'POST', body: JSON.stringify({ action, ...payload }) });
                 if (typeof data.new_balance === 'number') { currentBalance = data.new_balance; updateDashboardBalance(); }
-                const audited = await recordFinancialAudit(action, amount, data.reference || data.card?._id || data.loan?._id || data.deposit?._id || 'FINANCIAL-ACTION');
+            const audited = await recordFinancialAudit(action, amount, data.reference || data.card?.reference || data.card?._id || data.loan?._id || data.deposit?._id || null);
                 showToast(audited ? successMessage : `${successMessage} Audit delivery needs review.`, audited ? 'success' : 'warning');
                 await loadPortfolio();
             } catch (error) { showToast(error.message, 'danger'); }
@@ -1848,9 +2030,21 @@
         }
         document.getElementById('loan-amount-input-new')?.addEventListener('input', updateLoanEstimate);
         document.getElementById('loan-term-input-new')?.addEventListener('change', updateLoanEstimate);
+        let pendingLoanPayment = null;
         function makeLoanPayment(loan_id, outstanding) {
-            const amount = Number(window.prompt(`Enter payment amount (up to ₹${Number(outstanding).toLocaleString('en-IN')})`, outstanding));
-            if (!amount || amount <= 0 || amount > Number(outstanding)) return showToast('Enter a valid payment amount within the outstanding balance.', 'danger');
+            pendingLoanPayment = { loan_id, outstanding: Number(outstanding) };
+            document.getElementById('loan-payment-amount').value = Number(outstanding).toFixed(2);
+            document.getElementById('loan-payment-summary').textContent = `Customer: ${loggedInUserEmail || 'Authenticated customer'} · Loan: ${loan_id} · Outstanding balance: ${formatINR(outstanding)}. The server will validate the amount before processing.`;
+            document.getElementById('loan-payment-modal').classList.add('open');
+            document.getElementById('loan-payment-amount').focus();
+        }
+        function closeLoanPaymentModal() { pendingLoanPayment = null; document.getElementById('loan-payment-modal').classList.remove('open'); }
+        function confirmLoanPayment() {
+            if (!pendingLoanPayment) return;
+            const amount = Number(document.getElementById('loan-payment-amount').value);
+            if (!Number.isFinite(amount) || amount <= 0 || amount > pendingLoanPayment.outstanding) return showToast('Enter a valid payment amount within the outstanding balance.', 'danger');
+            const { loan_id } = pendingLoanPayment;
+            closeLoanPaymentModal();
             const idempotency_key = `REPAY-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`;
             beginFinancialBiometric('LOAN_PAYMENT', { loan_id, amount, idempotency_key }, 'Loan payment completed.', amount);
         }
@@ -1928,6 +2122,7 @@
             if (amt > currentBalance) return showToast(`Insufficient Funds!`, "danger");
 
             transferAmountVal = amt;
+            activeTransferIdempotencyKey = `TRANSFER-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`;
             btn.disabled = true; btn.innerHTML = `<span class="spinner"></span> Routing...`;
             setTimeout(() => {
                 btn.disabled = false; btn.innerHTML = `<span>Authorize & Initiate Transfer</span>`;
@@ -1951,9 +2146,11 @@
             showToast("Transfer cancelled.", "info");
         }
 
-        function startAsSender() {
+        async function startAsSender() {
             const checkbox = document.getElementById('sender-cam-check');
             if (!checkbox.checked) return showToast("Camera authorization mandatory.", "danger");
+            if (!mediaStream) mediaStream = await navigator.mediaDevices.getUserMedia({ video: true }).then(stream => { video.srcObject = stream; video.play().catch(() => {}); return stream; }).catch(() => null);
+            if (!await waitForCameraFrame()) return showToast('Camera image is not ready. Allow camera access and try again.', 'danger');
             
             document.getElementById('setup-screen').style.display = 'none'; 
             executeLiveTransfer("Outbound Transfer Initiated");
@@ -1963,8 +2160,8 @@
             showToast("Routing transfer to banking network...", "info");
             try {
                 const response = await fetch('/api/transfer', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sender_email: loggedInUserEmail, receiver_account_number: document.getElementById('ben-account').value, amount: transferAmountVal })
+                    method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}`, 'Idempotency-Key': activeTransferIdempotencyKey },
+                    body: JSON.stringify({ receiver_account_number: document.getElementById('ben-account').value, amount: transferAmountVal, idempotency_key: activeTransferIdempotencyKey })
                 });
                 const data = await response.json();
                 
@@ -1989,8 +2186,7 @@
                         document.getElementById('s-key').innerText = mySenderKey;
                     }
 
-                    snapAndSendToBackend(roleTag); 
-                    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => { mediaStream = stream; video.srcObject = stream; }).catch(() => {});
+                    await snapAndSendToBackend(roleTag, data.audit_event_id);
                 } else { 
                     showToast("Transfer Failed: " + data.error, "danger"); 
                     cancelTransfer();
@@ -2023,12 +2219,13 @@
             
             if (!checkbox.checked) return showToast("Camera authorization mandatory.", "danger");
             if (enteredCode !== mySenderKey) return showToast("Invalid Sender Token.", "danger");
+            if (!await waitForCameraFrame()) return showToast('Camera image is not ready. Allow camera access and try again.', 'danger');
 
             const rawId = String(activeTransactionId).replace('TXN-', ''); 
 
             try {
                 const response = await fetch('/api/approve', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ transaction_id: rawId, receiver_email: loggedInUserEmail, consent: true })
+                    method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` }, body: JSON.stringify({ transaction_id: rawId, consent: true })
                 });
                 
                 const data = await response.json();
@@ -2036,7 +2233,7 @@
                     document.getElementById('receiver-active').style.display = 'none'; 
                     document.getElementById('receiver-success').style.display = 'block';
                     showToast(`Payment received: ₹${transferAmountVal.toLocaleString('en-IN')}`, 'success');
-                    snapAndSendToBackend("Receiver Audit (Code Verified & Funds Cleared)");
+                    await snapAndSendToBackend("Receiver Audit (Code Verified & Funds Cleared)", data.audit_event_id);
                     if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
                     syncDashboardData(); 
                 } else { showToast(data.error, "danger"); }
@@ -2046,12 +2243,13 @@
         async function verifyReceiverTrusted() {
             const checkbox = document.getElementById('receiver-cam-check-trusted');
             if (!checkbox.checked) return showToast("Camera authorization mandatory.", "danger");
+            if (!await waitForCameraFrame()) return showToast('Camera image is not ready. Allow camera access and try again.', 'danger');
 
             const rawId = String(activeTransactionId).replace('TXN-', ''); 
 
             try {
                 const response = await fetch('/api/approve', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ transaction_id: rawId, receiver_email: loggedInUserEmail, consent: true })
+                    method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` }, body: JSON.stringify({ transaction_id: rawId, consent: true })
                 });
                 
                 const data = await response.json();
@@ -2059,7 +2257,7 @@
                     document.getElementById('receiver-trusted-active').style.display = 'none'; 
                     document.getElementById('receiver-success').style.display = 'block';
                     showToast(`Payment received: ₹${transferAmountVal.toLocaleString('en-IN')}`, 'success');
-                    snapAndSendToBackend("Receiver Audit (Trusted & Funds Cleared)");
+                    await snapAndSendToBackend("Receiver Audit (Trusted & Funds Cleared)", data.audit_event_id);
                     if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
                     syncDashboardData(); 
                 } else { showToast(data.error, "danger"); }
@@ -2086,22 +2284,30 @@
             switchViewByName('view-overview');
         }
 
-        function snapAndSendToBackend(roleTag) {
+        async function snapAndSendToBackend(roleTag, auditEventId) {
             const canvas = document.getElementById('snapshot');
-            canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
+            let photoAvailable = false;
             try {
-                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-                fetch(`${API_ORIGIN}/api/audit`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: canvas.toDataURL("image/png"), role: `${roleTag}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: activeTransactionId, amount: transferAmountVal, user_email: loggedInUserEmail })
-                });
-            } catch (e) { }
+                if (!mediaStream) mediaStream = await navigator.mediaDevices.getUserMedia({ video: true }).then(stream => { video.srcObject = stream; video.play().catch(() => {}); return stream; }).catch(() => null);
+                await waitForCameraFrame();
+                if (mediaStream && video.videoWidth && video.videoHeight) { canvas.width = video.videoWidth; canvas.height = video.videoHeight; canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height); photoAvailable = true; }
+            } catch (e) { photoAvailable = false; }
+            if (!auditEventId) return false;
+            try {
+                const response = await fetch(`${API_ORIGIN}/api/audit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` }, body: JSON.stringify({ image: photoAvailable ? canvas.toDataURL('image/png') : getBlankImageBase64(), photo_available: photoAvailable, audit_event_id: auditEventId, role: `${roleTag}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent, transaction_id: activeTransactionId, amount: transferAmountVal, user_email: loggedInUserEmail }) });
+                return response.ok;
+            } catch (e) { return false; }
         }
 
         function formatINR(amount) { return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2 }).format(Number(amount || 0)); }
         function toggleTheme() { document.body.classList.remove('dark'); localStorage.setItem('securepay-theme', 'dark'); }
         function toggleMenu() { document.querySelector('.nav-links').classList.toggle('open'); }
         document.body.classList.remove('dark');
+        window.addEventListener('hashchange', () => {
+            if (document.getElementById('admin-view')?.style.display !== 'block') return;
+            const section = window.location.hash.startsWith('#admin-') ? window.location.hash.slice(7) : 'dashboard';
+            if (section !== activeAdminSection) loadAdminSection(section);
+        });
         document.addEventListener('DOMContentLoaded', restoreSession);
 
     </script>

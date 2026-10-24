@@ -77,6 +77,7 @@ module.exports = async (req, res) => {
       const user = await db.collection('users').findOne({ _id: payload.user_id }, { session });
       const account = user && await db.collection('accounts').findOne({ user_id: user._id }, { session });
       if (!user || !account) badRequest('Account not found.', 404);
+      if (user.account_status === 'SUSPENDED' || account.status === 'SUSPENDED') badRequest('This account is suspended. Financial actions are unavailable.', 403);
 
       if (req.method === 'GET') {
         const loans = await db.collection('loans').find({ user_id: user._id }, { session }).sort({ created_at: -1 }).toArray();
@@ -120,7 +121,7 @@ module.exports = async (req, res) => {
         const auditEventId = createId('AUDIT');
         const loan = { _id: loanId, user_id: user._id, idempotency_key: key, principal_cents: principalCents, amount: principalCents / 100, interest_rate: LOAN_RATE, interest_cents: terms.interestCents, monthly_emi_cents: terms.emiCents, total_payable_cents: terms.totalCents, outstanding_cents: terms.totalCents, outstanding_principal_cents: principalCents, outstanding_interest_cents: terms.interestCents, term_months: termMonths, purpose, employment, monthly_income_cents: monthlyIncomeCents, status: 'UNDER_REVIEW', created_at: now, audit_event_id: auditEventId };
         await db.collection('loans').insertOne(loan, { session });
-        await createAuditEvent(db, session, { _id: auditEventId, event_type: 'LOAN_APPLICATION_SUBMITTED', loan_id: loanId, user_id: user._id, amount_cents: principalCents, tenure_months: termMonths, actor_role: 'CUSTOMER', outcome: 'SUBMITTED', idempotency_key: key });
+        await createAuditEvent(db, session, { _id: auditEventId, event_type: 'LOAN_APPLICATION_SUBMITTED', loan_id: loanId, user_id: user._id, amount_cents: principalCents, principal_cents: principalCents, interest_rate: LOAN_RATE, emi_cents: terms.emiCents, outstanding_balance_cents: terms.totalCents, tenure_months: termMonths, installment_status: 'UNDER_REVIEW', actor_role: 'CUSTOMER', outcome: 'SUBMITTED', idempotency_key: key });
         return { action, loan: loanView(loan), audit_event_id: auditEventId };
       }
 
@@ -132,7 +133,7 @@ module.exports = async (req, res) => {
           if (loan.status !== 'UNDER_REVIEW') badRequest('Only loans under review can be approved.');
           await db.collection('loans').updateOne({ _id: loan._id, status: 'UNDER_REVIEW' }, { $set: { status: 'APPROVED', reviewer_id: user._id, reviewer_role: user.role || 'reviewer', decision_at: now }, $unset: { rejection_reason: '' } }, { session });
           const eventId = createId('AUDIT');
-          await createAuditEvent(db, session, { _id: eventId, event_type: 'LOAN_APPROVED', loan_id: loan._id, user_id: loan.user_id, amount_cents: loan.principal_cents, actor_id: user._id, actor_role: user.role || 'reviewer', outcome: 'APPROVED' });
+          await createAuditEvent(db, session, { _id: eventId, event_type: 'LOAN_APPROVED', loan_id: loan._id, user_id: loan.user_id, amount_cents: loan.principal_cents, principal_cents: loan.principal_cents, interest_rate: loan.interest_rate, emi_cents: loan.monthly_emi_cents, outstanding_balance_cents: loan.outstanding_cents, tenure_months: loan.term_months, installment_status: 'APPROVED', actor_id: user._id, actor_role: user.role || 'reviewer', outcome: 'APPROVED' });
           return { action, loan_id: loan._id, audit_event_id: eventId };
         }
         if (action === 'REJECT_LOAN') {
@@ -141,7 +142,7 @@ module.exports = async (req, res) => {
           if (reason.length < 3 || reason.length > 500) badRequest('A rejection reason is required.');
           await db.collection('loans').updateOne({ _id: loan._id, status: 'UNDER_REVIEW' }, { $set: { status: 'REJECTED', rejection_reason: reason, reviewer_id: user._id, reviewer_role: user.role || 'reviewer', decision_at: now } }, { session });
           const eventId = createId('AUDIT');
-          await createAuditEvent(db, session, { _id: eventId, event_type: 'LOAN_REJECTED', loan_id: loan._id, user_id: loan.user_id, amount_cents: loan.principal_cents, actor_id: user._id, actor_role: user.role || 'reviewer', outcome: 'REJECTED' });
+          await createAuditEvent(db, session, { _id: eventId, event_type: 'LOAN_REJECTED', loan_id: loan._id, user_id: loan.user_id, amount_cents: loan.principal_cents, principal_cents: loan.principal_cents, interest_rate: loan.interest_rate, emi_cents: loan.monthly_emi_cents, outstanding_balance_cents: loan.outstanding_cents, tenure_months: loan.term_months, installment_status: 'REJECTED', actor_id: user._id, actor_role: user.role || 'reviewer', outcome: 'REJECTED' });
           return { action, loan_id: loan._id, audit_event_id: eventId };
         }
         if (loan.status !== 'APPROVED') badRequest('Only approved loans can be disbursed.');
@@ -156,7 +157,7 @@ module.exports = async (req, res) => {
         await db.collection('financial_transactions').insertOne({ _id: transactionId, user_id: loan.user_id, account_id: borrowerAccount._id, loan_id: loan._id, idempotency_key: disbursementKey, type: 'LOAN_DISBURSEMENT', amount_cents: loan.principal_cents, status: 'COMPLETED', created_at: now }, { session });
         await db.collection('loans').updateOne({ _id: loan._id, status: 'APPROVED' }, { $set: { status: 'DISBURSED', disbursed_at: now, disbursement_transaction_id: transactionId } }, { session });
         const eventId = createId('AUDIT');
-        await createAuditEvent(db, session, { _id: eventId, event_type: 'LOAN_DISBURSED', loan_id: loan._id, user_id: loan.user_id, amount_cents: loan.principal_cents, transaction_id: transactionId, actor_id: user._id, actor_role: user.role || 'reviewer', outcome: 'COMPLETED' });
+        await createAuditEvent(db, session, { _id: eventId, event_type: 'LOAN_DISBURSED', loan_id: loan._id, user_id: loan.user_id, amount_cents: loan.principal_cents, principal_cents: loan.principal_cents, interest_rate: loan.interest_rate, emi_cents: loan.monthly_emi_cents, outstanding_balance_cents: loan.outstanding_cents, tenure_months: loan.term_months, installment_status: 'DISBURSED', transaction_id: transactionId, actor_id: user._id, actor_role: user.role || 'reviewer', outcome: 'COMPLETED' });
         return { action, loan_id: loan._id, reference: transactionId, audit_event_id: eventId, new_balance: Number(borrowerAccount.balance) + loan.principal_cents / 100 };
       }
 
@@ -183,7 +184,7 @@ module.exports = async (req, res) => {
         const closed = remainingTotal === 0;
         await db.collection('loans').updateOne({ _id: loan._id, status: { $in: ['DISBURSED', 'ACTIVE'] }, outstanding_cents: Number(loan.outstanding_cents) }, { $set: { outstanding_cents: remainingTotal, outstanding_principal_cents: remainingPrincipal, outstanding_interest_cents: remainingInterest, status: closed ? 'CLOSED' : 'ACTIVE', next_due_date: closed ? null : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000), closed_at: closed ? now : null, updated_at: now } }, { session });
         const eventId = createId('AUDIT');
-        await createAuditEvent(db, session, { _id: eventId, event_type: closed ? 'LOAN_CLOSED' : 'LOAN_EMI_PAYMENT', loan_id: loan._id, user_id: user._id, amount_cents: paymentCents, transaction_id: transactionId, actor_id: user._id, actor_role: 'CUSTOMER', outcome: 'COMPLETED' });
+        await createAuditEvent(db, session, { _id: eventId, event_type: closed ? 'LOAN_CLOSED' : 'LOAN_EMI_PAYMENT', loan_id: loan._id, user_id: user._id, amount_cents: paymentCents, payment_amount_cents: paymentCents, principal_cents: loan.principal_cents, interest_rate: loan.interest_rate, emi_cents: loan.monthly_emi_cents, outstanding_balance_cents: remainingTotal, tenure_months: loan.term_months, installment_status: closed ? 'CLOSED' : 'ACTIVE', transaction_id: transactionId, actor_id: user._id, actor_role: 'CUSTOMER', outcome: 'COMPLETED' });
         return { action, amount: paymentCents / 100, principal_component: principalCents / 100, interest_component: interestCents / 100, reference: transactionId, audit_event_id: eventId, new_balance: Number(account.balance) - paymentCents / 100, status: closed ? 'CLOSED' : 'ACTIVE' };
       }
 
@@ -202,14 +203,18 @@ module.exports = async (req, res) => {
         const deposit = { _id: createId('FD'), user_id: user._id, principal: amount, interest_rate: 7.1, tenure_months: tenure, maturity_amount: Math.round(amount * (1 + 0.071 * tenure / 12)), status: 'ACTIVE', created_at: now };
         await db.collection('accounts').updateOne({ _id: account._id }, { $inc: { balance: -amount } }, { session });
         await db.collection('fixed_deposits').insertOne(deposit, { session });
-        return { action, deposit, new_balance: Number(account.balance) - amount };
+        const auditEventId = createId('AUDIT');
+        await createAuditEvent(db, session, { _id: auditEventId, event_type: 'FD_OPENING_FUNDED', fd_id: deposit._id, user_id: user._id, principal_cents: Math.round(amount * 100), amount_cents: Math.round(amount * 100), interest_rate: deposit.interest_rate, tenure_months: tenure, maturity_amount_cents: Math.round(deposit.maturity_amount * 100), fd_status: deposit.status, actor_id: user._id, actor_role: 'CUSTOMER', outcome: 'COMPLETED' });
+        return { action, deposit, audit_event_id: auditEventId, new_balance: Number(account.balance) - amount };
       }
       if (action === 'CLOSE_FD') {
         const deposit = await db.collection('fixed_deposits').findOne({ _id: body.deposit_id, user_id: user._id, status: 'ACTIVE' }, { session });
         if (!deposit) badRequest('Fixed deposit not found or already closed.');
         await db.collection('fixed_deposits').updateOne({ _id: deposit._id }, { $set: { status: 'CLOSED', closed_at: now } }, { session });
         await db.collection('accounts').updateOne({ _id: account._id }, { $inc: { balance: deposit.maturity_amount } }, { session });
-        return { action, amount: deposit.maturity_amount, new_balance: Number(account.balance) + Number(deposit.maturity_amount) };
+        const auditEventId = createId('AUDIT');
+        await createAuditEvent(db, session, { _id: auditEventId, event_type: 'FD_PREMATURE_CLOSURE_COMPLETED', fd_id: deposit._id, user_id: user._id, principal_cents: Math.round(Number(deposit.principal) * 100), amount_cents: Math.round(Number(deposit.maturity_amount) * 100), interest_rate: Number(deposit.interest_rate || 7.1), tenure_months: Number(deposit.tenure_months), maturity_amount_cents: Math.round(Number(deposit.maturity_amount) * 100), fd_status: 'CLOSED', actor_id: user._id, actor_role: 'CUSTOMER', outcome: 'COMPLETED' });
+        return { action, amount: deposit.maturity_amount, audit_event_id: auditEventId, new_balance: Number(account.balance) + Number(deposit.maturity_amount) };
       }
       badRequest('Unsupported financial action.');
     });

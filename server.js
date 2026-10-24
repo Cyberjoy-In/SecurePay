@@ -5,6 +5,7 @@ const path = require('path');
 const apiHandlers = new Map([
   ['approve', require('./api/approve')],
   ['audit', require('./api/audit')],
+  ['admin', require('./api/admin')],
   ['bbps', require('./api/bbps')],
   ['change-password', require('./api/change-password')],
   ['cards', require('./api/cards')],

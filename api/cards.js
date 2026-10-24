@@ -81,6 +81,7 @@ module.exports = async (req, res) => {
       const user = await db.collection('users').findOne({ _id: payload.user_id }, { session });
       const account = user && await db.collection('accounts').findOne({ user_id: user._id }, { session });
       if (!user || !account) badRequest('Account not found.', 404);
+      if (user.account_status === 'SUSPENDED' || account.status === 'SUSPENDED') badRequest('This account is suspended. Financial actions are unavailable.', 403);
       const accountLimitCents = Math.round(Number(account.daily_limit || 100000) * 100);
 
       if (req.method === 'GET') {
@@ -110,7 +111,7 @@ module.exports = async (req, res) => {
         const auditEventId = createId('AUDIT');
         const card = { _id: cardId, reference, user_id: user._id, type: cardType, last4: String(Math.floor(1000 + Math.random() * 9000)), status: 'PENDING', application_status: 'PENDING', application_date: now, created_at: now, daily_limit_cents: accountLimitCents, audit_event_id: auditEventId };
         await db.collection('cards').insertOne(card, { session });
-        await createAuditEvent(db, session, { _id: auditEventId, event_type: 'CARD_APPLICATION_SUBMITTED', card_id: cardId, user_id: user._id, actor_id: user._id, actor_role: 'CUSTOMER', outcome: 'PENDING' });
+        await createAuditEvent(db, session, { _id: auditEventId, event_type: 'CARD_APPLICATION_SUBMITTED', card_id: cardId, application_id: reference, card_type: cardType, card_last4: card.last4, previous_status: null, new_status: 'PENDING', user_id: user._id, actor_id: user._id, actor_role: 'CUSTOMER', outcome: 'PENDING' });
         const response = { action: 'APPLY', card: cardView(card, accountLimitCents), audit_event_id: auditEventId };
         await saveOperation(db, session, user._id, key, response);
         return response;
@@ -127,7 +128,7 @@ module.exports = async (req, res) => {
         if (action === 'APPROVE') fields.approved_at = now; else fields.activated_at = now;
         await db.collection('cards').updateOne({ _id: card._id, status: expected }, { $set: fields }, { session });
         const auditEventId = createId('AUDIT');
-        await createAuditEvent(db, session, { _id: auditEventId, event_type: `CARD_${action}_DECISION`, card_id: card._id, user_id: card.user_id, actor_id: user._id, actor_role: user.role || 'reviewer', outcome: next });
+        await createAuditEvent(db, session, { _id: auditEventId, event_type: `CARD_${action}_DECISION`, card_id: card._id, application_id: card.reference || card._id, card_type: card.type || card.card_type, card_last4: card.last4, previous_status: expected, new_status: next, user_id: card.user_id, actor_id: user._id, actor_role: user.role || 'reviewer', outcome: next });
         return { action, card_id: card._id, status: next, audit_event_id: auditEventId };
       }
 
@@ -143,7 +144,7 @@ module.exports = async (req, res) => {
         const changed = await db.collection('cards').updateOne({ _id: card._id, user_id: user._id, status: expected }, { $set: update }, { session });
         if (changed.modifiedCount !== 1) badRequest('Card status changed. Refresh and try again.');
         const auditEventId = createId('AUDIT');
-        await createAuditEvent(db, session, { _id: auditEventId, event_type: `CARD_${action}ED`, card_id: card._id, user_id: user._id, actor_id: user._id, actor_role: 'CUSTOMER', outcome: next });
+        await createAuditEvent(db, session, { _id: auditEventId, event_type: `CARD_${action}ED`, card_id: card._id, application_id: card.reference || card._id, card_type: card.type || card.card_type, card_last4: card.last4, previous_status: current, new_status: next, user_id: user._id, actor_id: user._id, actor_role: 'CUSTOMER', outcome: next });
         const response = { action, card_id: card._id, status: next, audit_event_id: auditEventId };
         await saveOperation(db, session, user._id, key, response);
         return response;
@@ -151,10 +152,12 @@ module.exports = async (req, res) => {
       if (action === 'SET_LIMIT' || action === 'DAILY_LIMIT_UPDATE') {
         const limitCents = moneyCents(body.limit, 'daily limit');
         if (limitCents < MIN_LIMIT_CENTS || limitCents > MAX_LIMIT_CENTS) badRequest('Daily limit must be between ₹1,000 and ₹10,00,000.');
+        const previousLimitCents = Math.round(Number(account.daily_limit == null ? accountLimitCents / 100 : account.daily_limit) * 100);
+        if (previousLimitCents === limitCents) badRequest('The daily card limit is already set to that amount.', 409);
         await db.collection('accounts').updateOne({ _id: account._id, user_id: user._id }, { $set: { daily_limit: limitCents / 100, daily_limit_updated_at: now } }, { session });
         await db.collection('cards').updateMany({ user_id: user._id }, { $set: { daily_limit_cents: limitCents, daily_limit_updated_at: now } }, { session });
         const auditEventId = createId('AUDIT');
-        await createAuditEvent(db, session, { _id: auditEventId, event_type: 'CARD_DAILY_LIMIT_CHANGED', user_id: user._id, account_id: account._id, amount_cents: limitCents, actor_id: user._id, actor_role: 'CUSTOMER', outcome: 'COMPLETED' });
+        await createAuditEvent(db, session, { _id: auditEventId, event_type: 'CARD_LIMIT_CHANGED', user_id: user._id, account_id: account._id, previous_limit: previousLimitCents / 100, new_limit: limitCents / 100, limit_type: 'DAILY_CARD_SPENDING', currency: 'INR', amount_cents: limitCents, actor_id: user._id, actor_role: 'CUSTOMER', outcome: 'COMPLETED' });
         const response = { action: 'SET_LIMIT', limit: limitCents / 100, audit_event_id: auditEventId };
         await saveOperation(db, session, user._id, key, response);
         return response;
@@ -176,7 +179,7 @@ module.exports = async (req, res) => {
         const transactionId = createId('CARD-TXN');
         const auditEventId = createId('AUDIT');
         await db.collection('card_transactions').insertOne({ _id: transactionId, user_id: user._id, card_id: card._id, idempotency_key: key, type: 'SIMULATED_CARD_PAYMENT', amount_cents: amountCents, spending_day: today, status: 'COMPLETED', created_at: now }, { session });
-        await createAuditEvent(db, session, { _id: auditEventId, event_type: 'SIMULATED_CARD_PAYMENT', card_id: card._id, user_id: user._id, amount_cents: amountCents, transaction_id: transactionId, actor_id: user._id, actor_role: 'CUSTOMER', outcome: 'COMPLETED' });
+        await createAuditEvent(db, session, { _id: auditEventId, event_type: 'SIMULATED_CARD_PAYMENT', card_id: card._id, application_id: card.reference || card._id, card_type: card.type || card.card_type, card_last4: card.last4, previous_status: current, new_status: current, user_id: user._id, amount_cents: amountCents, transaction_id: transactionId, actor_id: user._id, actor_role: 'CUSTOMER', outcome: 'COMPLETED' });
         const response = { action, simulated: true, reference: transactionId, amount: amountCents / 100, daily_spent: (spentCents + amountCents) / 100, daily_limit: limitCents / 100, audit_event_id: auditEventId };
         await saveOperation(db, session, user._id, key, response);
         return response;
@@ -188,7 +191,11 @@ module.exports = async (req, res) => {
     if (error && error.code === 11000) return res.status(409).json({ success: false, error: 'This card request was already processed or is being processed.' });
     try {
       const attemptedAction = String((req.body || {}).action || '').toUpperCase();
-      if (attemptedAction) await db.collection('audit_events').insertOne({ _id: createId('AUDIT'), event_type: 'CARD_ACTION_FAILED', card_id: (req.body || {}).card_id || null, user_id: payload.user_id, actor_id: payload.user_id, actor_role: String(payload.role || 'CUSTOMER'), outcome: 'REJECTED', failure_reason: String(error.message || 'Card action failed').slice(0, 240), created_at: new Date(), updated_at: new Date(), delivery_status: 'PENDING', attempts: 0 });
+      if (attemptedAction) {
+        const requestedCardId = String((req.body || {}).card_id || '');
+        const failedCard = requestedCardId ? await db.collection('cards').findOne({ _id: requestedCardId, user_id: payload.user_id }, { projection: { _id: 1, reference: 1, type: 1, last4: 1, status: 1 } }) : null;
+        await db.collection('audit_events').insertOne({ _id: createId('AUDIT'), event_type: 'CARD_ACTION_FAILED', card_id: failedCard?._id || null, application_id: failedCard?.reference || null, card_type: failedCard?.type || null, card_last4: failedCard?.last4 || null, previous_status: failedCard?.status || null, user_id: payload.user_id, actor_id: payload.user_id, actor_role: String(payload.role || 'CUSTOMER'), outcome: 'REJECTED', failure_reason: String(error.message || 'Card action failed').slice(0, 240), created_at: new Date(), updated_at: new Date(), delivery_status: 'PENDING', attempts: 0 });
+      }
     } catch { /* audit failure must not replace the original safe response */ }
     const status = error.statusCode || 500;
     return res.status(status).json({ success: false, error: error.expose || status < 500 ? error.message : 'Card request could not be completed.' });

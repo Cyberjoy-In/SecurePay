@@ -9,7 +9,8 @@ function getClient() {
     const dbName = process.env.MONGODB_DB_NAME || 'securepay';
     const client = new MongoClient(uri, {
       serverSelectionTimeoutMS: 10000,
-      connectTimeoutMS: 10000
+      connectTimeoutMS: 10000,
+      family: 4
     });
     clientPromise = client.connect().then(async connectedClient => {
       await connectedClient.db(dbName).command({ ping: 1 });

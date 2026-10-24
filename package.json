@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "node server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "bootstrap-admin": "node scripts/bootstrap-admin.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

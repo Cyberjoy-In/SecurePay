@@ -84,7 +84,7 @@ async function settleMaturity(db, session, fd, now) {
   if (updated.modifiedCount !== 1) return null;
   await db.collection('accounts').updateOne({ _id: account._id }, { $inc: { balance: proceeds / 100 } }, { session });
   await db.collection('financial_transactions').insertOne({ _id: transactionId, user_id: fd.user_id, account_id: account._id, fd_id: fd._id, type: 'FD_MATURITY', amount_cents: proceeds, status: 'COMPLETED', created_at: now }, { session });
-  await createAuditEvent(db, session, { _id: eventId, event_type: 'FD_MATURITY_CREDIT_COMPLETED', fd_id: fd._id, user_id: fd.user_id, amount_cents: proceeds, transaction_id: transactionId, actor_role: 'SYSTEM', outcome: 'COMPLETED' });
+  await createAuditEvent(db, session, { _id: eventId, event_type: 'FD_MATURITY_CREDIT_COMPLETED', fd_id: fd._id, user_id: fd.user_id, amount_cents: proceeds, principal_cents: fd.principal_cents, interest_rate: Number(fd.annual_rate_bps || 0) / 100, tenure_months: fd.tenure_months, maturity_amount_cents: proceeds, fd_status: 'CLOSED', transaction_id: transactionId, actor_role: 'SYSTEM', outcome: 'COMPLETED' });
   return { fd_id: fd._id, reference: transactionId, amount: amountView(proceeds), audit_event_id: eventId };
 }
 
@@ -102,6 +102,7 @@ module.exports = async (req, res) => {
       const user = await db.collection('users').findOne({ _id: payload.user_id }, { session });
       const account = user && await db.collection('accounts').findOne({ user_id: user._id }, { session });
       if (!user || !account) badRequest('Account not found.', 404);
+      if (user.account_status === 'SUSPENDED' || account.status === 'SUSPENDED') badRequest('This account is suspended. Financial actions are unavailable.', 403);
       if (req.method === 'GET') {
         const deposits = await db.collection('fixed_deposits').find({ user_id: user._id }, { session }).sort({ created_at: -1 }).toArray();
         return { account: { balance: Number(account.balance || 0), _id: account._id }, deposits: deposits.map(fdView), product: { minimum_amount: 5000, tenures: [12, 24, 36], annual_rate: 7.1, calculation_method: 'SIMPLE_INTEREST', terms_label: 'Illustrative prototype terms' } };
@@ -125,15 +126,14 @@ module.exports = async (req, res) => {
         const projectedMaturityCents = principalCents + projectedInterestCents;
         const fdId = createId('FD');
         const transactionId = createId('TXN');
-        const applicationAuditEventId = createId('AUDIT');
         const auditEventId = createId('AUDIT');
-        const fd = { _id: fdId, user_id: user._id, account_id: account._id, idempotency_key: key, principal_cents: principalCents, annual_rate_bps: ANNUAL_RATE_BPS, interest_rate: 7.1, calculation_method: 'SIMPLE_INTEREST', tenure_months: tenureMonths, opened_at: now, created_at: now, maturity_date: maturityDate, projected_interest_cents: projectedInterestCents, projected_maturity_cents: projectedMaturityCents, maturity_instruction: 'CREDIT_ACCOUNT', status: 'ACTIVE', status_history: ['ACTIVE'], application_audit_event_id: applicationAuditEventId, audit_event_id: auditEventId };
+        const fd = { _id: fdId, user_id: user._id, account_id: account._id, idempotency_key: key, principal_cents: principalCents, annual_rate_bps: ANNUAL_RATE_BPS, interest_rate: 7.1, calculation_method: 'SIMPLE_INTEREST', tenure_months: tenureMonths, opened_at: now, created_at: now, maturity_date: maturityDate, projected_interest_cents: projectedInterestCents, projected_maturity_cents: projectedMaturityCents, maturity_instruction: 'CREDIT_ACCOUNT', status: 'ACTIVE', status_history: ['ACTIVE'], application_audit_event_id: auditEventId, audit_event_id: auditEventId };
         const debit = await db.collection('accounts').updateOne({ _id: account._id, user_id: user._id, balance: { $gte: principalCents / 100 } }, { $inc: { balance: -(principalCents / 100) } }, { session });
         if (debit.modifiedCount !== 1) badRequest('Insufficient account balance.');
         await db.collection('fixed_deposits').insertOne(fd, { session });
         await db.collection('financial_transactions').insertOne({ _id: transactionId, user_id: user._id, account_id: account._id, fd_id: fdId, idempotency_key: key, type: 'FD_OPENING', amount_cents: principalCents, status: 'COMPLETED', created_at: now }, { session });
-        await createAuditEvent(db, session, { _id: applicationAuditEventId, event_type: 'FD_APPLICATION_SUBMITTED', fd_id: fdId, user_id: user._id, amount_cents: principalCents, actor_id: user._id, actor_role: 'CUSTOMER', outcome: 'SUBMITTED', idempotency_key: key });
-        await createAuditEvent(db, session, { _id: auditEventId, event_type: 'FD_OPENING_FUNDED', fd_id: fdId, user_id: user._id, amount_cents: principalCents, transaction_id: transactionId, actor_id: user._id, actor_role: 'CUSTOMER', outcome: 'COMPLETED', idempotency_key: key });
+        const fdAuditDetails = { fd_id: fdId, user_id: user._id, amount_cents: principalCents, principal_cents: principalCents, interest_rate: fd.interest_rate, tenure_months: tenureMonths, maturity_date: maturityDate, maturity_amount_cents: projectedMaturityCents, fd_status: 'ACTIVE', actor_id: user._id, actor_role: 'CUSTOMER', idempotency_key: key };
+        await createAuditEvent(db, session, { _id: auditEventId, event_type: 'FD_FUNDED', ...fdAuditDetails, transaction_id: transactionId, outcome: 'COMPLETED' });
         return { action, deposit: fdView(fd), reference: transactionId, audit_event_id: auditEventId, new_balance: Number(account.balance || 0) - principalCents / 100 };
       }
       if (action === 'CLOSE') {
@@ -156,7 +156,7 @@ module.exports = async (req, res) => {
         if (updated.modifiedCount !== 1) badRequest('This FD was already settled.');
         await db.collection('accounts').updateOne({ _id: account._id }, { $inc: { balance: settlementCents / 100 } }, { session });
         await db.collection('financial_transactions').insertOne({ _id: transactionId, user_id: user._id, account_id: account._id, fd_id: fd._id, idempotency_key: key, type: 'FD_PREMATURE_CLOSURE', amount_cents: settlementCents, principal_cents: principalCents, interest_cents: interestPaidCents, penalty_cents: penaltyCents, status: 'COMPLETED', created_at: now }, { session });
-        await createAuditEvent(db, session, { _id: auditEventId, event_type: 'FD_PREMATURE_CLOSURE_COMPLETED', fd_id: fd._id, user_id: user._id, amount_cents: settlementCents, transaction_id: transactionId, actor_id: user._id, actor_role: 'CUSTOMER', outcome: 'COMPLETED', penalty_cents: penaltyCents });
+        await createAuditEvent(db, session, { _id: auditEventId, event_type: 'FD_PREMATURE_CLOSURE_COMPLETED', fd_id: fd._id, user_id: user._id, amount_cents: settlementCents, principal_cents: principalCents, interest_rate: PREMATURE_RATE_BPS / 100, tenure_months: fd.tenure_months, maturity_amount_cents: settlementCents, fd_status: 'CLOSED', transaction_id: transactionId, actor_id: user._id, actor_role: 'CUSTOMER', outcome: 'COMPLETED', penalty_cents: penaltyCents });
         return { action, amount: amountView(settlementCents), principal_returned: amountView(principalCents), interest_paid: amountView(interestPaidCents), penalty: amountView(penaltyCents), reference: transactionId, audit_event_id: auditEventId, new_balance: Number(account.balance || 0) + settlementCents / 100 };
       }
       if (action === 'PROCESS_MATURITY') {

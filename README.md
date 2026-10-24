@@ -170,6 +170,12 @@ Card operations use the authenticated `/api/cards` endpoint. `GET /api/cards` li
 
 Simulated card payments never expose or create full card numbers, CVVs, or real card credentials. Active cards accumulate server-side daily spending in MongoDB; blocked cards and concurrent requests over the configured limit are rejected atomically. Card actions use idempotency keys, MongoDB transactions, and the shared Telegram audit outbox. The UI labels these as simulated transactions and does not imply that a real card has been issued.
 
+## Administrator dashboard
+
+Administrators use the protected `/api/admin` route and the separate in-app operations workspace. The dashboard provides database-backed metrics and paginated views for customers, transactions, loans, fixed deposits, cards and audit events. Loan approval/rejection/disbursement and card approval/activation are server-authorized actions with conditional state transitions and audit events; completed ledger records are not editable.
+
+To bootstrap an administrator, create the account through the normal registration flow with its intended password, set `ADMIN_EMAIL` to that registered email in the server environment, and run `npm run bootstrap-admin`. The bootstrap only promotes the existing account and preserves its password hash; it never creates an account or changes the password. Public registration always creates `customer` users. The dashboard refreshes metrics every seven seconds and customer polling continues to reconcile authoritative backend state; this prototype does not add WebSockets or SSE infrastructure.
+
 For a local MongoDB installation, use `MONGODB_URI=mongodb://127.0.0.1:27017`. For MongoDB Atlas, confirm the database user password, grant the user access to the `securepay` database, and add the current IP address to Atlas Network Access. If the password contains characters such as `@`, `:`, `/`, or `#`, URL-encode them in the connection string.
 
 If a Telegram credential or other secret is exposed in a repository, deployment log, screenshot, or chat, revoke it immediately and replace it across every affected environment.
