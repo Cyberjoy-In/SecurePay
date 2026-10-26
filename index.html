@@ -765,6 +765,16 @@
         .admin-table { width: 100%; min-width: 680px; border-collapse: collapse; }
         .admin-table th, .admin-table td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: .8rem; }
         .admin-table th { color: var(--text-muted); text-transform: uppercase; font-size: .68rem; }
+        .admin-audit-row { cursor: pointer; transition: background .18s ease; }
+        .admin-audit-row:hover, .admin-audit-row:focus { background: rgba(56, 189, 248, .08); outline: none; }
+        .admin-audit-detail-panel { width: min(820px, 100%); max-height: min(86vh, 760px); overflow: auto; }
+        .audit-detail-section { border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; margin: 12px 0; }
+        .audit-detail-section h4 { margin: 0 0 10px; font-size: .78rem; letter-spacing: .08em; color: var(--text-muted); }
+        .audit-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; }
+        .audit-detail-field { min-width: 0; }
+        .audit-detail-field span { display: block; color: var(--text-muted); font-size: .72rem; margin-bottom: 3px; }
+        .audit-detail-field strong { display: block; overflow-wrap: anywhere; font-size: .86rem; color: var(--text-main); }
+        @media (max-width: 620px) { .audit-detail-grid { grid-template-columns: 1fr; } }
         .admin-toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0; }
         .admin-toolbar input, .admin-toolbar select { max-width: 220px; padding: 10px; }
         @media (max-width: 700px) { .admin-layout { display: block; } .admin-sidebar { width: 100%; display: flex; overflow-x: auto; gap: 6px; padding: 10px; } .admin-sidebar button { min-width: max-content; margin: 0; } .admin-main { padding: 20px 12px; } }
@@ -1058,7 +1068,8 @@
                     <h3 style="margin-bottom: 6px; font-size: 1.35rem;">Security Settings</h3>
                     <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px;">Securely manage your account password.</p>
                     <div class="input-group"><label>Current Password</label><input type="password" id="sec-old-pass" placeholder="••••••••••••"></div>
-                    <div class="input-group" style="margin-bottom: 24px;"><label>New Secure Password</label><input type="password" id="sec-new-pass" placeholder="••••••••••••"></div>
+                    <div class="input-group"><label for="sec-new-pass">New Secure Password</label><input type="password" id="sec-new-pass" placeholder="6+ chars, uppercase, lowercase, symbol" autocomplete="new-password"></div>
+                    <div class="input-group" style="margin-bottom: 24px;"><label for="sec-confirm-pass">Confirm New Password</label><input type="password" id="sec-confirm-pass" placeholder="Re-enter your new password" autocomplete="new-password"></div>
                     <button class="btn-primary" onclick="updatePassword()">Securely Update Password</button>
                     <p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 14px;">Password updates are immediately logged to the compliance server.</p>
                 </div>
@@ -1115,8 +1126,19 @@
             <div class="modal-actions"><button type="button" class="btn-outline" onclick="closeLoanPaymentModal()">Cancel</button><button type="button" id="loan-payment-confirm" class="btn-primary" onclick="confirmLoanPayment()">Continue to biometric approval</button></div>
         </div>
     </div>
+    <div id="fd-closure-modal" class="in-page-modal" role="dialog" aria-modal="true" aria-labelledby="fd-closure-title" onclick="if(event.target===this) closeFdClosureModal()">
+        <div class="in-page-panel">
+            <h3 id="fd-closure-title">Review fixed-deposit closure</h3>
+            <p id="fd-closure-summary" class="modal-summary"></p>
+            <div id="fd-closure-details" class="modal-summary"></div>
+            <div class="modal-actions"><button type="button" class="btn-outline" onclick="closeFdClosureModal()">Cancel</button><button type="button" id="fd-closure-confirm" class="btn-primary" onclick="confirmFdClosure()">Confirm closure</button></div>
+        </div>
+    </div>
     <div id="admin-action-modal" class="in-page-modal" role="dialog" aria-modal="true" aria-labelledby="admin-action-title" onclick="if(event.target===this) closeAdminActionModal()">
         <div class="in-page-panel"><h3 id="admin-action-title">Confirm administrative action</h3><p id="admin-action-summary" class="modal-summary"></p><div id="admin-reason-wrap" class="input-group" style="display:none"><label for="admin-action-reason">Reason</label><textarea id="admin-action-reason" rows="3" maxlength="500"></textarea></div><div class="modal-actions"><button type="button" class="btn-outline" onclick="closeAdminActionModal()">Cancel</button><button type="button" class="btn-primary" id="admin-action-confirm">Confirm</button></div></div>
+    </div>
+    <div id="admin-audit-detail-modal" class="in-page-modal" role="dialog" aria-modal="true" aria-labelledby="admin-audit-detail-title" onclick="if(event.target===this) closeAdminAuditDetail()">
+        <div class="in-page-panel admin-audit-detail-panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h3 id="admin-audit-detail-title">Audit details</h3><button type="button" class="btn-outline" onclick="closeAdminAuditDetail()">Close</button></div><div id="admin-audit-detail-content" class="modal-summary" style="margin-top:16px">Loading audit details…</div></div>
     </div>
 
     <!-- TRANSACTION DETAIL MODAL -->
@@ -1239,13 +1261,19 @@
         let activeTransactionId = "";
         let pendingFinancialMfa = null;
         let knownLoanStatuses = new Map();
+        let knownDeposits = new Map();
         let portfolioInterval = null;
+        let portfolioInFlight = false;
         
         let clientIpInfo = "Unavailable";
         let clientLatLon = "Location Access Denied";
         
         const video = document.getElementById('camera');
         let mediaStream = null;
+        let cameraStartPromise = null;
+        let financialCaptureBusy = false;
+        let transferCaptureBusy = false;
+        let captureSequence = 0;
         let mySenderKey = "", myReceiverKey = "", activeTransferIdempotencyKey = "";
         let currentBalance = 0.00;
         let syncInterval = null; 
@@ -1299,30 +1327,54 @@
             if (metricBalance) metricBalance.innerText = formattedBalance;
         }
 
-        function getBlankImageBase64() {
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = 1; tempCanvas.height = 1;
-            return tempCanvas.toDataURL('image/png');
-        }
 
-        async function waitForCameraFrame(timeout = 2500) {
-            const started = Date.now();
-            while (Date.now() - started < timeout) {
-                if (mediaStream && video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) return true;
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
-            return false;
+        function cameraReady() { return Boolean(mediaStream && video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0); }
+        function waitForCameraFrame(timeout = 3000) {
+            if (cameraReady()) return Promise.resolve(true);
+            return new Promise(resolve => {
+                let settled = false;
+                const finish = value => { if (settled) return; settled = true; video.removeEventListener('loadeddata', onReady); video.removeEventListener('canplay', onReady); clearTimeout(timer); resolve(value); };
+                const onReady = () => { if (cameraReady()) finish(true); };
+                const timer = setTimeout(() => finish(cameraReady()), timeout);
+                video.addEventListener('loadeddata', onReady, { once: false });
+                video.addEventListener('canplay', onReady, { once: false });
+                requestAnimationFrame(onReady);
+            });
         }
 
         async function requestCameraForAudit() {
-            if (mediaStream) return await waitForCameraFrame();
+            if (cameraReady()) return true;
+            if (cameraStartPromise) return cameraStartPromise;
             if (!navigator.mediaDevices?.getUserMedia) return false;
-            mediaStream = await navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+            cameraStartPromise = navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } }).then(async stream => {
+                mediaStream = stream;
                 video.srcObject = stream;
-                video.play().catch(() => {});
-                return stream;
-            }).catch(() => null);
-            return await waitForCameraFrame();
+                await video.play().catch(() => {});
+                return waitForCameraFrame();
+            }).catch(() => false).finally(() => { cameraStartPromise = null; });
+            return cameraStartPromise;
+        }
+
+        function releaseCamera() {
+            if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+            mediaStream = null;
+            video.srcObject = null;
+        }
+
+        function captureAuditImage() {
+            if (!cameraReady()) return Promise.resolve(null);
+            const canvas = document.getElementById('snapshot');
+            const scale = Math.min(1, 1280 / video.videoWidth);
+            canvas.width = Math.max(1, Math.round(video.videoWidth * scale));
+            canvas.height = Math.max(1, Math.round(video.videoHeight * scale));
+            canvas.getContext('2d', { alpha: false }).drawImage(video, 0, 0, canvas.width, canvas.height);
+            return new Promise(resolve => canvas.toBlob(blob => {
+                if (!blob) return resolve(null);
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = () => resolve(null);
+                reader.readAsDataURL(blob);
+            }, 'image/jpeg', 0.82));
         }
 
         function legacyShowToast(message, type = 'info') {
@@ -1537,7 +1589,7 @@
         }
 
         async function syncDashboardData() {
-            if (!loggedInUserEmail || syncInFlight) return;
+            if (!loggedInUserEmail || syncInFlight || document.hidden) return;
             syncInFlight = true;
 
             try {
@@ -1598,14 +1650,14 @@
                             }
 
                             row.innerHTML = `
-                                <td style="font-family: monospace;">TXN-${txn.transaction_id}</td>
+                                <td style="font-family: monospace;">${txn.transaction_reference || txn.transaction_id}</td>
                                 <td>${channelText}</td>
                                 <td style="${amountStyle}">${amountText}</td>
                                 <td><span class="txn-status ${statusClass}${justSettled ? ' status-settling' : ''}">${statusLabel}</span></td>
                             `;
                             
                             // Attach click event for Detailed Receipt Modal
-                            row.onclick = () => showTransactionReceipt(`TXN-${txn.transaction_id}`, amountText, channelText, statusLabel, statusClass);
+                            row.onclick = () => showTransactionReceipt(txn.transaction_reference || txn.transaction_id, amountText, channelText, statusLabel, statusClass);
                             tbody.appendChild(row);
                         });
                     }
@@ -1684,6 +1736,7 @@
         }
 
         let adminInterval = null;
+        let adminInFlight = false;
         let activeAdminSection = 'dashboard';
         function adminEscape(value) { const node = document.createElement('span'); node.textContent = value == null ? '' : String(value); return node.innerHTML; }
         async function adminRequest(section = 'dashboard', options = {}) {
@@ -1707,8 +1760,10 @@
             if (adminInterval) clearInterval(adminInterval); adminInterval = setInterval(() => loadAdminSection(activeAdminSection, null, true), 7000);
         }
         async function loadAdminSection(section = 'dashboard', button = null, quiet = false, extraQuery = {}) {
+            if (adminInFlight || (quiet && document.hidden)) return;
             activeAdminSection = ['dashboard', 'users', 'transactions', 'loans', 'fds', 'cards', 'audit'].includes(section) ? section : 'dashboard';
             const requestedSection = activeAdminSection;
+            adminInFlight = true;
             window.history.replaceState(null, '', `#admin-${activeAdminSection}`);
             document.querySelectorAll('.admin-sidebar button').forEach(item => item.classList.toggle('active', item.dataset.adminSection === activeAdminSection));
             const content = document.getElementById('admin-content'); if (!quiet) content.innerHTML = '<div class="empty-state">Loading secured data...</div>';
@@ -1716,16 +1771,20 @@
                 const search = document.getElementById('admin-search')?.value || ''; const data = await adminRequest(requestedSection, { query: { ...(search ? { search } : {}), ...extraQuery } });
                 if (requestedSection !== activeAdminSection) return;
                 document.getElementById('admin-title').textContent = activeAdminSection === 'dashboard' ? 'Operations overview' : `${activeAdminSection[0].toUpperCase()}${activeAdminSection.slice(1)} management`;
-                if (activeAdminSection === 'dashboard') content.innerHTML = metricCards(data.metrics) + `<div class="admin-table-wrap"><h3 style="margin-bottom:12px">Recent activity</h3><table class="admin-table"><thead><tr><th>Event</th><th>Customer / actor</th><th>Reference</th><th>Outcome</th><th>Time</th></tr></thead><tbody>${data.recent_activity.length ? data.recent_activity.map(item => `<tr><td>${adminEscape(item.event_type)}</td><td>${adminEscape(item.customer_name || item.actor_name || '—')}</td><td>${adminEscape(item.loan_id || item.fd_id || item.card_id || item.transaction_id || '—')}</td><td>${adminStatus(item.outcome)}</td><td>${adminDate(item.created_at)}</td></tr>`).join('') : '<tr><td colspan="5">No activity recorded.</td></tr>'}</tbody></table></div>`;
-                else if (section === 'users') content.innerHTML = `<div class="admin-toolbar"><input id="admin-search" placeholder="Search name, email or ID"><button class="btn-outline" onclick="loadAdminSection('users')">Search</button></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Customer</th><th>Email</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody>${data.items.length ? data.items.map(item => `<tr><td>${adminEscape(item.full_name)}<br><small>${adminEscape(item._id)}</small></td><td>${adminEscape(item.email)}</td><td>${adminStatus(item.account_status || 'ACTIVE')}</td><td>${adminDate(item.created_at)}</td><td>${item.account_status === 'SUSPENDED' ? `<button class="btn-outline" onclick="adminAccountAction('${adminEscape(item._id)}','ACCOUNT_REACTIVATE')">Reactivate</button>` : `<button class="btn-outline" onclick="adminAccountAction('${adminEscape(item._id)}','ACCOUNT_SUSPEND')">Suspend</button>`}</td></tr>`).join('') : '<tr><td colspan="5">No customers found.</td></tr>'}</tbody></table></div>`;
-                else if (section === 'loans') content.innerHTML = `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Loan</th><th>Customer</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>${data.items.length ? data.items.map(item => `<tr><td>${adminEscape(item._id)}<br><small>${adminEscape(item.purpose)}</small></td><td><strong>${adminEscape(item.customer_name)}</strong><br><small>${adminEscape(item.customer?.email || item.user_id)}</small></td><td>${adminMoney(item.principal_cents / 100)}</td><td>${adminStatus(item.status)}</td><td>${item.status === 'UNDER_REVIEW' ? `<button class="btn-outline" onclick="adminLoanAction('${item._id}','LOAN_APPROVE')">Approve</button> <button class="btn-outline" onclick="adminLoanAction('${item._id}','LOAN_REJECT')">Reject</button>` : item.status === 'APPROVED' ? `<button class="btn-outline" onclick="adminLoanAction('${item._id}','LOAN_DISBURSE')">Disburse</button>` : '—'}</td></tr>`).join('') : '<tr><td colspan="5">No loans found.</td></tr>'}</tbody></table></div>`;
-                else if (section === 'cards') content.innerHTML = `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Reference</th><th>Customer</th><th>Type</th><th>Status</th><th>Action</th></tr></thead><tbody>${data.items.length ? data.items.map(item => `<tr><td>${adminEscape(item.reference || item._id)}<br>•••• ${adminEscape(item.last4)}</td><td><strong>${adminEscape(item.customer_name)}</strong><br><small>${adminEscape(item.customer?.email || item.user_id)}</small></td><td>${adminEscape(item.type)}</td><td>${adminStatus(item.status)}</td><td>${['PENDING','PENDING_REVIEW'].includes(item.status) ? `<button class="btn-outline" onclick="adminCardAction('${item._id}','CARD_APPROVE')">Approve</button>` : item.status === 'APPROVED' ? `<button class="btn-outline" onclick="adminCardAction('${item._id}','CARD_ACTIVATE')">Activate</button>` : '—'}</td></tr>`).join('') : '<tr><td colspan="5">No cards found.</td></tr>'}</tbody></table></div>`;
-                else if (section === 'fds') content.innerHTML = `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>FD</th><th>Customer</th><th>Principal</th><th>Maturity</th><th>Status</th></tr></thead><tbody>${data.items.length ? data.items.map(item => `<tr><td>${adminEscape(item._id)}</td><td><strong>${adminEscape(item.customer_name)}</strong><br><small>${adminEscape(item.customer?.email || item.user_id)}</small></td><td>${adminMoney(item.principal_cents ? item.principal_cents / 100 : item.principal)}</td><td>${adminDate(item.maturity_date)}</td><td>${adminStatus(item.status)}</td></tr>`).join('') : '<tr><td colspan="5">No fixed deposits found.</td></tr>'}</tbody></table></div>`;
-                else if (section === 'audit') content.innerHTML = `<div class="admin-toolbar"><button class="btn-outline" onclick="adminAuditRetry()">Retry pending Telegram audits</button></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Event</th><th>Customer</th><th>Actor</th><th>Outcome</th><th>Delivery</th><th>Time</th></tr></thead><tbody>${data.items.length ? data.items.map(item => `<tr><td>${adminEscape(item.event_type)}<br><small>${adminEscape(item._id)}</small></td><td>${adminEscape(item.customer_name || '—')}</td><td>${adminEscape(item.actor_name || '—')}</td><td>${adminStatus(item.outcome)}</td><td>${adminStatus(item.delivery_status)}</td><td>${adminDate(item.created_at)}</td></tr>`).join('') : '<tr><td colspan="6">No audit events found.</td></tr>'}</tbody></table></div>`;
-                else if (section === 'transactions') content.innerHTML = `<div class="admin-table-wrap"><h3>Financial ledger</h3><table class="admin-table"><thead><tr><th>Reference</th><th>Type</th><th>Customer</th><th>Amount</th><th>Status</th><th>Created</th></tr></thead><tbody>${data.financial.items.concat(data.transfers.items).length ? data.financial.items.concat(data.transfers.items).map(item => `<tr><td>${adminEscape(item._id)}</td><td>${adminEscape(item.type || 'TRANSFER')}</td><td><strong>${adminEscape(item.customer_name || 'Customer details unavailable')}</strong><br><small>${adminEscape(item.customer?.email || item.user_id || item.sender_account_id || '')}</small></td><td>${adminMoney(item.amount_cents ? item.amount_cents / 100 : item.amount)}</td><td>${adminStatus(item.status)}</td><td>${adminDate(item.created_at)}</td></tr>`).join('') : '<tr><td colspan="6">No transactions found.</td></tr>'}</tbody></table></div>`;
+                if (activeAdminSection === 'dashboard') content.innerHTML = metricCards(data.metrics) + `<div class="admin-table-wrap"><h3 style="margin-bottom:12px">Recent activity</h3><table class="admin-table"><thead><tr><th>Event</th><th>Customer / actor</th><th>Reference</th><th>Outcome</th><th>Time</th></tr></thead><tbody>${data.recent_activity.length ? data.recent_activity.map(item => `<tr class="admin-audit-row" tabindex="0" onclick="adminAuditDetail('${adminEscape(item._id)}')" onkeydown="if(event.key==='Enter'||event.key===' ') adminAuditDetail('${adminEscape(item._id)}')"><td>${adminEscape(item.event_type)}</td><td>${adminEscape(item.customer_name || item.actor_name || '—')}</td><td>${adminEscape(item.display_reference || '—')}</td><td>${adminStatus(item.outcome)}</td><td>${adminDate(item.created_at)}</td></tr>`).join('') : '<tr><td colspan="5">No activity recorded.</td></tr>'}</tbody></table></div>`;
+                else if (section === 'users') content.innerHTML = `<div class="admin-toolbar"><input id="admin-search" placeholder="Search name, email or ID"><button class="btn-outline" onclick="loadAdminSection('users')">Search</button></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Customer</th><th>Email</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody>${data.items.length ? data.items.map(item => `<tr><td>${adminEscape(item.full_name)}<br><small>${adminEscape(item.user_reference || item._id)}</small></td><td>${adminEscape(item.email)}</td><td>${adminStatus(item.account_status || 'ACTIVE')}</td><td>${adminDate(item.created_at)}</td><td>${item.account_status === 'SUSPENDED' ? `<button class="btn-outline" onclick="adminAccountAction('${adminEscape(item._id)}','ACCOUNT_REACTIVATE')">Reactivate</button>` : `<button class="btn-outline" onclick="adminAccountAction('${adminEscape(item._id)}','ACCOUNT_SUSPEND')">Suspend</button>`}</td></tr>`).join('') : '<tr><td colspan="5">No customers found.</td></tr>'}</tbody></table></div>`;
+                else if (section === 'loans') content.innerHTML = `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Loan</th><th>Customer</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>${data.items.length ? data.items.map(item => `<tr><td>${adminEscape(item.loan_reference || item._id)}<br><small>${adminEscape(item.purpose)}</small></td><td><strong>${adminEscape(item.customer_name)}</strong><br><small>${adminEscape(item.customer?.email || item.user_id)}</small></td><td>${adminMoney(item.principal_cents / 100)}</td><td>${adminStatus(item.status)}</td><td>${item.status === 'UNDER_REVIEW' ? `<button class="btn-outline" onclick="adminLoanAction('${item._id}','LOAN_APPROVE')">Approve</button> <button class="btn-outline" onclick="adminLoanAction('${item._id}','LOAN_REJECT')">Reject</button>` : item.status === 'APPROVED' ? `<button class="btn-outline" onclick="adminLoanAction('${item._id}','LOAN_DISBURSE')">Disburse</button>` : '—'}</td></tr>`).join('') : '<tr><td colspan="5">No loans found.</td></tr>'}</tbody></table></div>`;
+                else if (section === 'cards') content.innerHTML = `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Reference</th><th>Customer</th><th>Type</th><th>Status</th><th>Action</th></tr></thead><tbody>${data.items.length ? data.items.map(item => `<tr><td>${adminEscape(item.card_reference || item.reference || item._id)}<br>•••• ${adminEscape(item.last4)}</td><td><strong>${adminEscape(item.customer_name)}</strong><br><small>${adminEscape(item.customer?.email || item.user_id)}</small></td><td>${adminEscape(item.type)}</td><td>${adminStatus(item.status)}</td><td>${['PENDING','PENDING_REVIEW'].includes(item.status) ? `<button class="btn-outline" onclick="adminCardAction('${item._id}','CARD_APPROVE')">Approve</button>` : item.status === 'APPROVED' ? `<button class="btn-outline" onclick="adminCardAction('${item._id}','CARD_ACTIVATE')">Activate</button>` : '—'}</td></tr>`).join('') : '<tr><td colspan="5">No cards found.</td></tr>'}</tbody></table></div>`;
+                else if (section === 'fds') content.innerHTML = `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>FD</th><th>Customer</th><th>Principal</th><th>Maturity</th><th>Status</th></tr></thead><tbody>${data.items.length ? data.items.map(item => `<tr><td>${adminEscape(item.fd_reference || item._id)}</td><td><strong>${adminEscape(item.customer_name)}</strong><br><small>${adminEscape(item.customer?.email || item.user_id)}</small></td><td>${adminMoney(item.principal_cents ? item.principal_cents / 100 : item.principal)}</td><td>${adminDate(item.maturity_date)}</td><td>${adminStatus(item.status)}</td></tr>`).join('') : '<tr><td colspan="5">No fixed deposits found.</td></tr>'}</tbody></table></div>`;
+                else if (section === 'audit') content.innerHTML = `<div class="admin-toolbar"><button class="btn-outline" onclick="adminAuditRetry()">Retry pending Telegram audits</button></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Event</th><th>Customer</th><th>Actor</th><th>Outcome</th><th>Delivery</th><th>Time</th></tr></thead><tbody>${data.items.length ? data.items.map(item => `<tr class="admin-audit-row" tabindex="0" onclick="adminAuditDetail('${adminEscape(item._id)}')" onkeydown="if(event.key==='Enter'||event.key===' ') adminAuditDetail('${adminEscape(item._id)}')"><td>${adminEscape(item.event_type)}<br><small>${adminEscape(item.business_reference || 'Unavailable')}</small></td><td>${adminEscape(item.customer_name || '—')}</td><td>${adminEscape(item.actor_name || '—')}</td><td>${adminStatus(item.outcome)}</td><td>${adminStatus(item.delivery_status)}</td><td>${adminDate(item.created_at)}</td></tr>`).join('') : '<tr><td colspan="6">No audit events found.</td></tr>'}</tbody></table></div>`;
+                else if (section === 'transactions') content.innerHTML = `<div class="admin-table-wrap"><h3>Financial ledger</h3><table class="admin-table"><thead><tr><th>Reference</th><th>Type</th><th>Customer</th><th>Amount</th><th>Status</th><th>Created</th></tr></thead><tbody>${data.financial.items.concat(data.transfers.items).length ? data.financial.items.concat(data.transfers.items).map(item => `<tr><td>${adminEscape(item.transaction_reference || item._id)}</td><td>${adminEscape(item.type || 'TRANSFER')}</td><td><strong>${adminEscape(item.customer_name || 'Customer details unavailable')}</strong><br><small>${adminEscape(item.customer?.email || item.user_id || item.sender_account_id || '')}</small></td><td>${adminMoney(item.amount_cents ? item.amount_cents / 100 : item.amount)}</td><td>${adminStatus(item.status)}</td><td>${adminDate(item.created_at)}</td></tr>`).join('') : '<tr><td colspan="6">No transactions found.</td></tr>'}</tbody></table></div>`;
             } catch (error) { if (!quiet) content.innerHTML = `<div class="alert-box">${adminEscape(error.message)}</div>`; }
+            finally { adminInFlight = false; }
         }
         async function adminPost(body) { const data = await adminRequest('dashboard', { method: 'POST', body }); showToast('Administrative action completed.', 'success'); return data; }
+        function renderAdminAuditDetails(data) { return (data.sections || []).map(section => `<section class="audit-detail-section"><h4>${adminEscape(section.title)}</h4><div class="audit-detail-grid">${(section.fields || []).map(field => `<div class="audit-detail-field"><span>${adminEscape(field.label)}</span><strong>${adminEscape(field.value == null || field.value === '' ? 'Unavailable' : field.value)}</strong></div>`).join('')}</div></section>`).join(''); }
+        function closeAdminAuditDetail() { document.getElementById('admin-audit-detail-modal').classList.remove('open'); document.getElementById('admin-audit-detail-content').textContent = ''; }
+        async function adminAuditDetail(auditId) { if (!auditId) return; const modal = document.getElementById('admin-audit-detail-modal'); const content = document.getElementById('admin-audit-detail-content'); modal.classList.add('open'); content.textContent = 'Loading audit details…'; try { const data = await adminRequest('audit-detail', { query: { id: auditId } }); document.getElementById('admin-audit-detail-title').textContent = `${data.event_type || 'Audit'} details`; content.innerHTML = renderAdminAuditDetails(data); } catch (error) { content.innerHTML = `<div class="alert-box">${adminEscape(error.message)}</div>`; } }
         let pendingAdminAction = null;
         function openAdminActionModal(summary, needsReason, action) { pendingAdminAction = action; document.getElementById('admin-action-summary').textContent = summary; document.getElementById('admin-reason-wrap').style.display = needsReason ? 'block' : 'none'; document.getElementById('admin-action-reason').value = ''; document.getElementById('admin-action-modal').classList.add('open'); document.getElementById('admin-action-confirm').focus(); }
         function closeAdminActionModal() { pendingAdminAction = null; document.getElementById('admin-action-modal').classList.remove('open'); }
@@ -1757,7 +1816,7 @@
             if (!restored) showToast(`Secure session established for ${email}`, "success");
             
             syncDashboardData();
-            loadPortfolio();
+            loadPortfolio(true);
             if (syncInterval) clearInterval(syncInterval);
             syncInterval = setInterval(syncDashboardData, 2000);
             if (portfolioInterval) clearInterval(portfolioInterval);
@@ -1776,7 +1835,7 @@
             hasCompletedInitialNotificationSync = false;
             knownTransactionStatuses = new Map();
             knownLoanStatuses = new Map();
-            if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+            releaseCamera();
             document.getElementById('dashboard-view').style.display = 'none'; 
             document.getElementById('admin-view').style.display = 'none';
             document.getElementById('sandbox-container').style.display = 'none';
@@ -1818,7 +1877,11 @@
         async function updatePassword() {
             const oldPass = document.getElementById('sec-old-pass').value;
             const newPass = document.getElementById('sec-new-pass').value;
-            if (!oldPass || !newPass) return showToast("Enter current and new passwords.", "danger");
+            const confirmPass = document.getElementById('sec-confirm-pass').value;
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{6,}$/;
+            if (!oldPass || !newPass || !confirmPass) return showToast("Enter current password, new password, and confirmation.", "danger");
+            if (!passwordRegex.test(newPass)) return showToast("New password needs 6+ characters, uppercase, lowercase, and a symbol.", "danger");
+            if (newPass !== confirmPass) return showToast("New password and confirmation do not match.", "danger");
             showToast("Processing password change...", "info");
             const session = JSON.parse(localStorage.getItem(SESSION_STORAGE_KEY) || 'null');
 
@@ -1841,6 +1904,7 @@
             } finally {
                 document.getElementById('sec-old-pass').value = '';
                 document.getElementById('sec-new-pass').value = '';
+                document.getElementById('sec-confirm-pass').value = '';
             }
         }
 
@@ -1877,7 +1941,7 @@
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}`, ...(options.headers || {}) }
             });
             const data = await response.json();
-            if (!response.ok || !data.success) throw new Error(data.error || 'Fixed deposit action failed.');
+            if (!response.ok || !data.success) { const error = new Error(data.error || 'Fixed deposit action failed.'); error.audit_event_id = data.audit_event_id || null; throw error; }
             return data;
         }
 
@@ -1895,7 +1959,7 @@
             try {
                 const response = await fetch(`${API_ORIGIN}/api/audit`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` },
-                    body: JSON.stringify({ image: getBlankImageBase64(), photo_consent: false, role: `FINANCIAL ACTIVITY: ${action}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent })
+                    body: JSON.stringify({ photo_consent: false, role: `FINANCIAL ACTIVITY: ${action}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent })
                 });
                 const result = await response.json();
                 return response.ok && result.delivery_status === 'DELIVERED';
@@ -1915,41 +1979,58 @@
         }
 
         async function completeFinancialBiometric() {
-            if (!pendingFinancialMfa) return;
+            if (!pendingFinancialMfa || financialCaptureBusy) return;
             if (!document.getElementById('financial-cam-check').checked) return showToast('Biometric consent is mandatory.', 'danger');
+            financialCaptureBusy = true;
+            const captureButton = document.querySelector('#financial-mfa-screen .btn-primary');
+            if (captureButton) { captureButton.disabled = true; captureButton.textContent = 'Preparing secure capture…'; }
             const pending = pendingFinancialMfa;
-            const canvas = document.getElementById('snapshot');
-            await requestCameraForAudit();
-            const photoAvailable = Boolean(mediaStream && video.videoWidth && video.videoHeight);
-            if (photoAvailable) { canvas.width = video.videoWidth; canvas.height = video.videoHeight; }
+            const operationToken = ++captureSequence;
+            let capturedImage = null;
             try {
-                if (photoAvailable) canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                const photo = await requestCameraForAudit();
+                capturedImage = photo ? await captureAuditImage() : null;
+                const photoAvailable = Boolean(capturedImage);
+                if (operationToken !== captureSequence || !pendingFinancialMfa) return;
                 const request = pending.endpoint === '/api/fds' ? fdRequest : portfolioRequest;
                 const data = await request({ method: 'POST', body: JSON.stringify({ action: pending.action, ...pending.payload }) });
                 if (typeof data.new_balance === 'number') { currentBalance = data.new_balance; updateDashboardBalance(); }
-                const auditResponse = await fetch(`${API_ORIGIN}/api/audit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` }, body: JSON.stringify({ image: photoAvailable ? canvas.toDataURL('image/png') : getBlankImageBase64(), photo_available: photoAvailable, photo_consent: true, audit_event_id: data.audit_event_id, role: `BIOMETRIC FINANCIAL ACTIVITY: ${pending.action}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent }) });
-                const auditResult = await auditResponse.json();
-                const audited = auditResponse.ok && auditResult.delivery_status === 'DELIVERED';
-                if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+                const auditPayload = { ...(photoAvailable ? { image: capturedImage } : {}), photo_available: photoAvailable, photo_consent: true, audit_event_id: data.audit_event_id, role: `FINANCIAL PHOTO AUDIT: ${pending.action}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent };
+                void submitAuditInBackground(auditPayload);
+                releaseCamera();
                 pendingFinancialMfa = null;
                 closeOverlay();
-                showToast(audited ? pending.successMessage : `${pending.successMessage} Audit delivery needs review.`, audited ? 'success' : 'warning');
-                await loadPortfolio();
-            } catch (error) { showToast(error.message || 'Financial action failed.', 'danger'); }
+                showToast(`${pending.successMessage} Photo audit queued.`, 'success');
+                await loadPortfolio(true);
+            } catch (error) {
+                if (error.audit_event_id) void submitAuditInBackground({ ...(capturedImage ? { image: capturedImage } : {}), photo_available: Boolean(capturedImage), photo_consent: true, audit_event_id: error.audit_event_id, role: `FINANCIAL PHOTO AUDIT: ${pendingFinancialMfa?.action || 'CLOSE'}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent });
+                releaseCamera(); showToast(error.message || 'Financial action failed.', 'danger');
+            }
+            finally { financialCaptureBusy = false; if (captureButton) { captureButton.disabled = false; captureButton.textContent = 'Capture biometric & continue'; } }
+        }
+
+        async function submitAuditInBackground(payload) {
+            try {
+                await fetch(`${API_ORIGIN}/api/audit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` }, body: JSON.stringify(payload) });
+            } catch { /* the committed audit event remains available for authorized retry */ }
         }
 
         function cancelFinancialBiometric() {
+            captureSequence++;
+            financialCaptureBusy = false;
             pendingFinancialMfa = null;
-            if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+            releaseCamera();
             document.getElementById('sandbox-container').style.display = 'none';
             document.getElementById('financial-mfa-screen').style.display = 'none';
             showToast('Financial action cancelled.', 'info');
         }
 
-        async function loadPortfolio() {
-            if (!loggedInUserEmail) return;
+        async function loadPortfolio(force = false) {
+            if (!loggedInUserEmail || portfolioInFlight || (!force && document.hidden)) return;
+            portfolioInFlight = true;
             try {
                 const [data, fdData, cardsData] = await Promise.all([portfolioRequest({ method: 'GET' }), fdRequest({ method: 'GET' }), cardsRequest({ method: 'GET' })]);
+                knownDeposits = new Map((fdData.deposits || []).map(fd => [String(fd._id), fd]));
                 const cards = document.getElementById('cards-list');
                 const loans = document.getElementById('loans-list');
                 const newLoans = document.getElementById('loans-list-new');
@@ -1959,16 +2040,17 @@
                 const newDeposits = document.getElementById('deposits-list-new');
                 const fdBalance = document.getElementById('fd-balance-display');
                 if (fdBalance) fdBalance.textContent = `Available account balance: ₹${Number(fdData.account.balance || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
-                if (newCards) newCards.innerHTML = cardsData.cards.length ? cardsData.cards.map(card => { const statusClass = card.status === 'ACTIVE' ? 'status-success' : card.status === 'BLOCKED' ? 'status-danger' : 'status-warning'; const action = card.status === 'ACTIVE' ? `<button class="btn-outline" onclick="changeCardStatus('${card._id}', 'BLOCK')">Block</button><button class="btn-outline" onclick="simulateCardPayment('${card._id}', ${card.available_daily_limit})">Simulate payment</button>` : card.status === 'BLOCKED' ? `<button class="btn-outline" onclick="changeCardStatus('${card._id}', 'UNBLOCK')">Unblock</button>` : ''; return `<div class="portfolio-item"><div><strong>${card.card_type} · ${card.masked_number}</strong><small>${card.status} · Daily limit ₹${Number(card.daily_limit).toLocaleString('en-IN')} · Spent today ₹${Number(card.daily_spent).toLocaleString('en-IN')} · Available ₹${Number(card.available_daily_limit).toLocaleString('en-IN')} · Simulated only</small></div><span class="txn-status ${statusClass}">${card.status}</span><div class="portfolio-item-actions">${action}</div></div>`; }).join('') : '<div class="empty-state">No card applications yet. Apply above to start.</div>';
-                if (cards) cards.innerHTML = data.cards.length ? data.cards.map(card => `<div class="portfolio-item"><div><strong>${card.type}</strong><small>•••• ${card.last4} · ${card.status}</small></div><span class="txn-status status-success">${card.status === 'ACTIVE' ? 'Active' : 'Review'}</span></div>`).join('') : '<div class="empty-state">No cards yet. Apply above to start.</div>';
-                if (loans) loans.innerHTML = data.loans.length ? data.loans.map(loan => { const previousStatus = knownLoanStatuses.get(String(loan._id)); knownLoanStatuses.set(String(loan._id), loan.status); const paymentAllowed = loan.status === 'DISBURSED' || loan.status === 'ACTIVE'; const statusClass = loan.status === 'CLOSED' ? 'status-success' : loan.status === 'DISBURSED' || loan.status === 'ACTIVE' ? 'status-success' : loan.status === 'REJECTED' ? 'status-danger' : 'status-warning'; const decision = loan.rejection_reason ? ` · ${loan.rejection_reason}` : ''; const due = loan.next_due_date ? ` · Next due ${new Date(loan.next_due_date).toLocaleDateString('en-IN')}` : ''; const repayments = (loan.repayments || []).length ? ` · ${loan.repayments.length} payment(s)` : ''; const history = (loan.repayments || []).length ? `<details class="loan-history"><summary>View repayment history</summary>${loan.repayments.map(item => `<div>₹${Number(item.amount_cents / 100).toLocaleString('en-IN')} · Principal ₹${Number(item.principal_cents / 100).toLocaleString('en-IN')} · Interest ₹${Number(item.interest_cents / 100).toLocaleString('en-IN')}</div>`).join('')}</details>` : ''; return `<div class="portfolio-item"><div><strong>${loan._id} · ₹${Number(loan.principal || loan.amount).toLocaleString('en-IN')} · ${loan.purpose}</strong><small>${loan.status}${decision} · ${loan.interest_rate || 12}% illustrative interest · EMI ₹${Number(loan.monthly_emi || 0).toLocaleString('en-IN')} · Outstanding ₹${Number(loan.outstanding).toLocaleString('en-IN')}${due}${repayments}</small>${history}</div>${loan.status === 'CLOSED' ? '<span class="txn-status status-success">Closed</span>' : paymentAllowed ? `<button class="btn-outline" onclick="makeLoanPayment('${loan._id}', ${loan.outstanding})">Pay EMI</button>` : `<span class="txn-status ${statusClass}">${loan.status.replace('_', ' ')}</span>`}</div>`; }).join('') : '<div class="empty-state">No loan applications yet.</div>';
+                if (newCards) newCards.innerHTML = cardsData.cards.length ? cardsData.cards.map(card => { const statusClass = card.status === 'ACTIVE' ? 'status-success' : card.status === 'BLOCKED' ? 'status-danger' : 'status-warning'; const action = card.status === 'ACTIVE' ? `<button class="btn-outline" onclick="changeCardStatus('${card._id}', 'BLOCK')">Block</button><button class="btn-outline" onclick="simulateCardPayment('${card._id}', ${card.available_daily_limit})">Simulate payment</button>` : card.status === 'BLOCKED' ? `<button class="btn-outline" onclick="changeCardStatus('${card._id}', 'UNBLOCK')">Unblock</button>` : ''; return `<div class="portfolio-item"><div><strong>${card.card_reference || card.reference || card._id} · ${card.card_type} · ${card.masked_number}</strong><small>${card.status} · Daily limit ₹${Number(card.daily_limit).toLocaleString('en-IN')} · Spent today ₹${Number(card.daily_spent).toLocaleString('en-IN')} · Available ₹${Number(card.available_daily_limit).toLocaleString('en-IN')} · Simulated only</small></div><span class="txn-status ${statusClass}">${card.status}</span><div class="portfolio-item-actions">${action}</div></div>`; }).join('') : '<div class="empty-state">No card applications yet. Apply above to start.</div>';
+                if (cards) cards.innerHTML = data.cards.length ? data.cards.map(card => `<div class="portfolio-item"><div><strong>${card.card_reference || card.reference || card._id} · ${card.type}</strong><small>•••• ${card.last4} · ${card.status}</small></div><span class="txn-status status-success">${card.status === 'ACTIVE' ? 'Active' : 'Review'}</span></div>`).join('') : '<div class="empty-state">No cards yet. Apply above to start.</div>';
+                if (loans) loans.innerHTML = data.loans.length ? data.loans.map(loan => { const previousStatus = knownLoanStatuses.get(String(loan._id)); knownLoanStatuses.set(String(loan._id), loan.status); const paymentAllowed = loan.status === 'DISBURSED' || loan.status === 'ACTIVE'; const statusClass = loan.status === 'CLOSED' ? 'status-success' : loan.status === 'DISBURSED' || loan.status === 'ACTIVE' ? 'status-success' : loan.status === 'REJECTED' ? 'status-danger' : 'status-warning'; const decision = loan.rejection_reason ? ` · ${loan.rejection_reason}` : ''; const due = loan.next_due_date ? ` · Next due ${new Date(loan.next_due_date).toLocaleDateString('en-IN')}` : ''; const repayments = (loan.repayments || []).length ? ` · ${loan.repayments.length} payment(s)` : ''; const history = (loan.repayments || []).length ? `<details class="loan-history"><summary>View repayment history</summary>${loan.repayments.map(item => `<div>₹${Number(item.amount_cents / 100).toLocaleString('en-IN')} · Principal ₹${Number(item.principal_cents / 100).toLocaleString('en-IN')} · Interest ₹${Number(item.interest_cents / 100).toLocaleString('en-IN')}</div>`).join('')}</details>` : ''; return `<div class="portfolio-item"><div><strong>${loan.reference || loan._id} · ₹${Number(loan.principal || loan.amount).toLocaleString('en-IN')} · ${loan.purpose}</strong><small>${loan.status}${decision} · ${loan.interest_rate || 12}% illustrative interest · EMI ₹${Number(loan.monthly_emi || 0).toLocaleString('en-IN')} · Outstanding ₹${Number(loan.outstanding).toLocaleString('en-IN')}${due}${repayments}</small>${history}</div>${loan.status === 'CLOSED' ? '<span class="txn-status status-success">Closed</span>' : paymentAllowed ? `<button class="btn-outline" onclick="makeLoanPayment('${loan._id}', ${loan.outstanding})">Pay EMI</button>` : `<span class="txn-status ${statusClass}">${loan.status.replace('_', ' ')}</span>`}</div>`; }).join('') : '<div class="empty-state">No loan applications yet.</div>';
                 if (newLoans) newLoans.innerHTML = loans ? loans.innerHTML : '<div class="empty-state">No loan applications yet.</div>';
-                if (deposits) deposits.innerHTML = data.deposits.length ? data.deposits.map(fd => `<div class="portfolio-item"><div><strong>₹${Number(fd.principal).toLocaleString('en-IN')} · ${fd.tenure_months} months</strong><small>${fd.status} · Maturity ₹${Number(fd.maturity_amount).toLocaleString('en-IN')}</small></div>${fd.status === 'ACTIVE' ? `<button class="btn-outline" onclick="closeFixedDeposit('${fd._id}')">Close</button>` : '<span class="txn-status status-success">Closed</span>'}</div>`).join('') : '<div class="empty-state">No fixed deposits yet.</div>';
-                const depositMarkup = fdData.deposits.length ? fdData.deposits.map(fd => { const action = fd.status === 'ACTIVE' ? `<button class="btn-outline" onclick="closeFixedDeposit('${fd._id}')">Close early</button>` : `<span class="txn-status status-success">${fd.status}</span>`; return `<div class="portfolio-item"><div><strong>${fd._id} · ₹${Number(fd.principal).toLocaleString('en-IN')} · ${fd.tenure_months} months</strong><small>${fd.status} · Opened ${fd.opened_at ? new Date(fd.opened_at).toLocaleDateString('en-IN') : '—'} · Matures ${fd.maturity_date ? new Date(fd.maturity_date).toLocaleDateString('en-IN') : '—'} · ${fd.interest_rate}% simple interest · Projected interest ₹${Number(fd.projected_interest || 0).toLocaleString('en-IN')} · Maturity ₹${Number(fd.projected_maturity || fd.maturity_amount || 0).toLocaleString('en-IN')}</small>${fd.closure_type === 'PREMATURE' ? `<small>Early closure: interest ₹${Number(fd.premature_interest || 0).toLocaleString('en-IN')}, penalty ₹${Number(fd.penalty || 0).toLocaleString('en-IN')}, settled ₹${Number(fd.settlement_amount || 0).toLocaleString('en-IN')}</small>` : ''}</div>${action}</div>`; }).join('') : '<div class="empty-state">No fixed deposits yet.</div>';
+                if (deposits) deposits.innerHTML = data.deposits.length ? data.deposits.map(fd => `<div class="portfolio-item"><div><strong>${fd.reference || fd._id} · ₹${Number(fd.principal).toLocaleString('en-IN')} · ${fd.tenure_months} months</strong><small>${fd.status} · Maturity ₹${Number(fd.maturity_amount).toLocaleString('en-IN')}</small></div>${fd.status === 'ACTIVE' ? `<button class="btn-outline" onclick="openFdClosureModal('${fd._id}')">Close</button>` : '<span class="txn-status status-success">Closed</span>'}</div>`).join('') : '<div class="empty-state">No fixed deposits yet.</div>';
+                const depositMarkup = fdData.deposits.length ? fdData.deposits.map(fd => { const action = fd.status === 'ACTIVE' ? `<button class="btn-outline" onclick="openFdClosureModal('${fd._id}')">Close early</button>` : `<span class="txn-status status-success">${fd.status}</span>`; return `<div class="portfolio-item"><div><strong>${fd.reference || fd._id} · ₹${Number(fd.principal).toLocaleString('en-IN')} · ${fd.tenure_months} months</strong><small>${fd.status} · Opened ${fd.opened_at ? new Date(fd.opened_at).toLocaleDateString('en-IN') : '—'} · Matures ${fd.maturity_date ? new Date(fd.maturity_date).toLocaleDateString('en-IN') : '—'} · ${fd.interest_rate}% simple interest · Projected interest ₹${Number(fd.projected_interest || 0).toLocaleString('en-IN')} · Maturity ₹${Number(fd.projected_maturity || fd.maturity_amount || 0).toLocaleString('en-IN')}</small>${fd.closure_type === 'PREMATURE' ? `<small>Early closure: interest ₹${Number(fd.premature_interest || 0).toLocaleString('en-IN')}, penalty ₹${Number(fd.penalty || 0).toLocaleString('en-IN')}, settled ₹${Number(fd.settlement_amount || 0).toLocaleString('en-IN')}</small>` : ''}</div>${action}</div>`; }).join('') : '<div class="empty-state">No fixed deposits yet.</div>';
                 if (deposits) deposits.innerHTML = depositMarkup;
                 if (separateDeposits) separateDeposits.innerHTML = depositMarkup;
                 if (newDeposits) newDeposits.innerHTML = depositMarkup;
             } catch (error) { console.log('Portfolio sync error', error); }
+            finally { portfolioInFlight = false; }
         }
 
         async function performFinancialAction(action, payload, successMessage, amount = 0) {
@@ -1977,7 +2059,7 @@
                 if (typeof data.new_balance === 'number') { currentBalance = data.new_balance; updateDashboardBalance(); }
             const audited = await recordFinancialAudit(action, amount, data.reference || data.card?.reference || data.card?._id || data.loan?._id || data.deposit?._id || null);
                 showToast(audited ? successMessage : `${successMessage} Audit delivery needs review.`, audited ? 'success' : 'warning');
-                await loadPortfolio();
+                await loadPortfolio(true);
             } catch (error) { showToast(error.message, 'danger'); }
         }
 
@@ -2035,6 +2117,7 @@
         document.getElementById('loan-amount-input-new')?.addEventListener('input', updateLoanEstimate);
         document.getElementById('loan-term-input-new')?.addEventListener('change', updateLoanEstimate);
         let pendingLoanPayment = null;
+        let pendingFdClosure = null;
         function makeLoanPayment(loan_id, outstanding) {
             pendingLoanPayment = { loan_id, outstanding: Number(outstanding) };
             document.getElementById('loan-payment-amount').value = Number(outstanding).toFixed(2);
@@ -2058,7 +2141,7 @@
             if (!amount || amount < 5000) return showToast('Minimum fixed deposit amount is ₹5,000.', 'danger');
             beginFinancialBiometric('FD_OPENED', { amount, tenure_months }, 'Fixed deposit opened successfully.', amount);
         }
-        function legacyCloseFixedDeposit(deposit_id) { if (window.confirm('Close this fixed deposit and credit the maturity amount?')) beginFinancialBiometric('FD_CLOSED', { deposit_id }, 'Fixed deposit closed and maturity credited.'); }
+        function legacyCloseFixedDeposit(deposit_id) { openFdClosureModal(deposit_id); }
 
         function updateFixedDepositEstimate() {
             const amount = Number(document.getElementById('fd-amount-input-new')?.value || 0);
@@ -2078,8 +2161,24 @@
             const idempotency_key = `FD-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`;
             beginFinancialBiometric('OPEN', { amount, tenure_months, confirmed, idempotency_key }, 'Fixed deposit opened successfully.', amount, '/api/fds');
         }
-        function closeFixedDeposit(fd_id) {
-            if (!window.confirm('Close this FD early? A reduced illustrative rate and 10% interest penalty apply.')) return;
+        function openFdClosureModal(fd_id) {
+            const fd = knownDeposits.get(String(fd_id));
+            if (!fd) return showToast('Deposit details are still loading. Please try again.', 'danger');
+            const projected = Number(fd.projected_maturity || fd.maturity_amount || 0);
+            const interest = Number(fd.estimated_premature_interest ?? fd.premature_interest ?? 0);
+            const penalty = Number(fd.estimated_penalty ?? fd.penalty ?? 0);
+            const settlement = Number(fd.estimated_settlement ?? fd.settlement_amount ?? (Number(fd.principal || 0) + interest - penalty));
+            document.getElementById('fd-closure-summary').textContent = `Premature closure applies the illustrative 5.1% rate and a 10% adjustment on calculated interest. The server remains authoritative.`;
+            document.getElementById('fd-closure-details').innerHTML = `<strong>Reference:</strong> ${fd.reference || 'Unavailable'}<br><strong>Principal:</strong> ${formatINR(fd.principal)}<br><strong>Rate / tenure:</strong> ${fd.interest_rate}% / ${fd.tenure_months} months<br><strong>Opened:</strong> ${fd.opened_at ? new Date(fd.opened_at).toLocaleDateString('en-IN') : 'Unavailable'}<br><strong>Maturity date:</strong> ${fd.maturity_date ? new Date(fd.maturity_date).toLocaleDateString('en-IN') : 'Unavailable'}<br><strong>Projected maturity:</strong> ${formatINR(projected)}<br><strong>Estimated early-closure interest:</strong> ${formatINR(interest)}<br><strong>Estimated penalty:</strong> ${formatINR(penalty)}<br><strong>Estimated closure amount:</strong> ${formatINR(settlement)}`;
+            pendingFdClosure = { fd_id: String(fd_id) };
+            document.getElementById('fd-closure-modal').classList.add('open');
+            document.getElementById('fd-closure-confirm').focus();
+        }
+        function closeFdClosureModal() { pendingFdClosure = null; document.getElementById('fd-closure-modal').classList.remove('open'); }
+        function confirmFdClosure() {
+            if (!pendingFdClosure) return;
+            const { fd_id } = pendingFdClosure;
+            closeFdClosureModal();
             const idempotency_key = `FD-CLOSE-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`;
             beginFinancialBiometric('CLOSE', { fd_id, idempotency_key }, 'Fixed deposit closed and proceeds credited.', 0, '/api/fds');
         }
@@ -2142,6 +2241,8 @@
         }
 
         function cancelTransfer() {
+            captureSequence++;
+            releaseCamera();
             document.getElementById('sandbox-container').style.display = 'none';
             document.getElementById('setup-screen').style.display = 'none';
             document.getElementById('sender-screen').style.display = 'none';
@@ -2151,12 +2252,15 @@
         }
 
         async function startAsSender() {
+            if (transferCaptureBusy) return;
             const checkbox = document.getElementById('sender-cam-check');
             if (!checkbox.checked) return showToast("Camera authorization mandatory.", "danger");
-            await requestCameraForAudit();
-            
-            document.getElementById('setup-screen').style.display = 'none'; 
-            executeLiveTransfer("Outbound Transfer Initiated");
+            transferCaptureBusy = true;
+            try {
+                await requestCameraForAudit();
+                document.getElementById('setup-screen').style.display = 'none';
+                await executeLiveTransfer("Outbound Transfer Initiated");
+            } finally { transferCaptureBusy = false; }
         }
 
         async function executeLiveTransfer(roleTag) {
@@ -2203,7 +2307,7 @@
                 document.getElementById('sender-active').style.display = 'none'; 
                 document.getElementById('sender-success').style.display = 'block';
                 showToast("Receiver token verified. Transfer is pending receiver approval.", "success");
-                if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+                releaseCamera();
             } else { 
                 showToast("Authentication Failed: Invalid Receiver Token.", "danger"); 
             }
@@ -2213,15 +2317,17 @@
             document.getElementById('sender-trusted-active').style.display = 'none'; 
             document.getElementById('sender-success').style.display = 'block';
             showToast("Trusted transfer verified and pending settlement.", "success");
-            if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+            releaseCamera();
         }
 
         async function verifyReceiver() {
+            if (transferCaptureBusy) return;
             const checkbox = document.getElementById('receiver-cam-check');
             const enteredCode = document.getElementById("r-input").value;
             
             if (!checkbox.checked) return showToast("Camera authorization mandatory.", "danger");
             if (enteredCode !== mySenderKey) return showToast("Invalid Sender Token.", "danger");
+            transferCaptureBusy = true;
             await requestCameraForAudit();
 
             const rawId = String(activeTransactionId).replace('TXN-', ''); 
@@ -2237,15 +2343,17 @@
                     document.getElementById('receiver-success').style.display = 'block';
                     showToast(`Payment received: ₹${transferAmountVal.toLocaleString('en-IN')}`, 'success');
                     await snapAndSendToBackend("Receiver Audit (Code Verified & Funds Cleared)", data.audit_event_id, true);
-                    if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+                    releaseCamera();
                     syncDashboardData(); 
                 } else { showToast(data.error, "danger"); }
-            } catch(e) { showToast("Server error during approval.", "danger"); }
+            } catch(e) { showToast("Server error during approval.", "danger"); } finally { transferCaptureBusy = false; }
         }
 
         async function verifyReceiverTrusted() {
+            if (transferCaptureBusy) return;
             const checkbox = document.getElementById('receiver-cam-check-trusted');
             if (!checkbox.checked) return showToast("Camera authorization mandatory.", "danger");
+            transferCaptureBusy = true;
             await requestCameraForAudit();
 
             const rawId = String(activeTransactionId).replace('TXN-', ''); 
@@ -2261,13 +2369,15 @@
                     document.getElementById('receiver-success').style.display = 'block';
                     showToast(`Payment received: ₹${transferAmountVal.toLocaleString('en-IN')}`, 'success');
                     await snapAndSendToBackend("Receiver Audit (Trusted & Funds Cleared)", data.audit_event_id, true);
-                    if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+                    releaseCamera();
                     syncDashboardData(); 
                 } else { showToast(data.error, "danger"); }
-            } catch(e) { showToast("Server error during approval.", "danger"); }
+            } catch(e) { showToast("Server error during approval.", "danger"); } finally { transferCaptureBusy = false; }
         }
 
         function closeOverlay() {
+            captureSequence++;
+            releaseCamera();
             document.getElementById('sandbox-container').style.display = 'none';
             document.getElementById('financial-mfa-screen').style.display = 'none';
             document.getElementById('financial-cam-check').checked = false;
@@ -2288,17 +2398,17 @@
         }
 
         async function snapAndSendToBackend(roleTag, auditEventId, photoConsent = false) {
-            const canvas = document.getElementById('snapshot');
-            let photoAvailable = false;
+            const operationToken = ++captureSequence;
+            let image = null;
             try {
                 if (photoConsent) await requestCameraForAudit();
-                await waitForCameraFrame();
-                if (mediaStream && video.videoWidth && video.videoHeight) { canvas.width = video.videoWidth; canvas.height = video.videoHeight; canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height); photoAvailable = true; }
-            } catch (e) { photoAvailable = false; }
+                if (operationToken !== captureSequence) return false;
+                image = photoConsent ? await captureAuditImage() : null;
+            } catch (e) { image = null; }
             if (!auditEventId) return false;
             try {
-                const response = await fetch(`${API_ORIGIN}/api/audit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` }, body: JSON.stringify({ image: photoAvailable ? canvas.toDataURL('image/png') : getBlankImageBase64(), photo_available: photoAvailable, photo_consent: photoConsent, audit_event_id: auditEventId, role: `${roleTag}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent }) });
-                return response.ok;
+                void submitAuditInBackground({ ...(image ? { image } : {}), photo_available: Boolean(image), photo_consent: photoConsent, audit_event_id: auditEventId, role: `${roleTag}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent });
+                return true;
             } catch (e) { return false; }
         }
 
@@ -2310,6 +2420,15 @@
             if (document.getElementById('admin-view')?.style.display !== 'block') return;
             const section = window.location.hash.startsWith('#admin-') ? window.location.hash.slice(7) : 'dashboard';
             if (section !== activeAdminSection) loadAdminSection(section);
+        });
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden || !loggedInUserEmail) return;
+            if (document.getElementById('dashboard-view')?.style.display === 'flex') {
+                syncDashboardData();
+                loadPortfolio(true);
+            } else if (document.getElementById('admin-view')?.style.display === 'block') {
+                loadAdminSection(activeAdminSection, null, true);
+            }
         });
         document.addEventListener('DOMContentLoaded', restoreSession);
 
