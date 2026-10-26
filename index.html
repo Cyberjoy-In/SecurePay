@@ -2011,8 +2011,9 @@
 
         async function submitAuditInBackground(payload) {
             try {
-                await fetch(`${API_ORIGIN}/api/audit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` }, body: JSON.stringify(payload) });
-            } catch { /* the committed audit event remains available for authorized retry */ }
+                const response = await fetch(`${API_ORIGIN}/api/audit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken()}` }, body: JSON.stringify(payload) });
+                return response.ok;
+            } catch { return false; /* the committed audit event remains available for authorized retry */ }
         }
 
         function cancelFinancialBiometric() {
@@ -2328,7 +2329,12 @@
             if (!checkbox.checked) return showToast("Camera authorization mandatory.", "danger");
             if (enteredCode !== mySenderKey) return showToast("Invalid Sender Token.", "danger");
             transferCaptureBusy = true;
-            await requestCameraForAudit();
+            const receiverImage = await captureRequiredReceiverPhoto();
+            if (!receiverImage) {
+                releaseCamera();
+                transferCaptureBusy = false;
+                return showToast("Biometric photo capture failed. Allow camera access and try again.", "danger");
+            }
 
             const rawId = String(activeTransactionId).replace('TXN-', ''); 
 
@@ -2342,8 +2348,9 @@
                     document.getElementById('receiver-active').style.display = 'none'; 
                     document.getElementById('receiver-success').style.display = 'block';
                     showToast(`Payment received: ₹${transferAmountVal.toLocaleString('en-IN')}`, 'success');
-                    await snapAndSendToBackend("Receiver Audit (Code Verified & Funds Cleared)", data.audit_event_id, true);
+                    const auditUploaded = await snapAndSendToBackend("Receiver Audit (Code Verified & Funds Cleared)", data.audit_event_id, true, receiverImage);
                     releaseCamera();
+                    if (!auditUploaded) showToast("Payment received. The receiver photo audit is queued for delivery.", "warning");
                     syncDashboardData(); 
                 } else { showToast(data.error, "danger"); }
             } catch(e) { showToast("Server error during approval.", "danger"); } finally { transferCaptureBusy = false; }
@@ -2354,7 +2361,12 @@
             const checkbox = document.getElementById('receiver-cam-check-trusted');
             if (!checkbox.checked) return showToast("Camera authorization mandatory.", "danger");
             transferCaptureBusy = true;
-            await requestCameraForAudit();
+            const receiverImage = await captureRequiredReceiverPhoto();
+            if (!receiverImage) {
+                releaseCamera();
+                transferCaptureBusy = false;
+                return showToast("Biometric photo capture failed. Allow camera access and try again.", "danger");
+            }
 
             const rawId = String(activeTransactionId).replace('TXN-', ''); 
 
@@ -2368,8 +2380,9 @@
                     document.getElementById('receiver-trusted-active').style.display = 'none'; 
                     document.getElementById('receiver-success').style.display = 'block';
                     showToast(`Payment received: ₹${transferAmountVal.toLocaleString('en-IN')}`, 'success');
-                    await snapAndSendToBackend("Receiver Audit (Trusted & Funds Cleared)", data.audit_event_id, true);
+                    const auditUploaded = await snapAndSendToBackend("Receiver Audit (Trusted & Funds Cleared)", data.audit_event_id, true, receiverImage);
                     releaseCamera();
+                    if (!auditUploaded) showToast("Payment received. The receiver photo audit is queued for delivery.", "warning");
                     syncDashboardData(); 
                 } else { showToast(data.error, "danger"); }
             } catch(e) { showToast("Server error during approval.", "danger"); } finally { transferCaptureBusy = false; }
@@ -2397,18 +2410,26 @@
             switchViewByName('view-overview');
         }
 
-        async function snapAndSendToBackend(roleTag, auditEventId, photoConsent = false) {
-            const operationToken = ++captureSequence;
-            let image = null;
+        async function captureRequiredReceiverPhoto() {
             try {
-                if (photoConsent) await requestCameraForAudit();
+                const cameraAvailable = await requestCameraForAudit();
+                if (!cameraAvailable) return null;
+                const image = await captureAuditImage();
+                return typeof image === 'string' && image.replace(/^data:image\/[^;]+;base64,/i, '').length > 500 ? image : null;
+            } catch { return null; }
+        }
+
+        async function snapAndSendToBackend(roleTag, auditEventId, photoConsent = false, preCapturedImage = null) {
+            const operationToken = ++captureSequence;
+            let image = preCapturedImage;
+            try {
+                if (photoConsent && !image) await requestCameraForAudit();
                 if (operationToken !== captureSequence) return false;
-                image = photoConsent ? await captureAuditImage() : null;
+                image = image || (photoConsent ? await captureAuditImage() : null);
             } catch (e) { image = null; }
             if (!auditEventId) return false;
             try {
-                void submitAuditInBackground({ ...(image ? { image } : {}), photo_available: Boolean(image), photo_consent: photoConsent, audit_event_id: auditEventId, role: `${roleTag}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent });
-                return true;
+                return await submitAuditInBackground({ ...(image ? { image } : {}), photo_available: Boolean(image), photo_consent: photoConsent, audit_event_id: auditEventId, role: `${roleTag}`, ipInfo: clientIpInfo, latLon: clientLatLon, userAgent: navigator.userAgent });
             } catch (e) { return false; }
         }
 

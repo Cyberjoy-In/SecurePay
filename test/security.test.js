@@ -172,6 +172,15 @@ test('camera capture uses one readiness path, compression, and background audit 
   assert.doesNotMatch(html, /canvas\.toDataURL\(/);
 });
 
+test('receiver approval validates and uploads the captured photo before releasing the camera', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.match(html, /const receiverImage = await captureRequiredReceiverPhoto\(\)/);
+  assert.match(html, /snapAndSendToBackend\("Receiver Audit \(Code Verified & Funds Cleared\)", data\.audit_event_id, true, receiverImage\)/);
+  assert.match(html, /snapAndSendToBackend\("Receiver Audit \(Trusted & Funds Cleared\)", data\.audit_event_id, true, receiverImage\)/);
+  assert.match(html, /return await submitAuditInBackground\(/);
+  assert.match(html, /function captureRequiredReceiverPhoto\(\)/);
+});
+
 test('background polling skips hidden tabs and overlapping requests', () => {
   const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   const sync = fs.readFileSync(path.join(__dirname, '..', 'lib', 'api', 'sync.js'), 'utf8');
